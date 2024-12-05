@@ -6,7 +6,7 @@ editor: visual
 
 ## Load Libraries
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-psychometric-functions-with-brms/5762/2> .
 
 ```{r}
 library(tidyverse)
