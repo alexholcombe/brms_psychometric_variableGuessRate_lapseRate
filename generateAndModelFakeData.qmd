@@ -1,0 +1,93 @@
+---
+title: "exampleBrmsPsychometric"
+format: html
+editor: visual
+---
+
+## Load Libraries
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+library(tidyverse)
+library(brms)
+```
+
+## Generate a fake dataset
+
+Generate a fake dataset.
+
+```{r}
+#| echo: false
+set.seed(999)
+guess <- .02
+lapse <- .03
+numSs <- 3
+conditionsAndIVs <- cross_df(list(speed = seq(-5, 5),
+                     rep = seq(1, 5),
+                     subj = seq(1, numSs)))
+fakedata<- conditionsAndIVs
+fakedata<- fakedata %>% mutate(
+            probabilityCorrect = guess + (1-guess-lapse)*plogis(1 * (speed)) )
+
+fakedata<- fakedata %>% mutate(
+          correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
+         )
+
+```
+
+## Plot data
+
+```{r}
+#| echo: false
+ggplot(fakedata, aes(x=speed,y=correct)) + 
+  stat_summary( fun="mean", geom="point" ) +
+  facet_wrap(.~subj)
+```
+
+## Fit / model data
+
+```{r}
+#| echo: false
+#| 
+# Set up formula model for fitting
+myformula <- brms::brmsformula(
+  correct ~ guess + (1-guess-lapse) * inv_logit(eta),
+  eta ~ 1 + speed,
+  guess ~ 1,
+  lapse ~ 1, 
+  family = bernoulli(link="identity"),
+  nl = TRUE
+) 
+
+
+# Set up priors
+lapse_rate_bounds <- c(0,.1)
+guess_rate_bounds <- c(0,.1) #Eventually this should *not* be a free parameter
+  
+mypriors <- c(
+  brms::prior(student_t(7, 0, 10), class = "b", nlpar = "eta"),
+  brms::prior(beta(1, 1), nlpar = "lapse", lb = 0, ub = .1),
+  brms::prior(beta(1, 1), nlpar = "guess", lb = 0, ub = .1)
+)
+
+# Plot priors
+# not done yet
+
+```
+
+\*to-do: don't estimate guess rate, set it to 1/numobjects, and also check lapse parametrization
+
+Do the fit
+
+```{r}
+#! echo:false
+
+fit2 <- brm(
+  myformula,
+  data = fakedata,
+  init = 0,
+  control = list(adapt_delta = 0.99),
+  prior = mypriors,
+)
+```
