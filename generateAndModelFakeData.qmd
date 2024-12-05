@@ -4,7 +4,13 @@ format: html
 editor: visual
 ---
 
-## Load Libraries
+## Resources
+
+McElreath's Statistical Rethinking rewritten in brms and ggplot2 with multilevel models <https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/multilevel-models.html#multilevel-posterior-predictions>
+
+Cheat sheet especially for more advanced things: <https://michael-franke.github.io/Bayesian-Regression/practice-sheets/11a-cheat-sheet.html>
+
+## Load R libraries
 
 This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-psychometric-functions-with-brms/5762/2> .
 
@@ -20,7 +26,7 @@ Generate a fake dataset.
 ```{r}
 #| echo: false
 set.seed(999)
-guess <- .02
+chanceRate <- .02
 lapse <- .03
 numSs <- 3
 conditionsAndIVs <- cross_df(list(speed = seq(-5, 5),
@@ -28,12 +34,13 @@ conditionsAndIVs <- cross_df(list(speed = seq(-5, 5),
                      subj = seq(1, numSs)))
 fakedata<- conditionsAndIVs
 fakedata<- fakedata %>% mutate(
-            probabilityCorrect = guess + (1-guess-lapse)*plogis(1 * (speed)) )
+            probabilityCorrect = chanceRate + (1-chanceRate-lapse)*plogis(1 * (speed)) )
 
 fakedata<- fakedata %>% mutate(
           correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
          )
 
+fakedata$chanceRate <- chanceRate #Putting chanceRate in the brms formula, brms will know to look for chanceRate in the data dataframe
 ```
 
 ## Plot data
@@ -52,23 +59,19 @@ ggplot(fakedata, aes(x=speed,y=correct)) +
 #| 
 # Set up formula model for fitting
 myformula <- brms::brmsformula(
-  correct ~ guess + (1-guess-lapse) * inv_logit(eta),
+  correct ~ chanceRate + (1-chanceRate-lapse) * inv_logit(eta),
   eta ~ 1 + speed,
-  guess ~ 1,
   lapse ~ 1, 
   family = bernoulli(link="identity"),
   nl = TRUE
 ) 
 
-
 # Set up priors
-lapse_rate_bounds <- c(0,.1)
-guess_rate_bounds <- c(0,.1) #Eventually this should *not* be a free parameter
-  
+lapse_rate_bounds <- c(0,.4)
+
 mypriors <- c(
   brms::prior(student_t(7, 0, 10), class = "b", nlpar = "eta"),
-  brms::prior(beta(1, 1), nlpar = "lapse", lb = 0, ub = .1),
-  brms::prior(beta(1, 1), nlpar = "guess", lb = 0, ub = .1)
+  brms::prior(beta(1, 1), nlpar = "lapse", lb = 0, ub = .1)
 )
 
 # Plot priors
@@ -76,7 +79,7 @@ mypriors <- c(
 
 ```
 
-\*to-do: don't estimate guess rate, set it to 1/numobjects, and also check lapse parametrization
+\*to-do: set chanceRate to 1/numobjects, and also check lapse parametrization
 
 Do the fit
 
@@ -90,4 +93,34 @@ fit2 <- brm(
   control = list(adapt_delta = 0.99),
   prior = mypriors,
 )
+
+print(fit2)
+```
+
+## Show fit
+
+```{r}
+predict_interval_brms <- predict(fit2, re_formula = NULL)
+#head(predict_interval_brms)
+dataWithModelPredictions<- cbind(fakedata,predict_interval_brms)
+
+ggplot(dataWithModelPredictions, aes(x=speed,y=correct)) + 
+  stat_summary( fun="mean", geom="point" ) +
+  geom_line( aes(x=speed, y= Estimate) ) +
+  facet_wrap(.~subj)
+
+```
+
+In the above fit, I think it is overplotting the lines many times because there are multiple trials at each speed. So, should reduce the fakedata to unique values and then plot - and eventually interpolate to show smooth curves, and maybe annotate with lapse rate.
+
+<https://cu-psych-computing.github.io/cu-psych-comp-tutorial/tutorials/r-extra/accelerated-ggplot2/ggplot_summer2018_part2/>
+
+<https://kzee.github.io/PlotFixef_Demo.html#how-do-the-plots-using-lme4-and-brms-compare>
+
+Next, we will use the `fitted()` function in `brms` to generate predictions and the 95% credibility interval. We will append these predicted values to our `mydatab` dataframe.
+
+Note that `brms` features both a `fitted()` function and a `predict()` function, but they will return different information. The fitted line should be the same for both, but the credibility intervals differ. `fitted()` takes uncertainty of the estimation of the fitted line into account, whereas `predict()` takes into account both uncertainty about the estimation of the fitted line and uncertainty about the data. Thus, `predict()` in `brms` will yield a wider interval. `fitted()` closely matches the predicted interval we get from the `lmer()` model.
+
+```         
+mydatab <- cbind(mydatab, fitted(fitb, mydatab, re_formula=NA))
 ```
