@@ -4,12 +4,6 @@ format: html
 editor: visual
 ---
 
-## Resources
-
-McElreath's Statistical Rethinking rewritten in brms and ggplot2 with multilevel models <https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/multilevel-models.html#multilevel-posterior-predictions>
-
-Cheat sheet especially for more advanced things: <https://michael-franke.github.io/Bayesian-Regression/practice-sheets/11a-cheat-sheet.html>
-
 ## Load R libraries
 
 This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-psychometric-functions-with-brms/5762/2> .
@@ -52,7 +46,7 @@ ggplot(fakedata, aes(x=speed,y=correct)) +
   facet_wrap(.~subj)
 ```
 
-## Fit / model data
+## Set up the model 
 
 ```{r}
 #| echo: false
@@ -81,7 +75,7 @@ mypriors <- c(
 
 \*to-do: set chanceRate to 1/numobjects, and also check lapse parametrization
 
-Do the fit
+## Do the fit
 
 ```{r}
 #! echo:false
@@ -100,7 +94,7 @@ print(fit2)
 ## Show fit
 
 ```{r}
-predict_interval_brms <- predict(fit2, re_formula = NULL) #or use fitted to take into account uncertainty of observations
+predict_interval_brms <- predict(fit2, re_formula = NULL) #or use fitted to not take into account uncertainty of observations
 #head(predict_interval_brms)
 dataWithModelPredictions<- cbind(fakedata,predict_interval_brms)
 
@@ -116,14 +110,27 @@ In the above fit, I think it is overplotting the lines many times because there 
 ```{r}
 conditionsEachTrial<- fakedata %>% select(speed,subj,chanceRate)
 conditionsUniq <- unique(conditionsEachTrial)
-predict_interval_brms <- predict(fit2, newdata=conditionsUniq, re_formula = NULL) 
-predictions<- cbind(conditionsUniq, predict_interval_brms)
+prediction <- predict(fit2, newdata=conditionsUniq, re_formula = NULL) 
+prediction<- fitted(fit2, newdata=conditionsUniq, re_formula = NULL) 
+
+predictions<- cbind(conditionsUniq, prediction)
+  
   
 ggplot(dataWithModelPredictions, aes(x=speed,y=correct)) + 
   stat_summary( fun="mean", geom="point" ) +
   geom_line(data=predictions, aes(x=speed, y= Estimate) ) +
+  geom_ribbon(data=predictions, aes(y=Estimate, ymin = Q2.5, ymax = Q97.5),
+             alpha = .3, fill = "red") +
   facet_wrap(.~subj)
 ```
+
+Why are Q2.7 and Q97.5 of predict always 0 and 1 but fitted is a continuous value? Maybe it is a consequence of predict not taking into account the uncertainty of the data.
+
+## Resources
+
+McElreath's Statistical Rethinking rewritten in brms and ggplot2 with multilevel models <https://bookdown.org/ajkurz/Statistical_Rethinking_recoded/multilevel-models.html#multilevel-posterior-predictions>
+
+Cheat sheet especially for more advanced things: <https://michael-franke.github.io/Bayesian-Regression/practice-sheets/11a-cheat-sheet.html>
 
 <https://cu-psych-computing.github.io/cu-psych-comp-tutorial/tutorials/r-extra/accelerated-ggplot2/ggplot_summer2018_part2/>
 
@@ -132,7 +139,3 @@ ggplot(dataWithModelPredictions, aes(x=speed,y=correct)) +
 Next, we will use the `fitted()` function in `brms` to generate predictions and the 95% credibility interval. We will append these predicted values to our `mydatab` dataframe.
 
 Note that `brms` features both a `fitted()` function and a `predict()` function, but they will return different information. The fitted line should be the same for both, but the credibility intervals differ. `fitted()` takes uncertainty of the estimation of the fitted line into account, whereas `predict()` takes into account both uncertainty about the estimation of the fitted line and uncertainty about the data. Thus, `predict()` in `brms` will yield a wider interval. `fitted()` closely matches the predicted interval we get from the `lmer()` model.
-
-```         
-mydatab <- cbind(mydatab, fitted(fitb, mydatab, re_formula=NA))
-```
