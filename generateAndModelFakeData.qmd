@@ -10,7 +10,7 @@ This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-ps
 
 ```{r}
 library(tidyverse)
-library(brms)
+library(brms)\
 ```
 
 ## Generate a fake dataset
@@ -20,15 +20,15 @@ Generate a fake dataset.
 ```{r}
 #| echo: false
 set.seed(999)
-chanceRate <- .02
-lapse <- .03
+chanceRate <- .02 #probablity just guessing
+lapse <- .03 #even most attentive person may zone out in trial and guess
 numSs <- 3
 conditionsAndIVs <- cross_df(list(speed = seq(-5, 5),
                      rep = seq(1, 5),
                      subj = seq(1, numSs)))
 fakedata<- conditionsAndIVs
 fakedata<- fakedata %>% mutate(
-            probabilityCorrect = chanceRate + (1-chanceRate-lapse)*plogis(1 * (speed)) )
+            probabilityCorrect = chanceRate + (1-chanceRate-lapse)*plogis(1 * (-speed)) )
 
 fakedata<- fakedata %>% mutate(
           correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
@@ -46,7 +46,7 @@ ggplot(fakedata, aes(x=speed,y=correct)) +
   facet_wrap(.~subj)
 ```
 
-## Set up the model 
+## Set up the model
 
 ```{r}
 #| echo: false
