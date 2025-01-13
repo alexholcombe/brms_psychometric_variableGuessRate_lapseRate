@@ -90,7 +90,7 @@ With the probability of just guessing being `chanceRate = 0.02` for example, we 
 
 -   If we left it like this, the ceiling would ofcourse go above 1 which makes no sense, we must 'squish' the curve. We also need to 'squish' it with the `lapse` rate as even the best performers are expected to not perform perfectly and have small perceptual lapses.
 
--   `chanceRate + (1-chanceRate-lapse)*(1-plogis((speed-location)/scale).`
+-   `chanceRate + (1-chanceRate-lapse)*(1-plogis((speed-location)/scale). #change to -speed`
 
 ### Alternate parametrization
 
@@ -115,7 +115,7 @@ All of this is to say that with $\mu=0.91$ and $s=0.2$ , we have the parameters 
 ```{r}
 #| echo: false
 set.seed(999)
-chanceRate <- .02 #probablity of correct just guessing
+chanceRate <- .1 #probablity of correct just guessing
 lapse <- .03 #even most attentive person may zone out in trial and guess
 numSs <- 3 #small number as the brm takes ages
 
@@ -125,8 +125,8 @@ scale <- 0.2 #
 
 conditionsAndIVs <- 
   tidyr::expand_grid(
-    speed = seq(.02,1.8, length.out = 10), #changed min and max speed to match our data
-    rep = seq(1, 5),
+    speed = seq(.02,1.8, length.out = 11), #changed min and max speed to match our data
+    rep = seq(1, 50),
     subj = seq(1, numSs)
   )
 
@@ -134,7 +134,7 @@ fakedata<- conditionsAndIVs
 
 #create a new column
 fakedata<- fakedata %>% mutate(
-  probabilityCorrect = chanceRate + (1-chanceRate-lapse)*(1-plogis((speed-location)/scale))
+  probabilityCorrect = chanceRate + (1-chanceRate-lapse)*(1-plogis(speed, location = 0.91, scale =0.2))
 )
 
 fakedata<- fakedata %>% mutate(
@@ -162,7 +162,7 @@ ggplot(fakedata, aes(x=speed,y=correct)) +
 # Set up formula model for fitting
 myformula <- brms::brmsformula(
   correct ~ chanceRate + (1-chanceRate-lapse) * (1-inv_logit(eta)),
-  eta ~ 1 + speed,
+  eta ~ 1 + speed, #beta_0 and #beta_1
   lapse ~ 1, 
   family = bernoulli(link="identity"),
   nl = TRUE
