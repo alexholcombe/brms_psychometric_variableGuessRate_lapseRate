@@ -6,6 +6,8 @@ editor: visual
 
 ## Load R libraries
 
+hello everybody
+
 This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-psychometric-functions-with-brms/5762/2> .
 
 ```{r}
@@ -88,7 +90,7 @@ With the probability of just guessing being `chanceRate = 0.02` for example, we 
 
 -   If we left it like this, the ceiling would ofcourse go above 1 which makes no sense, we must 'squish' the curve. We also need to 'squish' it with the `lapse` rate as even the best performers are expected to not perform perfectly and have small perceptual lapses.
 
--    `chanceRate + (1-chanceRate-lapse)*(1-plogis((speed-location)/scale).`
+-   `chanceRate + (1-chanceRate-lapse)*(1-plogis((speed-location)/scale).`
 
 ### Alternate parametrization
 
