@@ -6,35 +6,150 @@ editor: visual
 
 ## Load R libraries
 
+hello everybody
+
 This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-psychometric-functions-with-brms/5762/2> .
 
 ```{r}
 library(tidyverse)
-library(brms)\
+library(ggdist)
+library(brms)
+library(cowplot)
+
 ```
 
-## Generate a fake dataset
+## Random Notes (Vince; Extensive use of Microsoft Copilot)
 
-Generate a fake dataset.
+### Logistic Function
+
+`plogis(x)` is the default logistic function with **location** parameter $\mu = 0$ and **scale** parameter $s = 1$
+
+$$
+plogis(x) = \frac{1}{1+e^{-(x-\mu)/s}} = \frac{1}{1+e^{-x}}
+$$
+
+The **location** parameter refers to where on the x-axis the y axis is 0.5 (in our context, 50% correct) and the scale parameter is how steep the curve is about this 50% mark (close to 0 is VERY steep, higher values is not so steep). The default curve is below, but obviously our x-axis is speed so it's not going to be negative! also, our x axis is 'bounded' by a much smaller interval. (we know that the min speed by rps in our experiment is 0.02 and the max is 1.8. hence we have to adjust the location and scale.
+
+```{r}
+plot(seq(-5, 5, by = 0.1), plogis(seq(-5, 5, by = 0.1)), type = "l", col = "blue", lwd = 2, main = "Default Logistic Curve using plogis()", xlab = "x", ylab = "Probability")
+
+```
+
+### Flipping the curve
+
+-   first we need to flip the curve because the logistic function is an increasing function from 0 to 1, but our experiment we want as x increases (speed) then the y axis (% correct) decreases.
+
+<!-- -->
+
+-   Also, all of our values will be positive (speed) so we take `1-plogis(x)`
+
+### Location
+
+From the methods, it appears that the revolutions per second (rps) of any given trial is bounded by $speed \in [0.02,1.8]$
+
+-   This location parameter would be based off the literature and a given condition on where this 50% mark would be, but i left it at 0.91 (halfway between 0.02 and 1.8) for now as something generic that can be changed.
+
+### Scale
+
+The Scale parameter is a bit more complicated. Using microsoft copilot, i generated how changing the scale affects the function. by default it is scale = 1 but, again, this is not appropriate for how small our interval is.
+
+```{r}
+
+## CODE FROM MICROSOFT COPILOT!
+
+# Define the logistic function using plogis
+logistic_function <- function(speed, chanceRate, lapse, location, scale) {
+  chanceRate + (1 - chanceRate - lapse) * (1 - plogis((speed - location) / scale))
+}
+
+# Parameters
+chanceRate <- 0.02
+lapse <- 0.03
+location <- 0.91 #placeholder, it would be actually defined by the literature (50% point)
+
+# Speed range
+speed <- seq(0, 2, length.out = 400)
+
+# Different scale values to plot
+scale_values <- c(0.01, 0.05, 0.1, 0.2)
+
+# Plotting the logistic functions with different scale values
+plot(NULL, xlim = c(0, 2), ylim = c(0, 1), xlab = "Speed", ylab = "Probability", main = "Logistic Functions with Different Scale Values")
+colors <- rainbow(length(scale_values))
+
+for (i in seq_along(scale_values)) {
+  scale <- scale_values[i]
+  lines(speed, logistic_function(speed, chanceRate, lapse, location, scale), col = colors[i], lwd = 2)
+}
+
+legend("bottomright", legend = paste("Scale =", scale_values), col = colors, lwd = 2)
+```
+
+Given the purpose of this is to test how our analysis performs, i am unsure what scale to use. the original data generation was between -5 and 5 with a scale of 1. The the equivalent scale for the interval of \[0.02, 1.8\] is `scale = 0.178`but let's go with `scale = 0.2`
+
+### Bounding the y-axis of the curve
+
+With the probability of just guessing being `chanceRate = 0.02` for example, we would like to move our curve up to reflect this. so we add `chanceRate` to the equation.
+
+-   Now we have `chanceRate + (1-plogis(speed, location = location_parameter, scale = scale_parameter)`
+
+-   If we left it like this, the ceiling would ofcourse go above 1 which makes no sense, we must 'squish' the curve. We also need to 'squish' it with the `lapse` rate as even the best performers are expected to not perform perfectly and have small perceptual lapses.
+
+-   `chanceRate + (1-chanceRate-lapse)*(1-plogis(speed, location = location_parameter, scale = scale_parameter).`
+
+### Alternate parametrization
+
+In the `brms` analysis, the parameters estimated is $\beta_0$ and $\beta_1$ in which compose the formula of eta
+
+$$
+plogis(x) = \frac{1}{1+e^{-\eta}}= \frac{1}{1+e^{-(\beta_0 +\beta_1x_{speed})}}
+$$
+
+Which are equivalent to the coefficients that we predict
+
+$$
+\eta=\beta_0 +\beta_1x_{speed}
+$$
+
+Using the **scale** and **location** parameters this gives us $\beta_0 = -\mu/s$ and $\beta_1= 1/s$
+
+All of this is to say that with $\mu=0.91$ and $s=0.2$ , we have the parameters we are trying to get to be $\beta_0 =-4.55$ and $\beta_1=5$ . remember these numbers.
+
+-   Also, to flip the curve you take 1 - plogis()
+
+## Generate a fake dataset
 
 ```{r}
 #| echo: false
 set.seed(999)
-chanceRate <- .02 #probablity just guessing
+chanceRate <- .1 #probablity of correct just guessing
 lapse <- .03 #even most attentive person may zone out in trial and guess
-numSs <- 3
-conditionsAndIVs <- cross_df(list(speed = seq(-5, 5),
-                     rep = seq(1, 5),
-                     subj = seq(1, numSs)))
+numSs <- 3 #small number as the brm takes ages
+
+location_parameter <- 0.91 #where on the x-axis (speed) does the y axis reach 50%
+scale_parameter <- 0.2 #
+
+
+conditionsAndIVs <- 
+  tidyr::expand_grid(
+    speed = seq(.02,1.8, length.out = 11), #changed min and max speed to match our data
+    rep = seq(1, 50),
+    subj = seq(1, numSs)
+  )
+
 fakedata<- conditionsAndIVs
+
+#create a new column
 fakedata<- fakedata %>% mutate(
-            probabilityCorrect = chanceRate + (1-chanceRate-lapse)*plogis(1 * (-speed)) )
+  probabilityCorrect = chanceRate + (1-chanceRate-lapse)*(1-plogis(speed, location = location_parameter, scale = scale_parameter))
+)
 
 fakedata<- fakedata %>% mutate(
           correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
          )
 
 fakedata$chanceRate <- chanceRate #Putting chanceRate in the brms formula, brms will know to look for chanceRate in the data dataframe
+
 ```
 
 ## Plot data
@@ -53,7 +168,7 @@ ggplot(fakedata, aes(x=speed,y=correct)) +
 #| 
 # Set up formula model for fitting
 myformula <- brms::brmsformula(
-  correct ~ chanceRate + (1-chanceRate-lapse) * inv_logit(eta),
+  correct ~ chanceRate + (1-chanceRate-lapse) * (1-inv_logit(eta)),
   eta ~ 1 + speed,
   lapse ~ 1, 
   family = bernoulli(link="identity"),
@@ -61,19 +176,39 @@ myformula <- brms::brmsformula(
 ) 
 
 # Set up priors
-lapse_rate_bounds <- c(0,.4)
+
+## NOTE: when i put these in the mypriors, it seems to mess up when mypriors it put in brm() fitting model so i put the numbers manually in
+lapse_rate_lb <- 0
+lapse_rate_ub <- 0.4
 
 mypriors <- c(
   brms::prior(student_t(7, 0, 10), class = "b", nlpar = "eta"),
-  brms::prior(beta(1, 1), nlpar = "lapse", lb = 0, ub = .1)
+  brms::prior(beta(1, 1), nlpar = "lapse", lb = 0, ub = 0.4)
 )
 
 # Plot priors
 # not done yet
 
+
+eta_prior_plot <- 
+  tibble(x = seq(from = -50, to = 50, by = .01)) %>% 
+  ggplot() +
+  geom_ribbon(aes(x = x, ymin = 0, ymax = dstudent_t(x, df = 7, mu = 0, sigma = 10)), alpha = 1/3) +
+  labs(title = "Eta prior")
+
+beta_prior_plot <- 
+  tibble(x = seq(from = lapse_rate_lb, to = lapse_rate_ub, by = .001)) %>% 
+  ggplot() +
+  geom_ribbon(aes(x = x, ymin = 0, ymax = dbeta(x, 1, 1)), alpha = 1/3) +
+  labs(title = "lapse prior")
+
+
+cowplot::plot_grid(eta_prior_plot, beta_prior_plot, ncol = 2)
 ```
 
 \*to-do: set chanceRate to 1/numobjects, and also check lapse parametrization
+
+-   note (vince):
 
 ## Do the fit
 
@@ -85,11 +220,42 @@ fit2 <- brm(
   data = fakedata,
   init = 0,
   control = list(adapt_delta = 0.99),
-  prior = mypriors,
+  prior = mypriors
 )
 
 print(fit2)
 ```
+
+## Convert $\hat\beta_0$ and $\hat\beta_1$ statistics back to scale and location estimates
+
+$\beta_0 = -\mu/s$ and $\beta_1= 1/s \implies s=1/\beta_1$ and $\mu=-\beta_0/\beta_1$
+
+```{r}
+beta_hat_0 <- fixef(fit2)["eta_Intercept","Estimate"]
+beta_hat_1 <- fixef(fit2)["eta_speed","Estimate"]
+
+scale_hat = 1/beta_hat_1
+location_hat = -beta_hat_0/beta_hat_1
+
+scale_parameter
+scale_hat #scale estimation
+
+location_parameter
+location_hat #location estimation
+```
+
+## 
+
+```{r}
+fit2 %>% 
+  prior_summary() %>% 
+  parse_dist(prior) %>% 
+  ggplot(aes(y = prior, dist = .dist, args = .args)) + 
+  ggdist::stat_dist_halfeye() + 
+  xlim(-4,4)
+```
+
+Recall that $\beta_0 =-4.55$ and $\beta_1=5$. While these are within the 95% confidence intervals, the point estimates are quite off (with a sample of 5) but bang on with sample = 50
 
 ## Show fit
 
