@@ -1,0 +1,21 @@
+condition: has a one-to-one mapping with 'cond' so can be deleted
+
+From Eugenie:
+
+The zip contains all 36 subjects included in the paper. There is a handy csv that has all of them (sub-ALL_task-motc.csv).
+the columns are:
+subj group age gender condition cond responseRing speed rt correct
+
+group 1 = younger, 2 = older.
+
+cond has pretty self explanatory condition names:
+t1.d05 == 1 target, 5 objects per ring. t2.d10: 2 targets, 10 objects per ring. .. etc. responseRing is the ring that was probed for the response. 1 = inner, 2 = middle 3 = outer,
+
+speed = rotations per second rt = response time
+
+correct: 0 = false, 1 = true.
+
+I thought I had saved both the objects that were indexed as targets, and the objects that they clicked on, but, sadly, I only saved the response ring that was probed during the response phase and the object they clicked, not the object that was the target. So we only know the response ring probed, not how close their answer was to the actual target.
+I dropped the objectClicked variable from the outputs since it isn't meaningful without the target object information.
+The zip also has a couple of quick figures plotting the data split by responseRing, but didn't have a chance to do any more analyses. Please let me know if you have any questions.
+
