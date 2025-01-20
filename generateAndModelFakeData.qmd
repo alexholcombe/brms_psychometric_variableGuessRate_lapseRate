@@ -122,12 +122,11 @@ All of this is to say that with $\mu=0.91$ and $s=0.2$ , we have the parameters 
 ```{r}
 #| echo: false
 set.seed(999)
-chanceRate <- .1 #probablity of correct just guessing
 lapse <- .03 #even most attentive person may zone out in trial and guess
 numSs <- 3 #small number as the brm takes ages
 
 location_parameter <- 0.91 #where on the x-axis (speed) does the y axis reach 50%
-scale_parameter <- 0.2 #
+scale_parameter <- 0.2 
 
 
 conditionsAndIVs <- 
@@ -152,11 +151,57 @@ fakedata$chanceRate <- chanceRate #Putting chanceRate in the brms formula, brms 
 
 ```
 
+## Fake dataset 2
+
+```{r}
+#possibly need to make new locations and scales per condition combination
+location_parameter <- 0.91 
+scale_parameter <- 0.2
+
+num_subj <- 4
+lapse <- 0.03
+
+#generate fake data
+fakedata2 <- tidyr::expand_grid(
+    speed = seq(.02,1.8, length.out = 12), #changed min and max speed to match our data
+    subj = seq(1, num_subj),
+    num_target = c(1,2,3),
+    obj_per_ring = c(5,10), #two conditions for object density
+    rep = seq(1,5) #5 replicants of each trial combination
+  )
+
+fakedata2 <- fakedata2 %>%
+  group_by(subj) %>%
+  mutate(
+    gender = sample(c("M","F"), 1, replace = TRUE),
+    group = sample(c("younger", "older"), 1, replace = TRUE)
+  ) %>%
+  ungroup()
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    responseRing = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
+  )
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    chanceRate = 1/obj_per_ring,
+    probabilityCorrect = chanceRate + (1-chanceRate-lapse)*(1-plogis(speed, location = location_parameter, scale = scale_parameter))
+  )
+
+fakedata2 <- fakedata2 %>% mutate(
+          correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
+         )
+
+glimpse(fakedata2)
+
+```
+
 ## Plot data
 
 ```{r}
 #| echo: false
-ggplot(fakedata, aes(x=speed,y=correct)) + 
+ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = group)) + 
   stat_summary( fun="mean", geom="point" ) +
   facet_wrap(.~subj)
 ```
@@ -203,8 +248,6 @@ mypriors <- c(
 )
 
 # Plot priors
-# not done yet
-
 
 eta_prior_plot <- 
   tibble(x = seq(from = -50, to = 50, by = .01)) %>% 
