@@ -14,9 +14,6 @@ library(here)
 
 ```
 
-
-
-
 ```{r}
 # Load the data
 rf_data_raw <- read_csv(here("data", "roudaia_faubert_data", "dat_csvs", "sub-ALL_task-motc.csv"))
@@ -52,5 +49,3 @@ rf_data_clean <- rf_data_raw %>%
 
 glimpse(rf_data_clean)
 ```
-notes:
-* doesnt seem to be an explanation of the 'condition' variable
