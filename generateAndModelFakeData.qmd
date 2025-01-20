@@ -175,7 +175,23 @@ myformula <- brms::brmsformula(
   nl = TRUE
 ) 
 
-# Set up priors
+#Get list of what parameters in my model brms will let me set priors on
+get_prior(myformula, data=fakedata)
+
+```
+
+## Set up the priors
+
+If we want to put a prior on the speed threshold, it doesn't correspond directly to the slope or the y-intercept of the linear function of speed the precedes the inv_logit transformation that makes the output of the line go from 0 to 1.
+
+I think when the linear function of speed results in 0, the inv_logit will be halfway up the curve, which corresponds to halfway between chance and 1-lapse in our model.
+
+So if our prior is on midpoint threshold speed, that's a prior on when y will equal 0
+For the equation of a line, y=0   0=mx+b
+
+```{r}
+
+
 
 ## NOTE: when i put these in the mypriors, it seems to mess up when mypriors it put in brm() fitting model so i put the numbers manually in
 lapse_rate_lb <- 0
