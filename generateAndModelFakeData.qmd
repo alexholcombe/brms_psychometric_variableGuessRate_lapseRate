@@ -221,7 +221,7 @@ myformula <- brms::brmsformula(
 ) 
 
 #Get list of what parameters in my model brms will let me set priors on
-get_prior(myformula, data=fakedata)
+get_prior(myformula, data=fakedata2)
 
 ```
 
@@ -231,13 +231,9 @@ If we want to put a prior on the speed threshold, it doesn't correspond directly
 
 I think when the linear function of speed results in 0, the inv_logit will be halfway up the curve, which corresponds to halfway between chance and 1-lapse in our model.
 
-So if our prior is on midpoint threshold speed, that's a prior on when y will equal 0
-For the equation of a line, y=0   0=mx+b
+So if our prior is on midpoint threshold speed, that's a prior on when y will equal 0 For the equation of a line, y=0 0=mx+b
 
 ```{r}
-
-
-
 ## NOTE: when i put these in the mypriors, it seems to mess up when mypriors it put in brm() fitting model so i put the numbers manually in
 lapse_rate_lb <- 0
 lapse_rate_ub <- 0.4
@@ -276,7 +272,7 @@ cowplot::plot_grid(eta_prior_plot, beta_prior_plot, ncol = 2)
 
 fit2 <- brm(
   myformula,
-  data = fakedata,
+  data = fakedata2,
   init = 0,
   control = list(adapt_delta = 0.99),
   prior = mypriors
@@ -303,17 +299,6 @@ location_parameter
 location_hat #location estimation
 ```
 
-## 
-
-```{r}
-fit2 %>% 
-  prior_summary() %>% 
-  parse_dist(prior) %>% 
-  ggplot(aes(y = prior, dist = .dist, args = .args)) + 
-  ggdist::stat_dist_halfeye() + 
-  xlim(-4,4)
-```
-
 Recall that $\beta_0 =-4.55$ and $\beta_1=5$. While these are within the 95% confidence intervals, the point estimates are quite off (with a sample of 5) but bang on with sample = 50
 
 ## Show fit
@@ -321,11 +306,11 @@ Recall that $\beta_0 =-4.55$ and $\beta_1=5$. While these are within the 95% con
 ```{r}
 predict_interval_brms <- predict(fit2, re_formula = NULL) #or use fitted to not take into account uncertainty of observations
 #head(predict_interval_brms)
-dataWithModelPredictions<- cbind(fakedata,predict_interval_brms)
+dataWithModelPredictions<- cbind(fakedata2,predict_interval_brms)
 
 ggplot(dataWithModelPredictions, aes(x=speed,y=correct)) + 
   stat_summary( fun="mean", geom="point" ) +
-  geom_line( aes(x=speed, y= Estimate) ) +
+  geom_line(aes(x=speed, y= Estimate)) +
   facet_wrap(.~subj)
 
 ```
@@ -333,13 +318,12 @@ ggplot(dataWithModelPredictions, aes(x=speed,y=correct)) +
 In the above fit, I think it is overplotting the lines many times because there are multiple trials at each speed. So, should reduce the fakedata to unique values and then plot - and eventually interpolate to show smooth curves, and maybe annotate with lapse rate.
 
 ```{r}
-conditionsEachTrial<- fakedata %>% select(speed,subj,chanceRate)
+conditionsEachTrial<- fakedata2 %>% select(speed,subj,chanceRate)
 conditionsUniq <- unique(conditionsEachTrial)
 prediction <- predict(fit2, newdata=conditionsUniq, re_formula = NULL) 
-prediction<- fitted(fit2, newdata=conditionsUniq, re_formula = NULL) 
+prediction <- fitted(fit2, newdata=conditionsUniq, re_formula = NULL) 
 
 predictions<- cbind(conditionsUniq, prediction)
-  
   
 ggplot(dataWithModelPredictions, aes(x=speed,y=correct)) + 
   stat_summary( fun="mean", geom="point" ) +

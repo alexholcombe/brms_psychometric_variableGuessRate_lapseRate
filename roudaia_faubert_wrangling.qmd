@@ -50,7 +50,7 @@ rf_data_clean <- rf_data_raw %>%
 glimpse(rf_data_clean)
 
 rf_data_clean %>%
-  filter(subj == 201) %>%
+  filter(subj == 204) %>%
   filter(obj_per_ring == 5) %>%
   filter(num_target == 1) %>%
   group_by(speed) %>%
