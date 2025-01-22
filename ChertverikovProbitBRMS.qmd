@@ -1,0 +1,67 @@
+---
+title: "ChertverikovProbitBRMS"
+format: html
+editor: visual
+---
+
+He does it in a way that allows him to set a prior on the location parameter: https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
+
+## Quarto
+
+```{r}
+#| echo: false
+
+library(ggplot2)
+library(data.table)
+library(brms)
+library(cmdstanr)
+set_cmdstan_path('//wsl$/Ubuntu/home/andche/.cmdstan/cmdstan-2.35.0')
+
+
+distr_fun_std <- function(x, mean, sigma, lambda){
+  lambda+(1-2*lambda)*pnorm((x- mean)/sigma)
+}
+
+real_mean <- 50
+real_sigma <- 50
+
+exdata <- data.table(expand.grid(delay_ms = seq(-300,300, by = 10), repl_i = 1:100))
+exdata[,fixated_right := ifelse(rnorm(.N, delay_ms-real_mean, sd = real_sigma)>0, 1, 0), by = delay_ms]
+
+model_formula <- bf(
+  fixated_right ~ Phi((delay_ms-eta)/exp(logsigma)),
+  eta ~ 1,
+  logsigma ~ 1,
+  family = bernoulli(link="identity"),
+  nl = TRUE
+)
+
+log_sigma_mean <- log(50)
+p2 <- c(
+  prior(normal(100, 100), coef = "Intercept",  nlpar = "eta"),
+  prior(constant(3.91), class = "b", nlpar = "logsigma")
+)
+default_prior(model_formula, exdata)
+fit <- brm(
+  model_formula,
+  data = exdata, 
+  # control = list(adapt_delta = 0.99),
+  prior = p2,
+  cores = 4,
+  backend = "cmdstanr",
+  sample_prior = "only"
+)
+summary(fit)
+
+coefs <- fixef(fit)[,'Estimate']
+pred_df <-  data.table(delay_ms = seq(-200,200, by = 10))
+pred_df[,pred:=pnorm((delay_ms-coefs['eta_Intercept'])/exp(coefs['logsigma_Intercept']))]
+pred_df <- cbind(pred_df, predict(fit, newdata = pred_df ))
+ggplot(exdata, aes(x = delay_ms, y = fixated_right))+
+  geom_smooth(method = 'glm', method.args = list(family = binomial('probit')), aes(color = 'Data'), se = F)+
+  stat_function(fun = distr_fun_std, args = list(mean = real_mean, sigma = real_sigma, lambda = 0), aes(color = 'Generative model'))+
+  geom_line(data=pred_df, aes(y = Estimate, color = 'Fitted model with uncertainty'))+
+  geom_line(data=pred_df, aes(y = pred, color = 'Fitted model'))
+```
+
+

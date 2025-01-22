@@ -20,11 +20,24 @@ c: chance rate
 l: lapse rate
 p: Assuming no lapse, probability get it right, as a function of speed (s)
 
-lc + (1-l)(p+(1-p)c)
+lc + (1-l)( p+(1-p)c )
 
+The algebra leading to Equation A.6 in Schutt et al. 2016 shows that we can avoid having two invocations of the psychometric function p by reparameterizing this equation keeping chance rate (which they denote with gamma) but introducing lambda = l(1-c).
+
+That yields: c + (1 - c - lambda)p
+
+But that would mean that you can't put a prior directly on l, instead it's a prior on l(1-c). Of course, because we know c, we could use that knowledge to set the prior appropriately, except that c is different in different number of objects conditions in our experiment, so we'd have to call brms separately for the different conditions, which would not only be a pain, it would mean we can't use a multilevel model that includes both conditions.
+
+Only thing is, I don't know whether having two calls to p is somehow not ok with brms.
+
+Andrey Chertverikov used brms for this  (except using the Schutz parameterization) here:
+https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
+
+QUESTIONS:
+Why did he use cmdstan?
+Why did he use Phi instead of pnorm?
 
 ```{r}
-#possibly need to make new locations and scales per condition combination
 location_parameter <- 1 
 scale_parameter <- 0.1
 u=location_parameter
@@ -33,7 +46,7 @@ s=scale_parameter
 #Cumulative gaussian: pnorm(q, mean, sd)
 
 probCorrect<- function(c,l,u,s,speed) {
-  l*c + (1-l)*(pnorm(speed,u,s) + (1-pnorm(speed,u,s))*c)
+  l*c + (1-l)*( pnorm(speed,u,s) + (1-pnorm(speed,u,s))*c )
 }
 
 #Ceiling is when p = 1. When lapse, get it right c proportion of time, so (1-lapse)*1 + lapse*c
@@ -69,9 +82,10 @@ fakedata<- fakedata %>% mutate(
 
 glimpse(fakedata)
 ```
+Plot psychometric function
 ```{r}
 #| echo: false
-ggplot(fakedata, aes(x=speed,y=probCorrect)) + 
+myplot<- ggplot(fakedata, aes(x=speed,y=probCorrect)) + 
   geom_point() +
   stat_summary( fun="mean", geom="point" ,color="blue") +
   facet_wrap(.~subj) +
@@ -79,32 +93,54 @@ ggplot(fakedata, aes(x=speed,y=probCorrect)) +
   #geom_hline(yintercept=1-lapseRate + lapseRate*chanceRate, linetype="dotted")
   geom_hline(yintercept=1-lapseRate + lapseRate*0.2, linetype="dotted") +
   geom_hline(yintercept=0.2, linetype="dotted")
+show(myplot)
+```
+
+Plot psychometric function and fake data (black)
+```{r}
+#Generate binary responses
+fakedata<- fakedata %>% mutate(
+          correct = rbinom(n=length(probCorrect), size = 1, prob = probCorrect)
+         )
+
+myplot<- myplot + stat_summary(aes(x=speed,y=correct), fun="mean", geom="point")
+show(myplot)
+
 ```
 
 
-
-
-
-
-
-#Generate binary responses
-fakedata<- fakedata %>% mutate(
-          correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
-         )
-#Use ascending for now
-fakedata$speed <- fakedata$speed * -1
-
-
-
-## Plot data
-
-## Set up the probit model
+## Set up the cumulative normal (probit) model
 
 
 ```{r}
 #| echo: false
 #| 
 # Set up formula model for fitting
+
+#Non linear method explained by https://cran.r-project.org/web/packages/brms/vignettes/brms_nonlinear.html#advanced-item-response-models
+#Example:
+#fit1 <- brm(bf(y ~ b1 * exp(b2 * x), 
+#      b1 + b2 ~ 1,     nl = TRUE),
+#           data = dat1, prior = prior1)
+
+myformula<- brms::brms_formula(
+    correct ~ lapseRate*chanceRate + (1-lapseRate)*(pnorm(speed,u,s)) 
+  )
+
+lapseRate~1, chanceRate~1
+
+l*c + (1-l)*( pnorm(speed,u,s) + (1-pnorm(speed,u,s))*c )
+
+model_formula <- bf(
+  fixated_right ~ guess + (1-2*guess) * Phi(eta, exp(log_sigma)),
+  eta ~ 1 + delay_ms,
+  guess ~ 1,
+  log_sigma ~ 1,
+  family = bernoulli(link="identity"),
+  nl = TRUE
+)
+
+
 myformula <- brms::brmsformula(
   correct ~ chanceRate + (1-chanceRate-lapse) * 
              (1- pnorm(speed, mean = location_parameter, sd = scale_parameter)
@@ -115,6 +151,8 @@ myformula <- brms::brmsformula(
   family = bernoulli(link="identity"),
   nl = TRUE
 ) 
+
+
 
 #Get list of what parameters in my model brms will let me set priors on
 get_prior(myformula, data=fakedata2)
