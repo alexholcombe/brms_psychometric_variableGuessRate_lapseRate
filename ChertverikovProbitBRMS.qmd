@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
-He does it in a way that allows him to set a prior on the location parameter: https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
+This code does it in a way that allows him to set a prior on the location parameter: https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
 
 ## Quarto
 
@@ -14,8 +14,15 @@ He does it in a way that allows him to set a prior on the location parameter: ht
 library(ggplot2)
 library(data.table)
 library(brms)
+```
+
+Why does he use cmdstanr?
+
+```{r}
 library(cmdstanr)
-set_cmdstan_path('//wsl$/Ubuntu/home/andche/.cmdstan/cmdstan-2.35.0')
+```
+
+#set_cmdstan_path('//wsl$/Ubuntu/home/andche/.cmdstan/cmdstan-2.35.0')
 
 
 distr_fun_std <- function(x, mean, sigma, lambda){
