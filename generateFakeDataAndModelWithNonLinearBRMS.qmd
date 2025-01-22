@@ -14,51 +14,109 @@ library(cowplot)
 
 because I think can use probit (inverse of the cumulative normal) to recover the parameters, with true location parameterization
 
+What is the expression for the psychometric function?
+
+c: chance rate
+l: lapse rate
+p: Assuming no lapse, probability get it right, as a function of speed (s)
+
+lc + (1-l)(p+(1-p)c)
+
+
 ```{r}
 #possibly need to make new locations and scales per condition combination
 location_parameter <- 1 
 scale_parameter <- 0.1
+u=location_parameter
+s=scale_parameter
 
+#Cumulative gaussian: pnorm(q, mean, sd)
+
+probCorrect<- function(c,l,u,s,speed) {
+  l*c + (1-l)*(pnorm(speed,u,s) + (1-pnorm(speed,u,s))*c)
+}
+
+#Ceiling is when p = 1. When lapse, get it right c proportion of time, so (1-lapse)*1 + lapse*c
+#ceiling = 1-lapseRate + lapse*chanceRate
+```
+
+```{r}
+lapseRate=0.1
+
+numSs<-1
 conditionsAndIVs <- 
   tidyr::expand_grid(
-    speed = seq(.02,1.8, length.out = 11), #changed min and max speed to match our data
+    speed = seq(.02,1.8, length.out = 30), #changed min and max speed to match our data
     objects = 5,
-    rep = seq(1, 100),
+    rep = seq(1, 10),
     subj = seq(1, numSs)
   )
 
-fakedataProbit<- conditionsAndIVs
-fakedataProbit<- fakedataProbit %>% mutate(
-                                    chanceRate = 1/objects )
-fakedataProbit$chanceRate <- 0 #TEMP
+fakedata<- conditionsAndIVs
+fakedata<- fakedata %>% mutate( chanceRate = 1/objects )
+#fakedata$chanceRate <- 0 #TEMP
   
-#create a new column for the response
-#Cumulative gaussian: pnorm(q, mean, sd)
+#create a new column for the probability correct for this speed
 
-fakedataProbit<- fakedataProbit %>% mutate(
-  probabilityCorrect = chanceRate + (1-chanceRate-lapse)*(1-pnorm(speed, mean = location_parameter, sd = scale_parameter))
+fakedata<- fakedata %>% mutate(
+  probCorrect = probCorrect(chanceRate,lapseRate,u,s,speed)
 )
 
+#fakedata<- fakedata %>% mutate(
+#  probabilityCorrect = chanceRate + (1-chanceRate-lapse)*(1-pnorm(speed, u, s))
+#)
+
+
+glimpse(fakedata)
+```
+```{r}
+#| echo: false
+ggplot(fakedata, aes(x=speed,y=probCorrect)) + 
+  geom_point() +
+  stat_summary( fun="mean", geom="point" ,color="blue") +
+  facet_wrap(.~subj) +
+  geom_vline(xintercept=location_parameter, linetype = "dotted") +
+  #geom_hline(yintercept=1-lapseRate + lapseRate*chanceRate, linetype="dotted")
+  geom_hline(yintercept=1-lapseRate + lapseRate*0.2, linetype="dotted") +
+  geom_hline(yintercept=0.2, linetype="dotted")
+```
+
+
+
+
+
+
+
 #Generate binary responses
-fakedataProbit<- fakedataProbit %>% mutate(
+fakedata<- fakedata %>% mutate(
           correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
          )
 #Use ascending for now
-fakedataProbit$speed <- fakedataProbit$speed * -1
+fakedata$speed <- fakedata$speed * -1
 
-```
+
 
 ## Plot data
 
-```{r}
-#| echo: false
-ggplot(fakedataProbit, aes(x=speed,y=correct)) + 
-  geom_point() +
-  stat_summary( fun="mean", geom="point" ,color="blue") +
-  facet_wrap(.~subj)
-```
-
 ## Set up the probit model
 
-Example simple probit regression at https://www.bwilden.com/posts/probit-probit/
 
+```{r}
+#| echo: false
+#| 
+# Set up formula model for fitting
+myformula <- brms::brmsformula(
+  correct ~ chanceRate + (1-chanceRate-lapse) * 
+             (1- pnorm(speed, mean = location_parameter, sd = scale_parameter)
+                                                   
+                                                   inv_logit(eta)),
+  eta ~ 1 + speed,
+  lapse ~ 1, 
+  family = bernoulli(link="identity"),
+  nl = TRUE
+) 
+
+#Get list of what parameters in my model brms will let me set priors on
+get_prior(myformula, data=fakedata2)
+
+```
