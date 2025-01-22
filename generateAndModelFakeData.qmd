@@ -4,9 +4,11 @@ format: html
 editor: visual
 ---
 
-## Load R libraries
+# In this aborted effort we worked on using glm with brms but eventually realized glm isn't suitable
 
-hello everybody
+It isn't suitable because you can't put a prior on the location parameter because of the way the line is parameterized.
+
+## Load R libraries
 
 This code initially based on <https://discourse.mc-stan.org/t/fitting-lapsing-psychometric-functions-with-brms/5762/2> .
 
@@ -17,6 +19,8 @@ library(brms)
 library(cowplot)
 
 ```
+
+
 
 ## Random Notes (Vince; Extensive use of Microsoft Copilot)
 
@@ -188,6 +192,8 @@ fakedataProbit<- fakedataProbit %>% mutate(
 fakedataProbit$speed <- fakedataProbit$speed * -1
 
 ```
+
+
 
 ## Plot data
 
