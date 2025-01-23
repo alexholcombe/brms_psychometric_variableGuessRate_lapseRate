@@ -19,14 +19,16 @@ library(brms)
 Why does he use cmdstanr?
 
 ```{r}
-library(cmdstanr)
-```
-
+#library(cmdstanr)
 #set_cmdstan_path('//wsl$/Ubuntu/home/andche/.cmdstan/cmdstan-2.35.0')
 
+```
+
+```{r}
+#| echo: false
 
 distr_fun_std <- function(x, mean, sigma, lambda){
-  lambda+(1-2*lambda)*pnorm((x- mean)/sigma)
+  lambda+(1-2*lambda) * pnorm((x- mean)/sigma)
 }
 
 real_mean <- 50
@@ -36,37 +38,48 @@ exdata <- data.table(expand.grid(delay_ms = seq(-300,300, by = 10), repl_i = 1:1
 exdata[,fixated_right := ifelse(rnorm(.N, delay_ms-real_mean, sd = real_sigma)>0, 1, 0), by = delay_ms]
 
 model_formula <- bf(
-  fixated_right ~ Phi((delay_ms-eta)/exp(logsigma)),
+  fixated_right ~ Phi((delay_ms-eta)/exp(sigma)),
   eta ~ 1,
-  logsigma ~ 1,
-  family = bernoulli(link="identity"),
+  sigma ~ 1,
+  family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
 
-log_sigma_mean <- log(50)
+#log_sigma_mean <- log(50)
+#sigma_lb <- 0.01
+#sigma_ub <- 200
+
 p2 <- c(
   prior(normal(100, 100), coef = "Intercept",  nlpar = "eta"),
-  prior(constant(3.91), class = "b", nlpar = "logsigma")
+  #prior(constant(3.91), class = "b", nlpar = "sigma", lb=3.8, ub=4.0),
+  prior(normal(4,2), class = "b", nlpar = "sigma", lb=1, ub=6.0)
+#  prior(beta(1,1), class = "b", nlpar = "sigma", lb=3.8, ub=4.0)
 )
+
 default_prior(model_formula, exdata)
+```
+
+```{r}
+#| echo: false
+
 fit <- brm(
   model_formula,
   data = exdata, 
   # control = list(adapt_delta = 0.99),
   prior = p2,
-  cores = 4,
-  backend = "cmdstanr",
-  sample_prior = "only"
+#  cores = 4,
+#  backend = "cmdstanr",
+#  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
 )
 summary(fit)
 
 coefs <- fixef(fit)[,'Estimate']
 pred_df <-  data.table(delay_ms = seq(-200,200, by = 10))
-pred_df[,pred:=pnorm((delay_ms-coefs['eta_Intercept'])/exp(coefs['logsigma_Intercept']))]
+pred_df[,pred:=pnorm((delay_ms-coefs['eta_Intercept'])/exp(coefs['sigma_Intercept']))]
 pred_df <- cbind(pred_df, predict(fit, newdata = pred_df ))
 ggplot(exdata, aes(x = delay_ms, y = fixated_right))+
-  geom_smooth(method = 'glm', method.args = list(family = binomial('probit')), aes(color = 'Data'), se = F)+
-  stat_function(fun = distr_fun_std, args = list(mean = real_mean, sigma = real_sigma, lambda = 0), aes(color = 'Generative model'))+
+  stat_summary( fun="mean", geom="point", aes(color = 'Data') )+
+  stat_function(fun = distr_fun_std, args = list(mean = real_mean, sigma = real_sigma, lambda = 0), aes(color = 'Generating model'))+
   geom_line(data=pred_df, aes(y = Estimate, color = 'Fitted model with uncertainty'))+
   geom_line(data=pred_df, aes(y = pred, color = 'Fitted model'))
 ```
