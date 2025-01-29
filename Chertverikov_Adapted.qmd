@@ -61,8 +61,10 @@ fakedata2 <- fakedata2 %>%
 fakedata2 <- fakedata2 %>%
   mutate(
     chanceRate = 1/obj_per_ring,
-    phi = pnorm(speed, location_parameter, scale_parameter),
-    probabilityCorrect = (lapse*chanceRate) + (1 - lapse)*(1 - phi*(1-chanceRate))
+    #phi = pnorm(-speed, -location_parameter, scale_parameter) # old formula version
+    phi = pnorm(-speed, -location_parameter, scale_parameter),
+    #probabilityCorrect = (lapse*chanceRate) + (1 - lapse)*(1 - phi*(1-chanceRate)) #old formula version
+    probabilityCorrect = chanceRate + (1-chanceRate - lapse*(1-chanceRate))*phi
   )
 
 fakedata2 <- fakedata2 %>% mutate(
@@ -93,7 +95,8 @@ distr_fun <- function(x, mean, sigma, lapse, chanceRate){
 }
                                  
 model_formula <- bf(
-  correct ~ lapse * chanceRate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chanceRate)), #replaced delay_ms with speed to match our data
+  #correct ~ lapse * chanceRate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chanceRate)),
+  correct ~ chanceRate + (1-chanceRate - lapse*(1-chanceRate))*Phi((-speed+eta)/exp(logsigma)), #this works
   eta ~ 1,
   lapse ~ 1,
   logsigma ~ 1,
@@ -114,6 +117,8 @@ default_prior(model_formula, fakedata2)
 ```{r}
 #| echo: false
 
+set.seed(999)
+
 fit <- brm(
   model_formula,
   data = fakedata2, 
@@ -123,6 +128,7 @@ fit <- brm(
 #  backend = "cmdstanr",
 #  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
 )
+
 summary(fit)
 
 
