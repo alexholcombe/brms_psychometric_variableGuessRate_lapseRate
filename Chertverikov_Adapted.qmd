@@ -1,0 +1,148 @@
+---
+title: "ChertverikovProbitBRMS"
+format: html
+editor: visual
+---
+
+This code does it in a way that allows him to set a prior on the location parameter: https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
+
+## Quarto
+
+```{r}
+#| echo: false
+library(ggplot2)
+library(data.table)
+library(brms)
+library(tidyverse)
+```
+
+Why does he use cmdstanr?
+
+```{r}
+#library(cmdstanr)
+#set_cmdstan_path('//wsl$/Ubuntu/home/andche/.cmdstan/cmdstan-2.35.0')
+
+```
+
+## New psychometric function
+
+```{r}
+#| echo: false
+set.seed(999)
+#possibly need to make new locations and scales per condition combination
+location_parameter <- 0.91
+scale_parameter <- 0.2
+lapse <- 0.03
+
+num_subj <- 4
+
+#generate fake data
+fakedata2 <- tidyr::expand_grid(
+    speed = seq(.02,1.8, length.out = 12), #changed min and max speed to match our data
+    subj = seq(1, num_subj),
+    num_target = c(1,2,3),
+    obj_per_ring = c(5,10), #two conditions for object density
+    rep = seq(1,5) #5 replicants of each trial combination
+  )
+
+fakedata2 <- fakedata2 %>%
+  group_by(subj) %>%
+  mutate(
+    gender = sample(c("M","F"), 1, replace = TRUE),
+    group = sample(c("younger", "older"), 1, replace = TRUE)
+  ) %>%
+  ungroup()
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    responseRing = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
+  )
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    chanceRate = 1/obj_per_ring,
+    phi = pnorm(speed, location_parameter, scale_parameter),
+    probabilityCorrect = (lapse*chanceRate) + (1 - lapse)*(1 - phi*(1-chanceRate))
+  )
+
+fakedata2 <- fakedata2 %>% mutate(
+          correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
+         )
+          
+```
+
+## Plot our fake data
+
+```{r}
+#| echo: false
+ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = group)) + 
+  stat_summary( fun="mean", geom="point" ) +
+  facet_wrap(.~subj)
+
+ggplot(fakedata2, aes(x=speed,y=correct)) + 
+  stat_summary(fun="mean", geom="point" ) +
+  facet_wrap(.~chanceRate) +
+  aes(color = chanceRate)
+```
+
+```{r}
+#| echo: false
+
+distr_fun <- function(x, mean, sigma, lapse, chanceRate){
+(lapse*chanceRate) + (1 - lapse)*(1 - pnorm((x-mean)/sigma)*(1-chanceRate))
+}
+                                 
+model_formula <- bf(
+  correct ~ lapse * chanceRate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chanceRate)), #replaced delay_ms with speed to match our data
+  eta ~ 1,
+  lapse ~ 1,
+  logsigma ~ 1,
+  family = bernoulli(link="identity"), #because otherwise default link logit would be used
+  nl = TRUE
+)
+
+p2 <- c(
+  prior(normal(100, 100), coef = "Intercept",  nlpar = "eta"),
+  #prior(constant(3.91), class = "b", nlpar = "logsigma", lb=3.8, ub=4.0),
+  prior(normal(4,2), class = "b", nlpar = "logsigma", lb=0.1, ub=2) #changed from 1 and 6 to reflect what our scale/signma should be 
+#  prior(beta(1,1), class = "b", nlpar = "logsigma", lb=3.8, ub=4.0)
+)
+
+default_prior(model_formula, fakedata2)
+```
+
+```{r}
+#| echo: false
+
+fit <- brm(
+  model_formula,
+  data = fakedata2, 
+  # control = list(adapt_delta = 0.99),
+#  prior = p2,
+#  cores = 4,
+#  backend = "cmdstanr",
+#  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
+)
+summary(fit)
+
+
+```
+
+```{r}
+#| echo: false
+
+#since we have effectively two different conditions numerically (chancerate 0.1 and 0.2), treating it as one model probably not the move
+
+fakedata2_pred <- fakedata2
+coefs <- fixef(fit)[,'Estimate']
+fakedata2_pred[,pred=pnorm((speed-coefs['eta_Intercept'])/exp(coefs['logsigma_Intercept']))]
+fakedata2_pred <- cbind(fakedata2_pred, predict(fit, newdata = fakedata2))
+
+fakedata2_pred
+
+ggplot(fakedata2, aes(x = speed, y = correct))+
+  stat_summary(fun="mean", geom="point", aes(color = 'Data') )+
+  stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.2), aes(color = '0.2 chance curve')) +
+    stat_function(fun = distr_fun_std, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.1), aes(color = '0.1 chance curve'))+
+  geom_line(data=fakedata2_pred, aes(y = Estimate, color = 'Fitted model with uncertainty'))
+```
