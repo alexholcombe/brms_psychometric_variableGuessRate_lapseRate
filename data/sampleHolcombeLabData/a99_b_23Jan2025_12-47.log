@@ -1,0 +1,589 @@
+172.8467 	INFO 	Median frames per second =100.0, which is close enough to desired val of 100.0
+172.8468 	INFO 	longFrameLimit=12.7 Recording trials where one or more interframe interval exceeded this figure 
+172.8468 	INFO 	computer platform=win32
+172.8468 	INFO 	File that generated this = sys.argv[0]= C:\Users\HolcombeLab\Documents\MOTcircularClean-main\MOTcircular.py
+172.8469 	INFO 	has_retina_scrn=False
+172.8469 	INFO 	trialsPerCondition =3
+172.8469 	INFO 	random number seed =1737596859
+173.1620 	INFO 	Screen resolution, which is also being used for calculations, is 800 by 600
+176.8551 	INFO 	second window opening runInfo mean ms=10.012874600745864
+176.8551 	INFO 	#[ PsychoPy3 RuntimeInfoStart ]
+  #[[ PsychoPy ]] #---------
+    psychopyVersion: 2023.2.3
+    psychopyHaveExtRush: True
+  #[[ Experiment ]] #---------
+    experimentAuthVersion: None
+    experimentAuthor: None
+    experimentRunTime: 2025_01_23 12:50 (Year_Month_Day Hour:Min)
+    experimentRunTime.epoch: 1737597029
+    experimentScript: MOTcircular.py
+    experimentScript.digestSHA1: c600bde15cf1bca5d5a89031bb43359bf2f90197
+    experimentScript.directory: C:\Users\HolcombeLab\Documents\MOTcircularClean-main
+  #[[ System ]] #---------
+    systemHaveInternetAccess: False (proxies not attempted)
+    systemHostName: WDYK4NW1
+    systemLocale: English_Australia.1252
+    systemMemFreeRAM: 13064.93359375
+    systemMemTotalRAM: 16338.5546875
+    systemPlatform: windowsversion=sys.getwindowsversion(major=10, minor=0, build=19045, platform=2, service_pack='')
+    systemRebooted: System Boot Time:          11/06/2024, 3:09:20 PM
+    systemSec.pythonSSL: True
+    systemTimeNumpySD1000000_sec: 0.0052
+    systemUser: HolcombeLab
+    systemUserID: 1000
+    systemUserProcCmdPid: shellexperiencehost.exe msedge.exe textinputhost.exe smss.exe csrss.exe wmiprvse.exe pythonw.exe searchprotocolhost.exe dllhost.exe sisidsservice.exe searchapp.exe unsecapp.exe ccsvchst.exe sihost.exe microsoftedgeupdate.exe ctfmon.exe 'system idle process' uhssvc.exe registry startmenuexperiencehost.exe mathworksservicehost.exe securityhealthsystray.exe armsvc.exe logonexperthelper.exe wininit.exe explorer.exe atieclxx.exe spoolsv.exe updater.exe useroobebroker.exe applicationframehost.exe services.exe mousocoreworker.exe taskhostw.exe microsoft.photos.exe sisipsservice.exe rtdcpl64.exe fontdrvhost.exe fodhelper.exe logonexpertservice.exe sisipsutil.exe trustedinstaller.exe runtimebroker.exe svchost.exe lsass.exe jhi_service.exe winlogon.exe systemsettings.exe filecoauth.exe securityhealthservice.exe system sgrmbroker.exe mathworksservicehost-monitor.exe lms.exe memcompression cafservicemain.exe searchindexer.exe atiesrxx.exe searchfilterhost.exe aggregatorhost.exe lockapp.exe dwm.exe privacyiconclient.exe tiworker.exe onedrive.exe sepwscsvc64.exe
+    systemUserProcCount: 162
+    systemUserProcFlagged: explorer.exe
+    systemUsersCount: False
+  #[[ Window ]] #---------
+    windowWinType: pyglet
+    windowWaitBlanking: False
+    windowUseNativeGamma: True
+    windowUnits: deg
+    windowSize_pix: [800 600]
+    windowScreen: 0
+    windowRgb: [-1 -1 -1]
+    windowRefreshTimeSD_ms: 0.146
+    windowRefreshTimeMedian_ms: 10.008
+    windowRefreshTimeAvg_ms: 10.013
+    windowRefreshThreshold_sec: 0.0120
+    windowRecordFrameIntervals: False
+    windowPos_pix: (0, 0)
+    windowMonitor.name: testMonitor
+    windowMonitor.getWidth_cm: 38.0
+    windowMonitor.getLinearizeMethod: 1
+    windowMonitor.getGammaGrid: [[ 0.  1.  1. nan nan nan]
+ [ 0.  1.  1. nan nan nan]
+ [ 0.  1.  1. nan nan nan]
+ [ 0.  1.  1. nan nan nan]]
+    windowMonitor.getDistance_cm: 50.0
+    windowMonitor.gammaInterpolator2: None
+    windowMonitor.gammaInterpolator: None
+    windowMonitor.currentCalibName: 2024_03_25 11:05
+    windowIsFullScr: 1
+    windowHaveShaders: True
+    windowAllowGUI: False
+  #[[ Python ]] #---------
+    pythonWxVersion: 4.1.1 msw (phoenix) wxWidgets 3.1.5
+    pythonVersion: 3.8.10
+    pythonScipyVersion: 1.10.1
+    pythonPygletVersion: 1.4.11
+    pythonPygameVersion: 2.1.0
+    pythonNumpyVersion: 1.24.4
+    pythonMatplotlibVersion: 3.4.3
+    pythonFullVersion: 3.8.10 (tags/v3.8.10:3d8993a, May  3 2021, 11:48:03) [MSC v.1928 64 bit (AMD64)]
+    pythonExecutable: C:\Program Files\PsychoPy\pythonw.exe
+  #[[ OpenGL ]] #---------
+    openGLmaxVerticesInVertexArray: 536870911
+    False: openGLext.GL_STEREO
+    True: openGLext.GL_EXT_framebuffer_object
+    True: openGLext.GL_ARB_vertex_shader
+    True: openGLext.GL_ARB_texture_non_power_of_two
+    True: openGLext.GL_ARB_texture_float
+    True: openGLext.GL_ARB_shader_objects
+    True: openGLext.GL_ARB_multitexture
+    True: openGLext.GL_ARB_fragment_program
+    openGLVersion: 4.6.13596 Compatibility Profile Context 20.10.35.02 27.20.1034.6
+    openGLVendor: ATI Technologies Inc.
+    openGLRenderingEngine: AMD Radeon (TM) R9 M360
+#[ PsychoPy3 RuntimeInfoEnd ]
+
+176.8559 	INFO 	gammaGrid=[[ 0.  1.  1. nan nan nan]
+ [ 0.  1.  1. nan nan nan]
+ [ 0.  1.  1. nan nan nan]
+ [ 0.  1.  1. nan nan nan]]
+176.8559 	INFO 	linearizeMethod=1
+177.7550 	EXP 	Created sequence: random, trialTypes=40, nReps=3, seed=None
+177.7567 	INFO 	starting exp with name: "TemporalFrequencyLimit" at 23Jan2025_12-50
+177.7567 	INFO 	numtrials=120, trialDurMin= 2 trackVariableIntervMax= 2.5refreshRate=100.0
+177.7567 	INFO 	cueRampUpDur=0 cueRampDownDur= 0 secs
+177.7567 	INFO 	task=track   respType=order
+177.7569 	INFO 	ring radii=[ 2.5  7.  15. ]
+177.7570 	INFO 	drawingAsGrating=True gratingTexPix=1024 antialiasGrating=False
+trialnum=0 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.2 18.8 19.1] and was these frames: [ 0  1 26]
+177.7593 	EXP 	New trial (rep=0, index=0): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+184.8132 	DATA 	Mouse: Left button down, pos=(416,411)
+184.9262 	DATA 	Mouse:  Left button up, pos=(416,411)
+trialnum=1 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+185.0933 	EXP 	New trial (rep=0, index=1): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+193.3775 	DATA 	Mouse: Left button down, pos=(228,103)
+193.4451 	DATA 	Mouse:  Left button up, pos=(228,103)
+trialnum=2 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 18.6 19.1] and was these frames: [ 0  1  3 70]
+193.6413 	EXP 	New trial (rep=0, index=2): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+200.3545 	DATA 	Mouse: Left button down, pos=(504,66)
+200.4616 	DATA 	Mouse:  Left button up, pos=(504,66)
+trialnum=3 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.1 18.9] and was these frames: [ 0 52]
+200.6243 	EXP 	New trial (rep=0, index=3): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+208.2456 	DATA 	Mouse: Left button down, pos=(558,78)
+trialnum=4 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+208.3977 	DATA 	Mouse:  Left button up, pos=(558,78)
+208.5192 	EXP 	New trial (rep=0, index=4): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+217.0103 	DATA 	Mouse: Left button down, pos=(554,519)
+217.1017 	DATA 	Mouse:  Left button up, pos=(554,519)
+trialnum=5 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+217.2777 	EXP 	New trial (rep=0, index=5): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+225.2052 	DATA 	Mouse: Left button down, pos=(560,87)
+225.3089 	DATA 	Mouse:  Left button up, pos=(560,87)
+trialnum=6 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+225.4717 	EXP 	New trial (rep=0, index=6): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+233.2815 	DATA 	Mouse: Left button down, pos=(137,234)
+trialnum=7 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[21.  18.3] and was these frames: [0 1]
+233.4010 	DATA 	Mouse:  Left button up, pos=(137,234)
+233.5515 	EXP 	New trial (rep=0, index=7): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+243.4065 	DATA 	Mouse: Left button down, pos=(347,40)
+243.5008 	DATA 	Mouse:  Left button up, pos=(347,40)
+trialnum=8 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.] and was these frames: [0]
+243.6737 	EXP 	New trial (rep=0, index=8): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   2., -999.,    3.]), 'ringToQuery': 999}
+254.8929 	DATA 	Mouse: Left button down, pos=(364,296)
+254.9332 	DATA 	Mouse:  Left button up, pos=(364,296)
+trialnum=9 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.8 19.1] and was these frames: [0 1 3]
+255.1674 	EXP 	New trial (rep=0, index=9): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+263.5707 	DATA 	Mouse: Left button down, pos=(492,228)
+263.6694 	DATA 	Mouse:  Left button up, pos=(492,228)
+trialnum=10 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7] and was these frames: [0]
+263.8408 	EXP 	New trial (rep=0, index=10): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+270.7325 	DATA 	Mouse: Left button down, pos=(266,300)
+270.8212 	DATA 	Mouse:  Left button up, pos=(266,300)
+trialnum=11 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+270.9982 	EXP 	New trial (rep=0, index=11): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+289.5339 	DATA 	Mouse: Left button down, pos=(281,283)
+289.5810 	DATA 	Mouse:  Left button up, pos=(281,283)
+trialnum=12 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.5 19.1] and was these frames: [0 3]
+289.8066 	EXP 	New trial (rep=0, index=12): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+298.7891 	DATA 	Mouse: Left button down, pos=(416,421)
+298.8523 	DATA 	Mouse:  Left button up, pos=(416,421)
+trialnum=13 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+299.0557 	EXP 	New trial (rep=0, index=13): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   3.,    0., -999.]), 'ringToQuery': 999}
+308.1149 	DATA 	Mouse: Left button down, pos=(397,345)
+308.1971 	DATA 	Mouse:  Left button up, pos=(397,345)
+trialnum=14 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.] and was these frames: [0]
+308.3802 	EXP 	New trial (rep=0, index=14): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+317.3305 	DATA 	Mouse: Left button down, pos=(442,318)
+317.4048 	DATA 	Mouse:  Left button up, pos=(442,318)
+trialnum=15 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+317.5927 	EXP 	New trial (rep=0, index=15): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+463.8279 	DATA 	Mouse: Left button down, pos=(412,259)
+463.9158 	DATA 	Mouse:  Left button up, pos=(412,259)
+trialnum=16 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.5] and was these frames: [0]
+464.0939 	EXP 	New trial (rep=0, index=16): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+471.3227 	DATA 	Mouse: Left button down, pos=(439,287)
+trialnum=17 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19.  18.9] and was these frames: [0 1 3]
+471.4443 	DATA 	Mouse:  Left button up, pos=(439,287)
+471.5949 	EXP 	New trial (rep=0, index=17): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+480.0682 	DATA 	Mouse: Left button down, pos=(445,425)
+trialnum=18 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.2] and was these frames: [0 1 3]
+480.1955 	DATA 	Mouse:  Left button up, pos=(445,425)
+480.3396 	EXP 	New trial (rep=0, index=18): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+489.0076 	DATA 	Mouse: Left button down, pos=(465,29)
+489.0828 	DATA 	Mouse:  Left button up, pos=(465,29)
+trialnum=19 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.2] and was these frames: [0]
+489.2786 	EXP 	New trial (rep=0, index=19): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+497.5783 	DATA 	Mouse: Left button down, pos=(278,273)
+497.6348 	DATA 	Mouse:  Left button up, pos=(278,273)
+trialnum=20 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.2] and was these frames: [0]
+497.8492 	EXP 	New trial (rep=0, index=20): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 3., 0.]), 'ringToQuery': 999}
+505.9835 	DATA 	Mouse: Left button down, pos=(357,297)
+trialnum=21 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 19.5 19.1] and was these frames: [ 0  1  6 60]
+506.1074 	DATA 	Mouse:  Left button up, pos=(357,297)
+506.2556 	EXP 	New trial (rep=0, index=21): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 1., 7.]), 'ringToQuery': 999}
+519.7518 	DATA 	Mouse: Left button down, pos=(259,521)
+trialnum=22 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[19.8 19.3] and was these frames: [0 3]
+519.8673 	DATA 	Mouse:  Left button up, pos=(259,521)
+520.0180 	EXP 	New trial (rep=0, index=22): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 7., 4.]), 'ringToQuery': 999}
+527.5665 	DATA 	Mouse: Left button down, pos=(502,391)
+527.6596 	DATA 	Mouse:  Left button up, pos=(502,391)
+trialnum=23 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.3] and was these frames: [ 0  1 84]
+527.8323 	EXP 	New trial (rep=0, index=23): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 0., 2.]), 'ringToQuery': 999}
+539.2233 	DATA 	Mouse: Left button down, pos=(231,529)
+539.2750 	DATA 	Mouse:  Left button up, pos=(231,529)
+trialnum=24 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4 19.1 19.4 19.6] and was these frames: [ 0  3  5 31]
+539.4955 	EXP 	New trial (rep=0, index=24): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 3., 0.]), 'ringToQuery': 999}
+548.6699 	DATA 	Mouse: Left button down, pos=(427,272)
+548.7709 	DATA 	Mouse:  Left button up, pos=(427,272)
+trialnum=25 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19.  19.1 19.6] and was these frames: [ 0  1  3 79]
+548.9346 	EXP 	New trial (rep=0, index=25): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999.,    3.,    5.]), 'ringToQuery': 999}
+559.2357 	DATA 	Mouse: Left button down, pos=(392,328)
+559.3151 	DATA 	Mouse:  Left button up, pos=(392,328)
+560.3961 	DATA 	Mouse: Left button down, pos=(387,337)
+560.4590 	DATA 	Mouse:  Left button up, pos=(387,337)
+trialnum=26 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7] and was these frames: [0]
+560.6619 	EXP 	New trial (rep=0, index=26): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+570.0719 	DATA 	Mouse: Left button down, pos=(423,423)
+570.1781 	DATA 	Mouse:  Left button up, pos=(423,423)
+trialnum=27 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7] and was these frames: [0]
+570.3349 	EXP 	New trial (rep=0, index=27): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([   0.,    7., -999.]), 'ringToQuery': 999}
+577.9063 	DATA 	Mouse: Left button down, pos=(508,276)
+577.9947 	DATA 	Mouse:  Left button up, pos=(508,276)
+trialnum=28 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+578.1719 	EXP 	New trial (rep=0, index=28): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   1., -999.,    1.]), 'ringToQuery': 999}
+586.5822 	DATA 	Mouse: Left button down, pos=(402,428)
+trialnum=29 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[19.9 18.9 19.2] and was these frames: [ 0 70 74]
+586.7069 	DATA 	Mouse:  Left button up, pos=(402,428)
+586.8535 	EXP 	New trial (rep=0, index=29): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   2., -999.,    0.]), 'ringToQuery': 999}
+597.0482 	DATA 	Mouse: Left button down, pos=(390,429)
+597.1225 	DATA 	Mouse:  Left button up, pos=(390,429)
+trialnum=30 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[15.5 18.9] and was these frames: [0 1]
+597.3145 	EXP 	New trial (rep=0, index=30): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([-999., -999., -999.]), 'ringToQuery': 999}
+611.3179 	DATA 	Mouse: Left button down, pos=(460,210)
+611.3783 	DATA 	Mouse:  Left button up, pos=(460,210)
+trialnum=31 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19. ] and was these frames: [0 1]
+611.5885 	EXP 	New trial (rep=0, index=31): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 1., 1.]), 'ringToQuery': 999}
+618.8911 	DATA 	Mouse: Left button down, pos=(664,270)
+618.9464 	DATA 	Mouse:  Left button up, pos=(664,270)
+trialnum=32 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.8 19. ] and was these frames: [0 1 3]
+619.1575 	EXP 	New trial (rep=0, index=32): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   2.,    2., -999.]), 'ringToQuery': 999}
+627.9978 	DATA 	Mouse: Left button down, pos=(649,421)
+trialnum=33 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+628.1296 	DATA 	Mouse:  Left button up, pos=(649,421)
+628.2681 	EXP 	New trial (rep=0, index=33): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   0., -999.,    1.]), 'ringToQuery': 999}
+637.1920 	DATA 	Mouse: Left button down, pos=(655,237)
+trialnum=34 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19.  18.9] and was these frames: [0 1 3]
+637.3072 	DATA 	Mouse:  Left button up, pos=(655,237)
+637.4575 	EXP 	New trial (rep=0, index=34): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([-999.,    2.,    6.]), 'ringToQuery': 999}
+644.8376 	DATA 	Mouse: Left button down, pos=(398,263)
+644.9220 	DATA 	Mouse:  Left button up, pos=(398,263)
+trialnum=35 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.3 19.3] and was these frames: [ 0  1 13 63]
+645.1020 	EXP 	New trial (rep=0, index=35): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 2., 6.]), 'ringToQuery': 999}
+654.8425 	DATA 	Mouse: Left button down, pos=(263,310)
+654.9139 	DATA 	Mouse:  Left button up, pos=(263,310)
+trialnum=36 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.2] and was these frames: [0]
+655.1143 	EXP 	New trial (rep=0, index=36): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 0., 0.]), 'ringToQuery': 999}
+663.9784 	DATA 	Mouse: Left button down, pos=(422,341)
+664.0660 	DATA 	Mouse:  Left button up, pos=(422,341)
+trialnum=37 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7] and was these frames: [0]
+664.2432 	EXP 	New trial (rep=0, index=37): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([   7.,    2., -999.]), 'ringToQuery': 999}
+674.1585 	DATA 	Mouse: Left button down, pos=(383,417)
+674.2423 	DATA 	Mouse:  Left button up, pos=(383,417)
+trialnum=38 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.  19.1 19.5] and was these frames: [ 0 32 36]
+674.4302 	EXP 	New trial (rep=0, index=38): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([6., 5., 4.]), 'ringToQuery': 999}
+681.6887 	DATA 	Mouse: Left button down, pos=(433,301)
+681.7853 	DATA 	Mouse:  Left button up, pos=(433,301)
+trialnum=39 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.3 19.1] and was these frames: [ 0  1  3 23]
+681.9523 	EXP 	New trial (rep=0, index=39): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 1., 1.]), 'ringToQuery': 999}
+691.6151 	DATA 	Mouse: Left button down, pos=(450,180)
+trialnum=40 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.] and was these frames: [0]
+691.7531 	DATA 	Mouse:  Left button up, pos=(450,180)
+691.8868 	EXP 	New trial (rep=1, index=0): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 1., 2.]), 'ringToQuery': 1}
+701.4412 	DATA 	Mouse: Left button down, pos=(421,329)
+701.5216 	DATA 	Mouse:  Left button up, pos=(421,329)
+trialnum=41 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3 19.3] and was these frames: [ 0 10]
+701.7156 	EXP 	New trial (rep=1, index=1): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([6., 3., 5.]), 'ringToQuery': 1}
+708.8355 	DATA 	Mouse: Left button down, pos=(422,341)
+708.9376 	DATA 	Mouse:  Left button up, pos=(422,341)
+trialnum=42 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3 19.3] and was these frames: [ 0 85]
+709.1008 	EXP 	New trial (rep=1, index=2): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([2., 5., 5.]), 'ringToQuery': 2}
+726.6557 	DATA 	Mouse: Left button down, pos=(386,334)
+726.7215 	DATA 	Mouse:  Left button up, pos=(386,334)
+trialnum=43 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.6 19.1 19.5] and was these frames: [ 0  1 29 33]
+726.9271 	EXP 	New trial (rep=1, index=3): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([2., 0., 2.]), 'ringToQuery': 1}
+734.0210 	DATA 	Mouse: Left button down, pos=(612,149)
+734.1128 	DATA 	Mouse:  Left button up, pos=(612,149)
+trialnum=44 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+734.2859 	EXP 	New trial (rep=1, index=4): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([   0.,    0., -999.]), 'ringToQuery': 1}
+742.1648 	DATA 	Mouse: Left button down, pos=(379,175)
+742.2335 	DATA 	Mouse:  Left button up, pos=(379,175)
+trialnum=45 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 19.1] and was these frames: [ 0  1 31]
+742.4366 	EXP 	New trial (rep=1, index=5): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 1., 2.]), 'ringToQuery': 2}
+756.3137 	DATA 	Mouse: Left button down, pos=(659,210)
+trialnum=46 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+756.4324 	DATA 	Mouse:  Left button up, pos=(659,210)
+756.5770 	EXP 	New trial (rep=1, index=6): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([4., 0., 5.]), 'ringToQuery': 1}
+764.7788 	DATA 	Mouse: Left button down, pos=(336,40)
+764.8805 	DATA 	Mouse:  Left button up, pos=(336,40)
+trialnum=47 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+765.0436 	EXP 	New trial (rep=1, index=7): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   0.,    7., -999.]), 'ringToQuery': 1}
+773.0235 	DATA 	Mouse: Left button down, pos=(378,344)
+773.1216 	DATA 	Mouse:  Left button up, pos=(378,344)
+trialnum=48 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+773.2905 	EXP 	New trial (rep=1, index=8): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 2., 7.]), 'ringToQuery': 2}
+782.4091 	DATA 	Mouse: Left button down, pos=(602,129)
+782.4883 	DATA 	Mouse:  Left button up, pos=(602,129)
+trialnum=49 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.5] and was these frames: [0]
+782.6757 	EXP 	New trial (rep=1, index=9): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([6., 6., 6.]), 'ringToQuery': 1}
+789.7336 	DATA 	Mouse: Left button down, pos=(388,342)
+789.8006 	DATA 	Mouse:  Left button up, pos=(388,342)
+trialnum=50 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+790.0007 	EXP 	New trial (rep=1, index=10): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 1., 5.]), 'ringToQuery': 1}
+798.9690 	DATA 	Mouse: Left button down, pos=(521,261)
+799.0650 	DATA 	Mouse:  Left button up, pos=(521,261)
+trialnum=51 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.6] and was these frames: [0]
+799.2318 	EXP 	New trial (rep=1, index=11): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([2., 3., 6.]), 'ringToQuery': 0}
+806.9645 	DATA 	Mouse: Left button down, pos=(415,339)
+trialnum=52 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+807.0808 	DATA 	Mouse:  Left button up, pos=(415,339)
+807.2298 	EXP 	New trial (rep=1, index=12): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 3., 1.]), 'ringToQuery': 2}
+814.0282 	DATA 	Mouse: Left button down, pos=(513,265)
+trialnum=53 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.5 19.5] and was these frames: [ 0 40]
+814.1608 	DATA 	Mouse:  Left button up, pos=(513,265)
+814.3003 	EXP 	New trial (rep=1, index=13): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 0., 0.]), 'ringToQuery': 0}
+823.5341 	DATA 	Mouse: Left button down, pos=(318,49)
+823.6328 	DATA 	Mouse:  Left button up, pos=(318,49)
+trialnum=54 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.5] and was these frames: [0 1]
+823.7995 	EXP 	New trial (rep=1, index=14): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 1., 3.]), 'ringToQuery': 2}
+840.5939 	DATA 	Mouse: Left button down, pos=(438,323)
+840.6804 	DATA 	Mouse:  Left button up, pos=(438,323)
+trialnum=55 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[19.9] and was these frames: [0]
+840.8606 	EXP 	New trial (rep=1, index=15): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([   0., -999.,    3.]), 'ringToQuery': 2}
+849.1693 	DATA 	Mouse: Left button down, pos=(431,321)
+849.2487 	DATA 	Mouse:  Left button up, pos=(431,321)
+trialnum=56 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9] and was these frames: [0 1]
+849.4347 	EXP 	New trial (rep=1, index=16): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([5., 5., 6.]), 'ringToQuery': 2}
+858.7249 	DATA 	Mouse: Left button down, pos=(305,381)
+858.7837 	DATA 	Mouse:  Left button up, pos=(305,381)
+trialnum=57 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7 19.1 19.5] and was these frames: [ 0 69 73]
+858.9966 	EXP 	New trial (rep=1, index=17): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 7., 4.]), 'ringToQuery': 0}
+866.4096 	DATA 	Mouse: Left button down, pos=(411,339)
+trialnum=58 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19.2 19.1] and was these frames: [0 1 3]
+866.5284 	DATA 	Mouse:  Left button up, pos=(411,339)
+866.6765 	EXP 	New trial (rep=1, index=18): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 2., 3.]), 'ringToQuery': 1}
+875.3345 	DATA 	Mouse: Left button down, pos=(363,317)
+875.4003 	DATA 	Mouse:  Left button up, pos=(363,317)
+trialnum=59 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.5] and was these frames: [0]
+875.6004 	EXP 	New trial (rep=1, index=19): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([2., 2., 0.]), 'ringToQuery': 0}
+882.9993 	DATA 	Mouse: Left button down, pos=(489,219)
+883.0722 	DATA 	Mouse:  Left button up, pos=(489,219)
+trialnum=60 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.5 19.4 19.2] and was these frames: [ 0  1 44 67]
+883.2651 	EXP 	New trial (rep=1, index=20): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([6., 1., 5.]), 'ringToQuery': 1}
+891.1641 	DATA 	Mouse: Left button down, pos=(455,210)
+891.2556 	DATA 	Mouse:  Left button up, pos=(455,210)
+trialnum=61 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+891.4302 	EXP 	New trial (rep=1, index=21): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 0., 0.]), 'ringToQuery': 0}
+899.2390 	DATA 	Mouse: Left button down, pos=(255,556)
+899.2883 	DATA 	Mouse:  Left button up, pos=(255,556)
+trialnum=62 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+899.5112 	EXP 	New trial (rep=1, index=22): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 2., 3.]), 'ringToQuery': 0}
+908.3157 	DATA 	Mouse: Left button down, pos=(431,323)
+908.4160 	DATA 	Mouse:  Left button up, pos=(431,323)
+trialnum=63 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[21.  18.9 18.9] and was these frames: [0 1 3]
+908.5779 	EXP 	New trial (rep=1, index=23): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   2.,    3., -999.]), 'ringToQuery': 0}
+916.2096 	DATA 	Mouse: Left button down, pos=(575,83)
+916.2879 	DATA 	Mouse:  Left button up, pos=(575,83)
+trialnum=64 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+916.4757 	EXP 	New trial (rep=1, index=24): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 0., 0.]), 'ringToQuery': 1}
+925.2051 	DATA 	Mouse: Left button down, pos=(279,546)
+925.2791 	DATA 	Mouse:  Left button up, pos=(279,546)
+trialnum=65 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+925.4702 	EXP 	New trial (rep=1, index=25): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 3., 3.]), 'ringToQuery': 2}
+933.3594 	DATA 	Mouse: Left button down, pos=(371,315)
+933.4238 	DATA 	Mouse:  Left button up, pos=(371,315)
+trialnum=66 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.1] and was these frames: [ 0  1 24]
+933.6251 	EXP 	New trial (rep=1, index=26): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 7., 6.]), 'ringToQuery': 1}
+943.2455 	DATA 	Mouse: Left button down, pos=(421,329)
+943.2956 	DATA 	Mouse:  Left button up, pos=(421,329)
+trialnum=67 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9] and was these frames: [0]
+943.5108 	EXP 	New trial (rep=1, index=27): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 0., 1.]), 'ringToQuery': 2}
+951.3443 	DATA 	Mouse: Left button down, pos=(390,263)
+951.4317 	DATA 	Mouse:  Left button up, pos=(390,263)
+trialnum=68 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+951.6162 	EXP 	New trial (rep=1, index=28): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 0., 6.]), 'ringToQuery': 0}
+961.0558 	DATA 	Mouse: Left button down, pos=(430,332)
+961.1109 	DATA 	Mouse:  Left button up, pos=(430,332)
+trialnum=69 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 18.9] and was these frames: [0 1 3]
+961.3222 	EXP 	New trial (rep=1, index=29): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 3., 3.]), 'ringToQuery': 2}
+969.8114 	DATA 	Mouse: Left button down, pos=(394,262)
+969.8788 	DATA 	Mouse:  Left button up, pos=(394,262)
+trialnum=70 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7] and was these frames: [0]
+970.0836 	EXP 	New trial (rep=1, index=30): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([   4.,    7., -999.]), 'ringToQuery': 1}
+977.5259 	DATA 	Mouse: Left button down, pos=(437,303)
+977.6069 	DATA 	Mouse:  Left button up, pos=(437,303)
+trialnum=71 ERROR,5 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 18.9 19.1 19.5] and was these frames: [ 0  1  3 68 72]
+977.7907 	EXP 	New trial (rep=1, index=31): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([   2.,    3., -999.]), 'ringToQuery': 0}
+984.4000 	DATA 	Mouse: Left button down, pos=(375,45)
+984.5034 	DATA 	Mouse:  Left button up, pos=(375,45)
+trialnum=72 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.5 18.9 19.1 19.3] and was these frames: [ 0  1  3 68]
+984.6653 	EXP 	New trial (rep=1, index=32): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 6., 4.]), 'ringToQuery': 0}
+997.3476 	DATA 	Mouse: Left button down, pos=(136,307)
+997.3906 	DATA 	Mouse:  Left button up, pos=(136,307)
+trialnum=73 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 18.8] and was these frames: [0 1 3]
+997.6199 	EXP 	New trial (rep=1, index=33): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([6., 3., 1.]), 'ringToQuery': 0}
+1005.6226 	DATA 	Mouse: Left button down, pos=(195,122)
+1005.6953 	DATA 	Mouse:  Left button up, pos=(195,122)
+trialnum=74 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7 18.6] and was these frames: [0 1]
+1005.8884 	EXP 	New trial (rep=1, index=34): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 2., 2.]), 'ringToQuery': 2}
+1013.8183 	DATA 	Mouse: Left button down, pos=(482,377)
+1013.8865 	DATA 	Mouse:  Left button up, pos=(482,377)
+trialnum=75 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.1 19.2] and was these frames: [ 0 23]
+1014.0813 	EXP 	New trial (rep=1, index=35): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 0., 1.]), 'ringToQuery': 1}
+1020.7421 	DATA 	Mouse: Left button down, pos=(404,53)
+1020.8071 	DATA 	Mouse:  Left button up, pos=(404,53)
+trialnum=76 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9] and was these frames: [0 1]
+1021.0075 	EXP 	New trial (rep=1, index=36): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 2., 2.]), 'ringToQuery': 2}
+1029.1665 	DATA 	Mouse: Left button down, pos=(421,402)
+trialnum=77 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19.  18.9] and was these frames: [0 1 3]
+1029.2839 	DATA 	Mouse:  Left button up, pos=(421,402)
+1029.4340 	EXP 	New trial (rep=1, index=37): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([6., 7., 3.]), 'ringToQuery': 1}
+1036.6315 	DATA 	Mouse: Left button down, pos=(347,30)
+1036.7190 	DATA 	Mouse:  Left button up, pos=(347,30)
+trialnum=78 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 18.9 19.3] and was these frames: [ 0  1  3 64]
+1036.8962 	EXP 	New trial (rep=1, index=38): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 3., 3.]), 'ringToQuery': 2}
+1045.6267 	DATA 	Mouse: Left button down, pos=(327,196)
+1045.7103 	DATA 	Mouse:  Left button up, pos=(327,196)
+trialnum=79 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 18.8] and was these frames: [0 1 3]
+1045.8917 	EXP 	New trial (rep=1, index=39): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 0., 2.]), 'ringToQuery': 1}
+1055.2027 	DATA 	Mouse: Left button down, pos=(371,283)
+1055.3035 	DATA 	Mouse:  Left button up, pos=(371,283)
+trialnum=80 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.1 19.5] and was these frames: [ 0  1 46 50]
+1055.4676 	EXP 	New trial (rep=2, index=0): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 5., 2.]), 'ringToQuery': 2}
+1064.1878 	DATA 	Mouse: Left button down, pos=(339,58)
+1064.2709 	DATA 	Mouse:  Left button up, pos=(339,58)
+trialnum=81 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.  19.7] and was these frames: [ 0 63]
+1064.4532 	EXP 	New trial (rep=2, index=1): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 2., 1.]), 'ringToQuery': 0}
+1073.6639 	DATA 	Mouse: Left button down, pos=(529,534)
+trialnum=82 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.  19.4 19.6] and was these frames: [ 0  3 65]
+1073.7833 	DATA 	Mouse:  Left button up, pos=(529,534)
+1073.9306 	EXP 	New trial (rep=2, index=2): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 2., 7.]), 'ringToQuery': 1}
+1080.9591 	DATA 	Mouse: Left button down, pos=(602,97)
+1081.0459 	DATA 	Mouse:  Left button up, pos=(602,97)
+trialnum=83 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9] and was these frames: [0 1]
+1081.2331 	EXP 	New trial (rep=2, index=3): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 3., 2.]), 'ringToQuery': 0}
+1089.5829 	DATA 	Mouse: Left button down, pos=(463,32)
+1089.6227 	DATA 	Mouse:  Left button up, pos=(463,32)
+trialnum=84 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 19.2 19.5] and was these frames: [ 0  1 34 38]
+1089.8554 	EXP 	New trial (rep=2, index=4): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([4., 4., 7.]), 'ringToQuery': 2}
+1097.4179 	DATA 	Mouse: Left button down, pos=(515,349)
+1097.5020 	DATA 	Mouse:  Left button up, pos=(515,349)
+trialnum=85 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 18.9 19.1] and was these frames: [ 0  1  3 25]
+1097.6835 	EXP 	New trial (rep=2, index=5): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([1., 1., 3.]), 'ringToQuery': 0}
+1107.0233 	DATA 	Mouse: Left button down, pos=(560,130)
+1107.0943 	DATA 	Mouse:  Left button up, pos=(560,130)
+trialnum=86 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+1107.2892 	EXP 	New trial (rep=2, index=6): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([7., 7., 7.]), 'ringToQuery': 0}
+1116.8897 	DATA 	Mouse: Left button down, pos=(516,280)
+trialnum=87 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3 19.3 19.3 18.9] and was these frames: [ 0 46 60 77]
+1117.0067 	DATA 	Mouse:  Left button up, pos=(516,280)
+1117.1556 	EXP 	New trial (rep=2, index=7): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 3., 3.]), 'ringToQuery': 0}
+1125.0149 	DATA 	Mouse: Left button down, pos=(119,278)
+1125.0863 	DATA 	Mouse:  Left button up, pos=(119,278)
+trialnum=88 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+1125.2800 	EXP 	New trial (rep=2, index=8): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 7., 1.]), 'ringToQuery': 0}
+1135.2306 	DATA 	Mouse: Left button down, pos=(420,337)
+1135.3343 	DATA 	Mouse:  Left button up, pos=(420,337)
+trialnum=89 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9 19. ] and was these frames: [0 1 3]
+1135.4973 	EXP 	New trial (rep=2, index=9): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 0., 3.]), 'ringToQuery': 2}
+1143.1951 	DATA 	Mouse: Left button down, pos=(285,252)
+1143.2783 	DATA 	Mouse:  Left button up, pos=(285,252)
+trialnum=90 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[19.9] and was these frames: [0]
+1143.4608 	EXP 	New trial (rep=2, index=10): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 4., 7.]), 'ringToQuery': 0}
+1152.8709 	DATA 	Mouse: Left button down, pos=(431,313)
+1152.9494 	DATA 	Mouse:  Left button up, pos=(431,313)
+trialnum=91 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[21.  18.9 19.1] and was these frames: [0 1 3]
+1153.1369 	EXP 	New trial (rep=2, index=11): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([5., 6., 4.]), 'ringToQuery': 2}
+1160.4456 	DATA 	Mouse: Left button down, pos=(465,201)
+1160.5027 	DATA 	Mouse:  Left button up, pos=(465,201)
+trialnum=92 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.] and was these frames: [0]
+1160.7111 	EXP 	New trial (rep=2, index=12): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 0., 0.]), 'ringToQuery': 2}
+1168.9706 	DATA 	Mouse: Left button down, pos=(272,269)
+1169.0212 	DATA 	Mouse:  Left button up, pos=(272,269)
+trialnum=93 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.1 19.1 19.1 19.2] and was these frames: [ 0  4 24 44]
+1169.2430 	EXP 	New trial (rep=2, index=13): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([1., 3., 3.]), 'ringToQuery': 1}
+1177.7862 	DATA 	Mouse: Left button down, pos=(439,426)
+1177.8859 	DATA 	Mouse:  Left button up, pos=(439,426)
+trialnum=94 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[19.9 19.3 19.2 19.5] and was these frames: [ 0  3 27 31]
+1178.0488 	EXP 	New trial (rep=2, index=14): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 2., 0.]), 'ringToQuery': 1}
+1186.5514 	DATA 	Mouse: Left button down, pos=(501,247)
+trialnum=95 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4 19.4 19.1] and was these frames: [ 0 69 83]
+1186.6677 	DATA 	Mouse:  Left button up, pos=(501,247)
+1186.8174 	EXP 	New trial (rep=2, index=15): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 0., 1.]), 'ringToQuery': 0}
+1194.4973 	DATA 	Mouse: Left button down, pos=(367,264)
+1194.5730 	DATA 	Mouse:  Left button up, pos=(367,264)
+trialnum=96 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8] and was these frames: [0]
+1194.7611 	EXP 	New trial (rep=2, index=16): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 1., 3.]), 'ringToQuery': 0}
+1202.1704 	DATA 	Mouse: Left button down, pos=(380,314)
+1202.2315 	DATA 	Mouse:  Left button up, pos=(380,314)
+1203.0009 	DATA 	Mouse: Left button down, pos=(365,326)
+1203.1016 	DATA 	Mouse:  Left button up, pos=(365,326)
+trialnum=97 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4 19.4 19. ] and was these frames: [ 0 16 60]
+1203.2671 	EXP 	New trial (rep=2, index=17): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 0., 7.]), 'ringToQuery': 1}
+1210.7260 	DATA 	Mouse: Left button down, pos=(315,213)
+1210.7976 	DATA 	Mouse:  Left button up, pos=(315,213)
+trialnum=98 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 18.9 19.3] and was these frames: [ 0  1  3 46]
+1210.9907 	EXP 	New trial (rep=2, index=18): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([1., 2., 1.]), 'ringToQuery': 1}
+1218.7710 	DATA 	Mouse: Left button down, pos=(428,282)
+1218.8050 	DATA 	Mouse:  Left button up, pos=(428,282)
+trialnum=99 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.  19.1] and was these frames: [0 4]
+1219.0373 	EXP 	New trial (rep=2, index=19): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 3., 2.]), 'ringToQuery': 2}
+1238.6527 	DATA 	Mouse: Left button down, pos=(647,335)
+trialnum=100 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+1238.7690 	DATA 	Mouse:  Left button up, pos=(647,335)
+1238.9189 	EXP 	New trial (rep=2, index=20): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([0., 0., 2.]), 'ringToQuery': 2}
+1246.6478 	DATA 	Mouse: Left button down, pos=(298,243)
+1246.7413 	DATA 	Mouse:  Left button up, pos=(298,243)
+trialnum=101 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 18.7 18.9] and was these frames: [ 0  1  3 38]
+1246.9121 	EXP 	New trial (rep=2, index=21): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([6., 3., 1.]), 'ringToQuery': 0}
+1260.6060 	DATA 	Mouse: Left button down, pos=(148,220)
+trialnum=102 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8] and was these frames: [0]
+1260.7332 	DATA 	Mouse:  Left button up, pos=(148,220)
+1260.8788 	EXP 	New trial (rep=2, index=22): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([1., 3., 5.]), 'ringToQuery': 2}
+1270.5125 	DATA 	Mouse: Left button down, pos=(378,339)
+1270.5644 	DATA 	Mouse:  Left button up, pos=(378,339)
+trialnum=103 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 18.9] and was these frames: [0 1]
+1270.7839 	EXP 	New trial (rep=2, index=23): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 0., 1.]), 'ringToQuery': 0}
+1279.6368 	DATA 	Mouse: Left button down, pos=(375,337)
+1279.7323 	DATA 	Mouse:  Left button up, pos=(375,337)
+trialnum=104 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.1 19.5] and was these frames: [ 0  1 39 43]
+1279.9017 	EXP 	New trial (rep=2, index=24): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([6., 1., 3.]), 'ringToQuery': 0}
+1287.4727 	DATA 	Mouse: Left button down, pos=(566,512)
+1287.5410 	DATA 	Mouse:  Left button up, pos=(566,512)
+trialnum=105 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.2 19.3] and was these frames: [ 0 16]
+1287.7456 	EXP 	New trial (rep=2, index=25): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([2., 1., 1.]), 'ringToQuery': 1}
+1295.9566 	DATA 	Mouse: Left button down, pos=(434,268)
+1296.0049 	DATA 	Mouse:  Left button up, pos=(434,268)
+trialnum=106 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3 19.2 19.4] and was these frames: [ 0 74 78]
+1296.2234 	EXP 	New trial (rep=2, index=26): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([6., 7., 7.]), 'ringToQuery': 0}
+1303.8725 	DATA 	Mouse: Left button down, pos=(368,564)
+1303.9650 	DATA 	Mouse:  Left button up, pos=(368,564)
+trialnum=107 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 19.  19.2] and was these frames: [0 1 3]
+1304.1368 	EXP 	New trial (rep=2, index=27): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 3., 3.]), 'ringToQuery': 0}
+1312.3372 	DATA 	Mouse: Left button down, pos=(491,228)
+1312.4208 	DATA 	Mouse:  Left button up, pos=(491,228)
+trialnum=108 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[19.8 19.5] and was these frames: [ 0 18]
+1312.6018 	EXP 	New trial (rep=2, index=28): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([5., 1., 1.]), 'ringToQuery': 0}
+1321.4120 	DATA 	Mouse: Left button down, pos=(284,348)
+1321.4848 	DATA 	Mouse:  Left button up, pos=(284,348)
+trialnum=109 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.4] and was these frames: [0 1]
+1321.6827 	EXP 	New trial (rep=2, index=29): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 0., 3.]), 'ringToQuery': 0}
+1330.6779 	DATA 	Mouse: Left button down, pos=(366,284)
+1330.7647 	DATA 	Mouse:  Left button up, pos=(366,284)
+trialnum=110 ERROR,2 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.2 19.1] and was these frames: [ 0 38]
+1330.9429 	EXP 	New trial (rep=2, index=30): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([3., 1., 1.]), 'ringToQuery': 1}
+1338.6641 	DATA 	Mouse: Left button down, pos=(446,312)
+1338.7325 	DATA 	Mouse:  Left button up, pos=(446,312)
+trialnum=111 ERROR,8 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7 19.1 19.3 19.9 19.1 19.8 20.  18.6] and was these frames: [ 0  1  3  4 34 38 39 41]
+1338.9296 	EXP 	New trial (rep=2, index=31): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([1., 1., 0.]), 'ringToQuery': 2}
+1347.4383 	DATA 	Mouse: Left button down, pos=(437,301)
+1347.5168 	DATA 	Mouse:  Left button up, pos=(437,301)
+trialnum=112 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+1347.7020 	EXP 	New trial (rep=2, index=32): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([3., 0., 4.]), 'ringToQuery': 0}
+1356.5330 	DATA 	Mouse: Left button down, pos=(436,304)
+1356.6209 	DATA 	Mouse:  Left button up, pos=(436,304)
+trialnum=113 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.3] and was these frames: [0]
+1356.8051 	EXP 	New trial (rep=2, index=33): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 7., 7.]), 'ringToQuery': 0}
+1365.7790 	DATA 	Mouse: Left button down, pos=(366,325)
+1365.8515 	DATA 	Mouse:  Left button up, pos=(366,325)
+trialnum=114 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.4] and was these frames: [0]
+1366.0436 	EXP 	New trial (rep=2, index=34): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 1., 3.]), 'ringToQuery': 2}
+1375.7645 	DATA 	Mouse: Left button down, pos=(387,339)
+1375.8447 	DATA 	Mouse:  Left button up, pos=(387,339)
+trialnum=115 ERROR,5 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.8 19.  18.9 19.1 19.6] and was these frames: [ 0  1  3 35 39]
+1376.0301 	EXP 	New trial (rep=2, index=35): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': -1, 'numTargets': 2, 'whichIsTargetEachRing': array([2., 0., 0.]), 'ringToQuery': 2}
+1383.9394 	DATA 	Mouse: Left button down, pos=(493,69)
+trialnum=116 ERROR,1 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9] and was these frames: [0]
+1384.0569 	DATA 	Mouse:  Left button up, pos=(493,69)
+1384.2073 	EXP 	New trial (rep=2, index=36): {'basicShape': 'circle', 'numObjectsInRing': 4, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([0., 0., 2.]), 'ringToQuery': 1}
+1394.4061 	DATA 	Mouse: Left button down, pos=(348,413)
+1394.4522 	DATA 	Mouse:  Left button up, pos=(348,413)
+trialnum=117 ERROR,5 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 18.9 19.1 19.5] and was these frames: [ 0  1  3 20 24]
+1394.6783 	EXP 	New trial (rep=2, index=37): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': [0.02, 0.1], 'initialDirRing0': -1, 'numTargets': 3, 'whichIsTargetEachRing': array([5., 4., 0.]), 'ringToQuery': 2}
+1401.2001 	DATA 	Mouse: Left button down, pos=(428,337)
+1401.2834 	DATA 	Mouse:  Left button up, pos=(428,337)
+trialnum=118 ERROR,4 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.9 18.9 19.3 19.6] and was these frames: [ 0  1 52 69]
+1401.4629 	EXP 	New trial (rep=2, index=38): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 3, 'whichIsTargetEachRing': array([2., 7., 2.]), 'ringToQuery': 2}
+1413.1569 	DATA 	Mouse: Left button down, pos=(507,344)
+1413.2120 	DATA 	Mouse:  Left button up, pos=(507,344)
+trialnum=119 ERROR,3 frames were longer than 12.7 ms apparently screen refreshes skipped, interframe durs were:[20.7 19.2 19.8] and was these frames: [0 1 2]
+1413.4222 	EXP 	New trial (rep=2, index=39): {'basicShape': 'circle', 'numObjectsInRing': 8, 'speed': 'staircase', 'initialDirRing0': 1, 'numTargets': 2, 'whichIsTargetEachRing': array([6., 7., 4.]), 'ringToQuery': 1}
+1419.4208 	DATA 	Mouse: Left button down, pos=(415,265)
+1419.4678 	DATA 	Mouse:  Left button up, pos=(415,265)
+1419.7302 	INFO 	Finishing now, at 23Jan2025_13-11
+1419.7316 	INFO 	Didnt try to eyetrack because "eyetracking" was set to False
+1420.0209 	INFO 	saved wide-format data to dataRaw/a99_b_23Jan2025_12-47trialHandler.tsv
