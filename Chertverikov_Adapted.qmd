@@ -143,6 +143,6 @@ fakedata2_pred
 ggplot(fakedata2, aes(x = speed, y = correct))+
   stat_summary(fun="mean", geom="point", aes(color = 'Data') )+
   stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.2), aes(color = '0.2 chance curve')) +
-    stat_function(fun = distr_fun_std, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.1), aes(color = '0.1 chance curve'))+
+    stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.1), aes(color = '0.1 chance curve'))+
   geom_line(data=fakedata2_pred, aes(y = Estimate, color = 'Fitted model with uncertainty'))
 ```
