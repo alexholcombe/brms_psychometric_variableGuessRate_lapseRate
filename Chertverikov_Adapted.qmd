@@ -10,7 +10,6 @@ This code does it in a way that allows him to set a prior on the location parame
 
 ```{r}
 #| echo: false
-library(ggplot2)
 library(data.table)
 library(brms)
 library(tidyverse)
@@ -99,7 +98,6 @@ distr_fun <- function(x, mean, sigma, lapse, chanceRate){
 model_formula <- bf(
   #correct ~ lapse * chanceRate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chanceRate)),
   correct ~ chanceRate + (1-chanceRate - lapse*(1-chanceRate))*Phi((-speed+eta)/exp(logsigma)), #this works
-
   eta ~ 1,
   lapse ~ 1,
   logsigma ~ 1,
