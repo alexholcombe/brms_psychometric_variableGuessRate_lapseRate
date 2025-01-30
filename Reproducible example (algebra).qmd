@@ -1,0 +1,7 @@
+---
+title: "Reproducible example (algebra problem)"
+format: html
+editor: visual
+---
+
+## 
