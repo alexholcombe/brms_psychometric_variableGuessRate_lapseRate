@@ -107,11 +107,9 @@ model_formula <- bf(
   nl = TRUE
 )
 
-p2 <- c(
-  prior(normal(100, 100), coef = "Intercept",  nlpar = "eta"),
-  #prior(constant(3.91), class = "b", nlpar = "logsigma", lb=3.8, ub=4.0),
-  prior(normal(4,2), class = "b", nlpar = "logsigma", lb=0.1, ub=2) #changed from 1 and 6 to reflect what our scale/signma should be 
-#  prior(beta(1,1), class = "b", nlpar = "logsigma", lb=3.8, ub=4.0)
+p3 <- c(
+  set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  set_prior("uniform(0, 3)", class = "b", nlpar = "eta", lb = 0, ub = 3) #conservative ub of 3 rps
 )
 
 default_prior(model_formula, fakedata2)
@@ -120,13 +118,11 @@ default_prior(model_formula, fakedata2)
 ```{r}
 #| echo: false
 
-set.seed(999)
-
 fit <- brm(
   model_formula,
   data = fakedata2, 
   # control = list(adapt_delta = 0.99),
-#  prior = p2,
+  prior = p3
 #  cores = 4,
 #  backend = "cmdstanr",
 #  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
