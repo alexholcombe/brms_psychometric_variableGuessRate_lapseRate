@@ -11,7 +11,7 @@ library(here)
 
 # Data Wrangling
 
-## roudaia and faubert data wrangling
+## Roudaia and faubert data wrangling
 
 ```{r}
 # Load the data
@@ -21,14 +21,21 @@ rf_data_raw <- read_csv(here("data", "roudaia_faubert_data", "dat_csvs", "sub-AL
 
 # glimpse(rf_data_raw) ## initial data analysis
 
+# cond is in a format that includes both targets and rings so i seperate this
 rf_data <- rf_data_raw %>%
-  separate(# cond is in a format that includes both targets and rings so i seperate this
+  separate(
     cond, into = c("num_target", "obj_per_ring"), sep = "\\."
-  ) %>%
-  mutate(# make the newly created columns into numbers and remove characters
+  )
+
+# make the newly created columns into numbers and remove characters
+rf_data <- rf_data %>%
+  mutate(
     num_target = as.numeric(str_replace_all(num_target, "[^0-9]", "")),
     obj_per_ring = as.numeric(str_replace_all(obj_per_ring, "[^0-9]", ""))
-  ) %>%
+  )
+
+#rename responseRing and change data types to be appropriate
+rf_data <- rf_data %>%
   rename(
     response_ring = responseRing
   ) %>%
@@ -37,35 +44,32 @@ rf_data <- rf_data_raw %>%
     group = as_factor(group), #young vs old
     gender = as_factor(gender), #M, F
     response_ring = as_factor(response_ring), #ring prompted
-  ) %>%
-  mutate(# recode for more common sense names (or to align with our data in future)
+  )
+
+# recode for more common sense names (or to align with our data in future)
+rf_data <- rf_data %>%
+  mutate(
     group = fct_recode(group,
                        "younger" = "1",
                        "older" = "2"),
     response_ring = fct_recode(response_ring,
-                             "inner" = "1",
-                             "middle" = "2",
-                             "outer" = "3"),
+                               "inner" = "1",
+                               "middle" = "2",
+                               "outer" = "3"),
   )
 
+#remove redundant column
+rf_data <- rf_data %>% select(-condition)
 
-glimpse(rf_data)
-
-rf_data %>%
-  filter(subj == 204) %>%
-  filter(obj_per_ring == 5) %>%
-  filter(num_target == 1) %>%
-  group_by(speed) %>%
-  summarise(num_trials = n()) %>%
-  plot(type = "h")
-
-
-rf_data %>%
-  group_by(group) %>%
-  summarise(row_count = n())
+#add a chance_rate column
+rf_data <- rf_data %>%
+  mutate(
+    chance_rate = 1/obj_per_ring
+  )
+  
 ```
 
-## sample holcombe lab data wrangling
+## h_lab data wrangling
 
 ```{r}
 #load in session a
@@ -83,9 +87,10 @@ session_c <- read_delim(here("data", "sampleHolcombeLabData", "a99_c_23Jan2025_1
     delim = "\t", escape_double = FALSE, 
     trim_ws = TRUE)
 
-
+# combines all the different sessions into one data frame
 hlab_data_raw <- bind_rows(session_a, session_b, session_c)
 
+#removes the independent sessions from environment as no longer need
 rm(session_a,session_b,session_c)
 
 # selects the relevant variables
@@ -113,5 +118,11 @@ hlab_data <- hlab_data %>%
                                     "inner" = "0",
                                     "middle" = "1",
                                     "outer" = "2"))
+
+#add a chance_rate column
+hlab_data <- hlab_data %>%
+  mutate(
+    chance_rate = 1/obj_per_ring
+  )
 
 ```

@@ -59,11 +59,11 @@ fakedata2 <- fakedata2 %>%
 
 fakedata2 <- fakedata2 %>%
   mutate(
-    chanceRate = 1/obj_per_ring,
+    chance_rate = 1/obj_per_ring,
     #phi = pnorm(-speed, -location_parameter, scale_parameter) # old formula version
     phi = pnorm(-speed, -location_parameter, scale_parameter),
-    #probabilityCorrect = (lapse*chanceRate) + (1 - lapse)*(1 - phi*(1-chanceRate)) #old formula version
-    probabilityCorrect = chanceRate + (1-chanceRate - lapse*(1-chanceRate))*phi
+    #probabilityCorrect = (lapse*chance_rate) + (1 - lapse)*(1 - phi*(1-chance_rate)) #old formula version
+    probabilityCorrect = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi
   )
 
 fakedata2 <- fakedata2 %>% mutate(
@@ -82,22 +82,22 @@ ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = group)) +
 
 ggplot(fakedata2, aes(x=speed,y=correct)) + 
   stat_summary(fun="mean", geom="point" ) +
-  facet_wrap(.~chanceRate) +
-  aes(color = chanceRate)
+  facet_wrap(.~chance_rate) +
+  aes(color = chance_rate)
 ```
 
 ```{r}
 #| echo: false
 
-distr_fun <- function(x, mean, sigma, lapse, chanceRate){
-(lapse*chanceRate) + (1 - lapse)*(1 - pnorm((x-mean)/sigma)*(1-chanceRate))
+distr_fun <- function(x, mean, sigma, lapse, chance_rate){
+(lapse*chance_rate) + (1 - lapse)*(1 - pnorm((x-mean)/sigma)*(1-chance_rate))
 }
                                  
 #Phi = cumulative normal, internal to brms. Why do we use this instead of pnorm?
-#We are using the parameterization of psychometric function with chanceRate and lapse rate
+#We are using the parameterization of psychometric function with chance_rate and lapse rate
 model_formula <- bf(
-  #correct ~ lapse * chanceRate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chanceRate)),
-  correct ~ chanceRate + (1-chanceRate - lapse*(1-chanceRate))*Phi(-(speed-eta)/exp(logsigma)), #this works
+  #correct ~ lapse * chance_rate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chance_rate)),
+  correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)), #this works
   eta ~ 1,
   lapse ~ 1,
   logsigma ~ 1,
@@ -134,7 +134,7 @@ summary(fit)
 ```{r}
 #| echo: false
 
-#since we have effectively two different conditions numerically (chancerate 0.1 and 0.2), treating it as one model probably not the move
+#since we have effectively two different conditions numerically (chance_rate 0.1 and 0.2), treating it as one model probably not the move
 
 fakedata2_pred <- fakedata2
 coefs <- fixef(fit)[,'Estimate']
@@ -145,7 +145,7 @@ fakedata2_pred
 
 ggplot(fakedata2, aes(x = speed, y = correct))+
   stat_summary(fun="mean", geom="point", aes(color = 'Data') )+
-  stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.2), aes(color = '0.2 chance curve')) +
-    stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chanceRate = 0.1), aes(color = '0.1 chance curve'))+
+  stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chance_rate = 0.2), aes(color = '0.2 chance curve')) +
+    stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chance_rate = 0.1), aes(color = '0.1 chance curve'))+
   geom_line(data=fakedata2_pred, aes(y = Estimate, color = 'Fitted model with uncertainty'))
 ```
