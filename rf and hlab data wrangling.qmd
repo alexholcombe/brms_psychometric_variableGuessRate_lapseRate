@@ -1,0 +1,117 @@
+---
+title: "dataWrangling"
+format: html
+editor: visual
+---
+
+```{r warning = 'false'}
+library(tidyverse)
+library(here)
+```
+
+# Data Wrangling
+
+## roudaia and faubert data wrangling
+
+```{r}
+# Load the data
+rf_data_raw <- read_csv(here("data", "roudaia_faubert_data", "dat_csvs", "sub-ALL_task-motc.csv"))
+
+# naniar::gg_miss_var(rf_data_raw) ## no missing data
+
+# glimpse(rf_data_raw) ## initial data analysis
+
+rf_data <- rf_data_raw %>%
+  separate(# cond is in a format that includes both targets and rings so i seperate this
+    cond, into = c("num_target", "obj_per_ring"), sep = "\\."
+  ) %>%
+  mutate(# make the newly created columns into numbers and remove characters
+    num_target = as.numeric(str_replace_all(num_target, "[^0-9]", "")),
+    obj_per_ring = as.numeric(str_replace_all(obj_per_ring, "[^0-9]", ""))
+  ) %>%
+  rename(
+    response_ring = responseRing
+  ) %>%
+  mutate(# convert the char columns to factor (categorical)
+    subj = as_factor(subj), #participant
+    group = as_factor(group), #young vs old
+    gender = as_factor(gender), #M, F
+    response_ring = as_factor(response_ring), #ring prompted
+  ) %>%
+  mutate(# recode for more common sense names (or to align with our data in future)
+    group = fct_recode(group,
+                       "younger" = "1",
+                       "older" = "2"),
+    response_ring = fct_recode(response_ring,
+                             "inner" = "1",
+                             "middle" = "2",
+                             "outer" = "3"),
+  )
+
+
+glimpse(rf_data)
+
+rf_data %>%
+  filter(subj == 204) %>%
+  filter(obj_per_ring == 5) %>%
+  filter(num_target == 1) %>%
+  group_by(speed) %>%
+  summarise(num_trials = n()) %>%
+  plot(type = "h")
+
+
+rf_data %>%
+  group_by(group) %>%
+  summarise(row_count = n())
+```
+
+## sample holcombe lab data wrangling
+
+```{r}
+#load in session a
+session_a <- read_delim(here("data", "sampleHolcombeLabData", "a99_a_15Jan2025_12-03.tsv"), 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE)
+
+#load in session b
+session_b <- read_delim(here("data", "sampleHolcombeLabData", "a99_b_23Jan2025_12-47.tsv"), 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE)
+
+#load in session c
+session_c <- read_delim(here("data", "sampleHolcombeLabData", "a99_c_23Jan2025_14-22.tsv"), 
+    delim = "\t", escape_double = FALSE, 
+    trim_ws = TRUE)
+
+
+hlab_data_raw <- bind_rows(session_a, session_b, session_c)
+
+rm(session_a,session_b,session_c)
+
+# selects the relevant variables
+hlab_data <- hlab_data_raw %>%
+  select(subject, session, numObjects, speed, numTargets, ringToQuery, orderCorrect)
+
+# renames columns to be nicer and align with rf data
+hlab_data <- hlab_data %>%
+  rename(
+   subj = subject,
+    session = session,
+    obj_per_ring = numObjects,
+    speed = speed,
+    num_target = numTargets,
+    response_ring = ringToQuery,
+    correct = orderCorrect
+  )
+
+# changes 'correct' (binary) from 0 vs 3, to 0 vs 1
+# changes response ring to factor and renames to align with rf_data
+hlab_data <- hlab_data %>%
+  mutate(correct = ifelse(correct == 3, 1, correct),
+         response_ring = as_factor(response_ring),
+         response_ring = fct_recode(response_ring,
+                                    "inner" = "0",
+                                    "middle" = "1",
+                                    "outer" = "2"))
+
+```

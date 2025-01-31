@@ -35,10 +35,6 @@ fakedata2 <- tidyr::expand_grid(
     rep = seq(1,5) #5 replicants of each trial combination
   )
 
-fakedata2 <- fakedata2 %>%
-  mutate(
-    responseRing = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
-  )
 
 fakedata2 <- fakedata2 %>%
   mutate(
@@ -70,12 +66,17 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
 ```{r}
 #| echo: false
 model_formula <- bf(
-  correct ~ chanceRate + (1-chanceRate - lapse*(1-chanceRate))*Phi((-speed+eta)/exp(logsigma)), #this works
+  correct ~ chanceRate + (1-chanceRate - lapse*(1-chanceRate))*Phi(-(speed-eta)/exp(logsigma)), #this works
   eta ~ 1,
   lapse ~ 1,
   logsigma ~ 1,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
+)
+
+p3 <- c(
+  set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  set_prior("uniform(0, 3)", class = "b", nlpar = "eta", lb = 0, ub = 3) #conservative ub of 3 rps
 )
 ```
 
@@ -84,7 +85,8 @@ model_formula <- bf(
 
 fit <- brm(
   model_formula,
-  data = fakedata2, 
+  data = fakedata2,
+  prior = p3
 )
 
 summary(fit)
