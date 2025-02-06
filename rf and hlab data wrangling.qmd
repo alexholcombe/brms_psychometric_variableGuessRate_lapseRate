@@ -118,20 +118,11 @@ hlab_data <- hlab_data %>%
                                     "inner" = "0",
                                     "middle" = "1",
                                     "outer" = "2"))
-```
 
-```{r}
-
-```
-
-```{r}
-
-```
-
-```{r}
 hlab_data <- hlab_data %>%
   mutate(
     chance_rate = 1/obj_per_ring
   )
 
 ```
+
