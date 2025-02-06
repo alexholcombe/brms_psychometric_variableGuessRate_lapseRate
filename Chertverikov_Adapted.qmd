@@ -86,6 +86,8 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
   aes(color = chance_rate)
 ```
 
+
+
 ```{r}
 #| echo: false
 
@@ -125,14 +127,9 @@ fit <- brm(
   data = fakedata2, 
   # control = list(adapt_delta = 0.99),
   prior = p3
-#  cores = 4,
-#  backend = "cmdstanr",
-#  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
 )
 
 summary(fit)
-
-
 ```
 
 ```{r}
