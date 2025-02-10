@@ -28,12 +28,9 @@ Why does he use cmdstanr?
 ```{r}
 #| echo: false
 set.seed(999)
-location_parameter_younger <- 0.91
-scale_parameter_younger <- 0.2
-
-location_parameter_older <- 0.50
-scale_parameter_older <- 0.2
-
+#possibly need to make new locations and scales per condition combination
+location_parameter <- 0.91
+scale_parameter <- 0.2
 lapse <- 0.03
 
 num_subj <- 4
@@ -51,8 +48,7 @@ fakedata2 <- fakedata2 %>%
   group_by(subj) %>%
   mutate(
     gender = sample(c("M","F"), 1, replace = TRUE),
-    age_group = sample(c("younger", "older"), 1, replace = TRUE),
-    lab = sample(c("rf", "holcombe"), 1, replace = TRUE)
+    group = sample(c("younger", "older"), 1, replace = TRUE)
   ) %>%
   ungroup()
 
@@ -64,9 +60,9 @@ fakedata2 <- fakedata2 %>%
 fakedata2 <- fakedata2 %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    phi = ifelse(age_group == "younger",
-                 pnorm(-speed, -location_parameter_younger, scale_parameter_younger),
-                 pnorm(-speed, -location_parameter_older, scale_parameter_older)),
+    #phi = pnorm(-speed, -location_parameter, scale_parameter) # old formula version
+    phi = pnorm(-speed, -location_parameter, scale_parameter),
+    #probabilityCorrect = (lapse*chance_rate) + (1 - lapse)*(1 - phi*(1-chance_rate)) #old formula version
     probabilityCorrect = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi
   )
 
@@ -80,7 +76,7 @@ fakedata2 <- fakedata2 %>% mutate(
 
 ```{r}
 #| echo: false
-ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = age_group)) + 
+ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = group)) + 
   stat_summary( fun="mean", geom="point" ) +
   facet_wrap(.~subj)
 
@@ -88,11 +84,6 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
   stat_summary(fun="mean", geom="point" ) +
   facet_wrap(.~chance_rate) +
   aes(color = chance_rate)
-
-ggplot(fakedata2, aes(x=speed,y=correct)) + 
-  stat_summary(fun="mean", geom="point" ) +
-  facet_wrap(.~age_group) +
-  aes(color = age_group)
 ```
 
 ```{r}
@@ -103,30 +94,56 @@ distr_fun <- function(x, mean, sigma, lapse, chance_rate){
 }
                                  
 #Phi = cumulative normal, internal to brms. Why do we use this instead of pnorm?
-#We are usingg the parameterization of psychometric function with chanceRate and lapse rate
+#We are using the parameterization of psychometric function with chance_rate and lapse rate
 model_formula <- bf(
-  correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
-  eta ~ age_group,
-  lapse ~ age_group,
-  logsigma ~ age_group,
+  #correct ~ lapse * chance_rate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chance_rate)),
+  correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)), #this works
+  eta ~ 1,
+  lapse ~ 1,
+  logsigma ~ 1,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
 
-# Can all of these be used as priors? https://paulbuerkner.com/brms/reference/brmsfamily.html
 p3 <- c(
   set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
-  set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5) #conservative ub of 3 rps
-)
-
-
-# look through https://mc-stan.org/docs/functions-reference/unbounded_continuous_distributions.html
-p4 <- c(
-  set_prior("exp_mod_normal(0, 1, 1)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
   set_prior("uniform(0, 3)", class = "b", nlpar = "eta", lb = 0, ub = 3) #conservative ub of 3 rps
 )
 
 default_prior(model_formula, fakedata2)
+```
+
+#trying custom eta based on paul burkners example <https://cran.r-project.org/web/packages/brms/vignettes/brms_customfamilies.html>
+
+```{r}
+# Define the custom prior
+super_gaussian <- custom_family(
+  "super_gaussian",
+  dpars = c("mu", "sigma", "order"),
+  links = c("identity", "log", "identity"),
+  type = "real" # indicates a continuous response variable.
+)
+
+```
+
+does it need to be int??
+
+```{r}
+stan_code_eta_prior <- "
+  real super_gaussian_lpdf(real x, real mu, real sigma, real order) {
+    return -((x - mu) / sigma)^(2 * order);
+  }
+"
+```
+
+```{r}
+p4 <- c(
+  set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  set_prior("super_gaussian(1.2, 1.3, 4)", class = "b", nlpar = "eta", lb = 0) # no upper bound set yet
+)
+
+stanvars <- stanvar(scode = stan_code_eta_prior, block = "functions")
+
 ```
 
 ```{r}
@@ -135,18 +152,34 @@ default_prior(model_formula, fakedata2)
 fit <- brm(
   model_formula,
   data = fakedata2, 
-  #control = list(adapt_delta = 0.99),
+  # control = list(adapt_delta = 0.99),
+  prior = p4,
+  stanvars=stanvars
+#  cores = 4,
+#  backend = "cmdstanr",
+#  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
+)
+
+summary(fit)
+```
+
+```{r}
+#| echo: false
+
+fit <- brm(
+  model_formula,
+  data = fakedata2, 
+  # control = list(adapt_delta = 0.99),
   prior = p3
+#  cores = 4,
+#  backend = "cmdstanr",
+#  sample_prior = "only" #draws are drawn solely from the priors ignoring the likelihood
 )
 
 summary(fit)
 
-pp_check(fit)
-```
-```{r}
-brms::pp_check(fit)
-```
 
+```
 
 ```{r}
 #| echo: false
