@@ -67,6 +67,12 @@ rf_data <- rf_data %>%
     chance_rate = 1/obj_per_ring,
     lab = "rf"
   )
+
+#removes instances of 1 target as there are none of these in h_lab data
+rf_data <- rf_data %>%
+  filter(
+    num_target != 1
+  )
   
 ```
 
