@@ -41,7 +41,7 @@ rf_data <- rf_data %>%
   ) %>%
   mutate(# convert the char columns to factor (categorical)
     subj = as_factor(subj), #participant
-    group = as_factor(group), #young vs old
+    age_group = as_factor(group), #young vs old
     gender = as_factor(gender), #M, F
     response_ring = as_factor(response_ring), #ring prompted
   )
@@ -49,7 +49,7 @@ rf_data <- rf_data %>%
 # recode for more common sense names (or to align with our data in future)
 rf_data <- rf_data %>%
   mutate(
-    group = fct_recode(group,
+    age_group = fct_recode(age_group,
                        "younger" = "1",
                        "older" = "2"),
     response_ring = fct_recode(response_ring,
@@ -59,12 +59,13 @@ rf_data <- rf_data %>%
   )
 
 #remove redundant column
-rf_data <- rf_data %>% select(-condition)
+rf_data <- rf_data %>% select(-condition,-group)
 
-#add a chance_rate column
+#add a chance_rate column, and lab column
 rf_data <- rf_data %>%
   mutate(
-    chance_rate = 1/obj_per_ring
+    chance_rate = 1/obj_per_ring,
+    lab = "rf"
   )
   
 ```
@@ -119,10 +120,14 @@ hlab_data <- hlab_data %>%
                                     "middle" = "1",
                                     "outer" = "2"))
 
+#add a chance_rate column, age_group, and lab
 hlab_data <- hlab_data %>%
   mutate(
-    chance_rate = 1/obj_per_ring
+    chance_rate = 1/obj_per_ring,
+    age_group = "older",
+    lab = "holcombe"
   )
 
 ```
+
 

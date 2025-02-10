@@ -28,9 +28,12 @@ Why does he use cmdstanr?
 ```{r}
 #| echo: false
 set.seed(999)
-#possibly need to make new locations and scales per condition combination
-location_parameter <- 0.91
-scale_parameter <- 0.2
+location_parameter_younger <- 0.91
+scale_parameter_younger <- 0.2
+
+location_parameter_older <- 0.50
+scale_parameter_older <- 0.2
+
 lapse <- 0.03
 
 num_subj <- 4
@@ -48,7 +51,8 @@ fakedata2 <- fakedata2 %>%
   group_by(subj) %>%
   mutate(
     gender = sample(c("M","F"), 1, replace = TRUE),
-    group = sample(c("younger", "older"), 1, replace = TRUE)
+    age_group = sample(c("younger", "older"), 1, replace = TRUE),
+    lab = sample(c("rf", "holcombe"), 1, replace = TRUE)
   ) %>%
   ungroup()
 
@@ -60,9 +64,9 @@ fakedata2 <- fakedata2 %>%
 fakedata2 <- fakedata2 %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    #phi = pnorm(-speed, -location_parameter, scale_parameter) # old formula version
-    phi = pnorm(-speed, -location_parameter, scale_parameter),
-    #probabilityCorrect = (lapse*chance_rate) + (1 - lapse)*(1 - phi*(1-chance_rate)) #old formula version
+    phi = ifelse(age_group == "younger",
+                 pnorm(-speed, -location_parameter_younger, scale_parameter_younger),
+                 pnorm(-speed, -location_parameter_older, scale_parameter_older)),
     probabilityCorrect = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi
   )
 
@@ -76,7 +80,7 @@ fakedata2 <- fakedata2 %>% mutate(
 
 ```{r}
 #| echo: false
-ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = group)) + 
+ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = age_group)) + 
   stat_summary( fun="mean", geom="point" ) +
   facet_wrap(.~subj)
 
@@ -84,6 +88,11 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
   stat_summary(fun="mean", geom="point" ) +
   facet_wrap(.~chance_rate) +
   aes(color = chance_rate)
+
+ggplot(fakedata2, aes(x=speed,y=correct)) + 
+  stat_summary(fun="mean", geom="point" ) +
+  facet_wrap(.~age_group) +
+  aes(color = age_group)
 ```
 
 
@@ -98,17 +107,23 @@ distr_fun <- function(x, mean, sigma, lapse, chance_rate){
 #Phi = cumulative normal, internal to brms. Why do we use this instead of pnorm?
 #We are using the parameterization of psychometric function with chance_rate and lapse rate
 model_formula <- bf(
-  #correct ~ lapse * chance_rate + (1-lapse) * (1-Phi((speed-eta)/exp(logsigma)) * (1-chance_rate)),
-  correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)), #this works
-  eta ~ 1,
-  lapse ~ 1,
-  logsigma ~ 1,
+  correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
+  eta ~ age_group,
+  lapse ~ age_group,
+  logsigma ~ age_group,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
 
 p3 <- c(
   set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5) #conservative ub of 3 rps
+)
+
+
+# look through https://mc-stan.org/docs/functions-reference/unbounded_continuous_distributions.html
+p4 <- c(
+  set_prior("exp_mod_normal(0, 1, 1)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
   set_prior("uniform(0, 3)", class = "b", nlpar = "eta", lb = 0, ub = 3) #conservative ub of 3 rps
 )
 
@@ -121,12 +136,18 @@ default_prior(model_formula, fakedata2)
 fit <- brm(
   model_formula,
   data = fakedata2, 
-  # control = list(adapt_delta = 0.99),
+  #control = list(adapt_delta = 0.99),
   prior = p3
 )
 
 summary(fit)
+
+pp_check(fit)
 ```
+```{r}
+brms::pp_check(fit)
+```
+
 
 ```{r}
 #| echo: false
