@@ -56,7 +56,7 @@ scale_parameter_older <- 0.2
 
 lapse <- 0.03
 
-num_subj <- 4
+num_subj <- 12
 
 #generate fake data
 fakedata2 <- tidyr::expand_grid(
@@ -94,10 +94,10 @@ fakedata2 <- fakedata2 %>%
     #             pnorm(-speed, -location_parameter_older, scale_parameter_older)),
     probabilityCorrect = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi
   )
-fakedata2 <- fakedata2 %>%
-  mutate(
-    num_target = as_factor(num_target)
-  )
+#fakedata2 <- fakedata2 %>%
+#  mutate(
+#    num_target = as_factor(num_target)
+#  )
 
 fakedata2 <- fakedata2 %>% mutate(
           correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
@@ -113,7 +113,7 @@ View(fakedata2)
 #| echo: false
 ggplot(fakedata2, aes(x=speed,y=correct, colour = gender, shape = age_group)) + 
   stat_summary( fun="mean", geom="point" ) +
-  facet_wrap(.~subj~num_target~obj_per_ring)
+  facet_wrap(.~subj)
 
 ggplot(fakedata2, aes(x=speed,y=correct)) + 
   stat_summary(fun="mean", geom="point" ) +
@@ -140,8 +140,8 @@ fakedata2$num_target
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
   eta ~ age_group,
-  lapse ~ 1,
-  logsigma ~ 1,
+  lapse ~ age_group,
+  logsigma ~ age_group,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
@@ -170,7 +170,11 @@ fit <- brm(
   model_formula,
   data = fakedata2, 
   #control = list(adapt_delta = 0.99),
-  prior = p3
+  prior = p3,
+  silent = 0,
+  init = 0,
+  seed = 999,
+  cores = getOption("mc.cores", 6)
 )
 
 summary(fit)
