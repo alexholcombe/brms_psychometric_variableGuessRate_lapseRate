@@ -100,17 +100,11 @@ fakedata2 <- fakedata2 %>%
     #             pnorm(-speed, -location_parameter_older, scale_parameter_older)),
     probabilityCorrect = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi
   )
-#fakedata2 <- fakedata2 %>%
-#  mutate(
-#    num_target = as_factor(num_target)
-#  )
 
 fakedata2 <- fakedata2 %>% mutate(
           correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
          )
 
-View(fakedata2)
-          
 ```
 
 ## Plot our fake data
@@ -138,33 +132,26 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
 distr_fun <- function(x, mean, sigma, lapse, chance_rate){
 (lapse*chance_rate) + (1 - lapse)*(1 - pnorm((x-mean)/sigma)*(1-chance_rate))
 }
-
-fakedata2$num_target
                                  
 #Phi = cumulative normal, internal to brms. Why do we use this instead of pnorm?
 #We are usingg the parameterization of psychometric function with chanceRate and lapse rate
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
-  eta ~ age_group,
-  lapse ~ age_group,
-  logsigma ~ age_group,
+  eta ~ age_group + lab + num_target + obj_per_ring,
+  lapse ~ 1,
+  logsigma ~ age_group + lab + num_target + obj_per_ring,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
 
-
 # Can all of these be used as priors? https://paulbuerkner.com/brms/reference/brmsfamily.html
 p3 <- c(
   set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
-  set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5) #conservative ub of 3 rps
+  set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5), #conservative ub of 2.5 rps
+  set_prior("uniform(-2, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) #conservative ub of 1.6
 )
-
 
 # look through https://mc-stan.org/docs/functions-reference/unbounded_continuous_distributions.html
-p4 <- c(
-  set_prior("exp_mod_normal(0, 1, 1)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
-  set_prior("uniform(0, 3)", class = "b", nlpar = "eta", lb = 0, ub = 3) #conservative ub of 3 rps
-)
 
 default_prior(model_formula, fakedata2)
 ```
@@ -172,6 +159,9 @@ default_prior(model_formula, fakedata2)
 ```{r}
 #| echo: false
 
+#within chain parallelization and between chain paralellization
+#threads = how many cores per chain
+#cores = how many parrallel processes  (make it equal to the number of chains)
 fit <- brm(
   model_formula,
   data = fakedata2, 
@@ -180,7 +170,9 @@ fit <- brm(
   silent = 0,
   init = 0,
   seed = 999,
-  cores = getOption("mc.cores", 6)
+  chains = 4,
+  cores = 4,
+  threads = threading(2)
 )
 
 summary(fit)
