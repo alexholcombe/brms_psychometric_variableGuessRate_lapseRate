@@ -6,7 +6,7 @@ editor: visual
 
 This code does it in a way that allows him to set a prior on the location parameter: https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
 
-## Quarto
+## Packages
 
 ```{r}
 #| echo: false
@@ -15,15 +15,7 @@ library(brms)
 library(tidyverse)
 ```
 
-Why does he use cmdstanr?
-
-```{r}
-#library(cmdstanr)
-#set_cmdstan_path('//wsl$/Ubuntu/home/andche/.cmdstan/cmdstan-2.35.0')
-
-```
-
-## New psychometric function
+## Setting condition-wise location parameters
 
 ```{r}
 location_parameter_data <-
@@ -41,28 +33,37 @@ location_parameter_data <- location_parameter_data %>%
 
 ```
 
+### Differences in location parameters averaged over group
+
+```{r}
+location_parameter_data %>%
+  group_by(num_target) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
+
+location_parameter_data %>%
+  group_by(obj_per_ring) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
+
+location_parameter_data %>%
+  group_by(age_group) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
+```
+## Generate data, including based on the location parameter matrix
+
 ```{r}
 #| echo: false
 set.seed(999)
 
-#making a dataframe of every variable combination to reflect the differing locations for age x obj_per_ring x num_target
-
-location_parameter_younger <- 0.91
-scale_parameter_younger <- 0.2
-
-location_parameter_older <- 0.50
-scale_parameter_older <- 0.2
-
 lapse <- 0.03
-
-num_subj <- 12
+num_subj <- 20
+sigma <- 0.2
 
 #generate fake data
 fakedata2 <- tidyr::expand_grid(
-    speed = seq(.02,1.8, length.out = 12), 
     subj = seq(1, num_subj),
+    rep = seq(1,5), #5 replicants of each trial combination
     num_target = c(2,3),
-    rep = seq(1,5) #5 replicants of each trial combination
+    speed = seq(.02,1.8, length.out = 12) #12 different speeds between .02 and 1.8
   )
 
 fakedata2 <- fakedata2 %>%
@@ -77,15 +78,15 @@ fakedata2 <- fakedata2 %>%
 fakedata2 <- fakedata2 %>%
   mutate(
     obj_per_ring = case_when(
-      lab== "rf" ~ sample(c(5,10), n(), replace=TRUE),
-      lab== "holcombe" ~ sample(c(4,8), n(), replace = TRUE)
+      lab == "rf" ~ sample(c(5,10), n(), replace=TRUE),
+      lab == "holcombe" ~ sample(c(4,8), n(), replace = TRUE)
     )
   )
 
 fakedata2 <- fakedata2 %>%
   mutate(
-    responseRing = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
-  )
+    response_ring = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
+  ) 
 
 fakedata2 <- fakedata2 %>%
   left_join(location_parameter_data, by = c("age_group", "obj_per_ring", "num_target")
@@ -94,17 +95,42 @@ fakedata2 <- fakedata2 %>%
 fakedata2 <- fakedata2 %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    phi = pnorm(-speed, -location, 0.2),
-    #phi = ifelse(age_group == “younger”,
-    #             pnorm(-speed, -location_parameter_younger, scale_parameter_younger),
-    #             pnorm(-speed, -location_parameter_older, scale_parameter_older)),
-    probabilityCorrect = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi
+    phi = pnorm(-speed, -location, sigma),
+    probability_correct = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi,
+    correct = rbinom(n=length(probability_correct), size = 1, prob = probability_correct)
   )
 
-fakedata2 <- fakedata2 %>% mutate(
-          correct = rbinom(n=length(probabilityCorrect), size = 1, prob = probabilityCorrect)
-         )
+fakedata2 <- fakedata2 %>%
+  mutate(
+    gender = as_factor(gender),
+    age_group = as_factor(age_group),
+    lab = as_factor(lab),
+    gender = as_factor(gender),
+    response_ring = as_factor(response_ring)
+  ) 
 
+glimpse(fakedata2)
+
+```
+
+### Differences in location parameters averaged over group (ACTUAL DATA)
+
+```{r}
+fakedata2 %>%
+  group_by(num_target) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
+
+fakedata2 %>%
+  group_by(obj_per_ring) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
+
+fakedata2 %>%
+  group_by(age_group) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
+
+fakedata2 %>%
+  group_by(lab) %>%
+  summarize(mean_location = mean(location, na.rm = TRUE))
 ```
 
 ## Plot our fake data
@@ -124,34 +150,39 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
   stat_summary(fun="mean", geom="point" ) +
   facet_wrap(.~age_group) +
   aes(color = age_group)
+
+ggplot(fakedata2, aes(x=speed,y=correct)) + 
+  stat_summary(fun="mean", geom="point" ) +
+  facet_wrap(.~num_target) +
+  aes(color = num_target)
+
+ggplot(fakedata2, aes(x=speed,y=correct)) + 
+  stat_summary(fun="mean", geom="point" ) +
+  facet_wrap(.~obj_per_ring) +
+  aes(color = obj_per_ring)
+
+
 ```
 
 ```{r}
 #| echo: false
 
-distr_fun <- function(x, mean, sigma, lapse, chance_rate){
-(lapse*chance_rate) + (1 - lapse)*(1 - pnorm((x-mean)/sigma)*(1-chance_rate))
-}
-                                 
-#Phi = cumulative normal, internal to brms. Why do we use this instead of pnorm?
-#We are usingg the parameterization of psychometric function with chanceRate and lapse rate
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
-  eta ~ age_group + lab + num_target + obj_per_ring,
+  eta ~ age_group + lab,
   lapse ~ 1,
-  logsigma ~ age_group + lab + num_target + obj_per_ring,
+  logsigma ~ age_group + lab,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
 
-# Can all of these be used as priors? https://paulbuerkner.com/brms/reference/brmsfamily.html
-p3 <- c(
+# https://paulbuerkner.com/brms/reference/brmsfamily.html
+# https://mc-stan.org/docs/functions-reference/unbounded_continuous_distributions.html
+prior1 <- c(
   set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
   set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5), #conservative ub of 2.5 rps
   set_prior("uniform(-2, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) #conservative ub of 1.6
 )
-
-# look through https://mc-stan.org/docs/functions-reference/unbounded_continuous_distributions.html
 
 default_prior(model_formula, fakedata2)
 ```
@@ -164,39 +195,17 @@ default_prior(model_formula, fakedata2)
 #cores = how many parrallel processes  (make it equal to the number of chains)
 fit <- brm(
   model_formula,
-  data = fakedata2, 
+  data = fakedata2,
   #control = list(adapt_delta = 0.99),
-  prior = p3,
+  prior = prior1,
   silent = 0,
   init = 0,
-  seed = 999,
   chains = 4,
   cores = 4,
+  iter = 2000, #default iterations (if errors come up in convergence, can increase this)
   threads = threading(2)
 )
 
 summary(fit)
 ```
 
-```{r}
-brms::pp_check(fit)
-```
-
-```{r}
-#| echo: false
-
-#since we have effectively two different conditions numerically (chance_rate 0.1 and 0.2), treating it as one model probably not the move
-
-fakedata2_pred <- fakedata2
-coefs <- fixef(fit)[,'Estimate']
-fakedata2_pred[,pred=pnorm((speed-coefs['eta_Intercept'])/exp(coefs['logsigma_Intercept']))]
-fakedata2_pred <- cbind(fakedata2_pred, predict(fit, newdata = fakedata2))
-
-fakedata2_pred
-
-ggplot(fakedata2, aes(x = speed, y = correct))+
-  stat_summary(fun="mean", geom="point", aes(color = 'Data') )+
-  stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chance_rate = 0.2), aes(color = '0.2 chance curve')) +
-    stat_function(fun = distr_fun, args = list(mean = location_parameter, sigma = scale_parameter, lapse = lapse, chance_rate = 0.1), aes(color = '0.1 chance curve'))+
-  geom_line(data=fakedata2_pred, aes(y = Estimate, color = 'Fitted model with uncertainty'))
-```
