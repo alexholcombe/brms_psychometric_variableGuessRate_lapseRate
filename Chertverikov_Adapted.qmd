@@ -2,6 +2,8 @@
 title: "ChertverikovProbitBRMS"
 format: html
 editor: visual
+editor_options: 
+  chunk_output_type: inline
 ---
 
 This code does it in a way that allows him to set a prior on the location parameter: https://gist.github.com/achetverikov/b1756dc06e04a55b70e888cd2c2719f5
@@ -48,6 +50,7 @@ location_parameter_data %>%
   group_by(age_group) %>%
   summarize(mean_location = mean(location, na.rm = TRUE))
 ```
+
 ## Generate data, including based on the location parameter matrix
 
 ```{r}
@@ -55,7 +58,7 @@ location_parameter_data %>%
 set.seed(999)
 
 lapse <- 0.03
-num_subj <- 20
+num_subj <- 90
 sigma <- 0.2
 
 #generate fake data
@@ -169,9 +172,9 @@ ggplot(fakedata2, aes(x=speed,y=correct)) +
 
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
-  eta ~ age_group + lab,
+  eta ~ age_group + lab + num_target,
   lapse ~ 1,
-  logsigma ~ age_group + lab,
+  logsigma ~ age_group + lab + num_target,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
   nl = TRUE
 )
@@ -181,7 +184,7 @@ model_formula <- bf(
 prior1 <- c(
   set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
   set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5), #conservative ub of 2.5 rps
-  set_prior("uniform(-2, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) #conservative ub of 1.6
+  set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) #conservative ub of 1.6
 )
 
 default_prior(model_formula, fakedata2)
@@ -208,4 +211,3 @@ fit <- brm(
 
 summary(fit)
 ```
-
