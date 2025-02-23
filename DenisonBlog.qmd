@@ -69,3 +69,22 @@ glimpse(fakedata2)
 
 ```
 
+# Psychometric Function
+
+The data is generated based on our psychometric function for the sake of model recovery. Using (citation) we obtained the function
+
+$$
+P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\exp(\log(\sigma))}\bigg) 
+$$
+
+Where
+
+-   $C$ is the chance rate of selecting the correct target (i.e. $\frac{1}{\text{# objects}}$) and represents a lower boundary of the function.
+
+-   $L$ is the lapse rate parameter (i.e. the rate at which participants fail due to lapses in attention) and represents the upper boundary of the function.
+
+-   $X$ is the speed in which objects move in a trial (rotations per second)
+
+-   $\eta$ is the location parameter, representative of the $X$ in which $P(\text{Correct})$ is halfway between the upper (lapse) and lower boundaries of the function.
+
+-   $\sigma$ represents the scale parameter, representative of the shape/steepness about $\eta$
