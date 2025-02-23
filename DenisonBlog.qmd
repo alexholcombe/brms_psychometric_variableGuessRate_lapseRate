@@ -12,6 +12,16 @@ library(tidyverse)
 library(brms)
 ```
 
+# Introduction
+
+Holcombe lab did a replication and extension experiment based on Rodaia and Faubert's 2017 study on the effect of aging on temporal resolution in attentional tracking. We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe's replication experiment and Rodaia and Faubert (2017) using BRMS. In order to achieve this, we conducted? a model recovery to determine if our model could accurately captured key patterns and estimate important parameters of fake data that simulated expected results/experimental conditions.
+
+# The Experiment 
+
+Participants in both experiments were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Rodaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring. 
+
+-   Maybe visual/figure of what participant saw eg. figure one from Rodaia and Faubert (2017)
+
 # Psychometric Function (Generating)
 
 The fake data is generated based on our psychometric function for the sake of model recovery. Using (citation) we obtained the function
@@ -146,7 +156,6 @@ glimpse(fakedata)
 
 ```
 
-
 # Selecting Priors
 
 Explanation of what priors are ...
@@ -185,8 +194,42 @@ Prior on Sigma
 
 # Setting our Model in BRMS
 
+```{r}
+#| echo: false
+
+model_formula <- bf(
+  correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
+  eta ~ age_group, 
+  lapse ~ 1,
+  logsigma ~ age_group,
+  family = bernoulli(link="identity"), #because otherwise default link logit would be used
+  nl = TRUE
+)
+```
+
+just looking at age group for now for simplicity
+
 # Fitting Model to Simulated Data
 
-# Acknowledgements 
+```{r}
+#| echo: false
+
+fit <- brm(
+  model_formula,
+  data = fakedata2,
+  #control = list(adapt_delta = 0.99),
+  prior = prior1,
+  silent = 0,
+  init = 0,
+  chains = 4,
+  cores = 4, #how many parallel processes, speeds up model 
+  iter = 2000, #default number of iterations 
+  threads = threading(2) #how many cores work per chain
+)
+
+summary(fit)
+```
+
+# Acknowledgements
 
 -   Extensive use of Microsoft Copilot
