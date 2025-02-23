@@ -5,11 +5,17 @@ format: html
 
 #Title Here
 
+## Load in required packages
+
 ```{r}
 library(tidyverse)
 library(brms)
 
 ```
+
+# Creating Simulated Data
+
+In order to build and test our model in BRMS, we must first create a simulated data set that is similar to our actual experiment data but has arbitrary values for unknown parameters. This allows us to confirm the BRMS model is working and estimating parameters correctly before applying it to our real experimental data.
 
 ```{r}
 #| echo: false
@@ -51,7 +57,8 @@ fakedata <- fakedata %>%
 
 #removed prompted ring for response from data
 
-
+#Add column for the probability of each trial being correct based on our psychometric function
+#then add column to generate if the subject got the trial correct
 fakedata <- fakedata %>%
   mutate(
     chance_rate = 1/obj_per_ring,
@@ -75,7 +82,7 @@ glimpse(fakedata)
 
 ```
 
-# Psychometric Function
+# Psychometric Function (move above generate simulated data)
 
 The data is generated based on our psychometric function for the sake of model recovery. Using (citation) we obtained the function
 
@@ -135,6 +142,46 @@ ggplot(example) + aes(x = speed, y = probability_correct) +
 
 
 ```
+
+# Selecting Priors
+
+Explanation of what priors are ...
+
+Prior on Lapse
+
+-   We set a prior on lapse using a beta distribution that was bounded between 0 and 1
+
+-   We know through previous literature (citation) that lapse is often between 0.03 and 0.04. Moreover, lapse is bounded between zero and one as it represents a rate. We then chose the beta distribution with a mode of 0.03 as …. - need to finish explaination
+
+Prior on Location
+
+-   We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5
+
+-   The lower bound was set at 0 as you cannot have negative speed 
+
+-   From previous research ( citations here) we know that a speed threshold and tracking ability over 2.5 revolutions per second are extremely rare. 
+
+Prior on Sigma
+
+-   Values of sigma can get extremely small and include many decimal points. Therefore, our BRMS model and by extention our prior transforms sigma into logsigma
+
+-   include redone graph (see shared word doc)
+
+-   Using a graph like the one above, we concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants
+
+-   Converting this, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
+
+    ```{r}
+    prior1 <- c(
+      set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+      set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
+      set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) 
+    )
+    ```
+
+# Setting our Model in BRMS
+
+# Fitting Model to Simulated Data
 
 # Acknowledgements
 
