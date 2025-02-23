@@ -5,11 +5,79 @@ format: html
 
 #Title Here
 
+# Load Packages
+
 ```{r}
 library(tidyverse)
 library(brms)
-
 ```
+
+# Psychometric Function (Generating)
+
+The fake data is generated based on our psychometric function for the sake of model recovery. Using (citation) we obtained the function
+
+$$
+P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg) 
+$$
+
+**Where**
+
+-   $C$ is the chance rate of selecting the correct target (i.e. $\frac{1}{\text{# objects}}$) and represents a lower boundary of the function.
+
+-   $L$ is the lapse rate parameter (i.e. the rate at which participants fail due to lapses in attention) and is included in the calculation of the upper boundary of the function.
+
+-   $X$ is the speed in which objects move in a trial (RPS)
+
+-   $\eta$ is the location parameter, representative of the $X$ in which $P(\text{Correct})$ is halfway between the upper boundary $(1-L(1-C))$ and lower boundary $C$.
+
+-   $\sigma$ represents the scale parameter, representative of the shape/steepness about $\eta$. (We later use $\log(\sigma)$ for numerical stability in the brms model.)
+
+**Note:**
+
+-   We take the negative of $(X-\eta)$ in $\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)$ is taken in order to reflect the function (as speed increases, $P(\text{Correct})$ decreases)
+
+-   The support of the function itself is $(-\infty,\infty)$ but speed is always positive. The model is not technically accurate but still useful with the right parameters.
+
+## Example of the function (for illustrative purposes)
+
+Here we have an example in which
+
+-   $C=1/4$
+
+-   $L = 0.1$
+
+-   $\eta = 0.9$
+
+-   $\sigma = 0.2$
+
+```{r}
+example <- dplyr::tibble(
+    speed = seq(0,2.5, length.out = 500),
+    C = 0.25,
+    L = 0.1, # for il
+    eta = 0.9,
+    sigma = 0.2,
+    phi = pnorm(-speed, -eta, sigma),
+    probability_correct = C + (1-C - L*(1-C))*phi,
+    upper_bound = 1 - L*(1-C)
+)
+
+ggplot(example) + 
+  geom_hline(aes(yintercept = upper_bound, colour = "Upper Bound"), linetype = "dashed") +
+  geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
+  geom_vline(aes(xintercept = 0.9, colour = "eta")) +
+  geom_line(aes(x = speed, y = probability_correct,
+                colour = "Probability Correct")) +
+  theme_light() +
+  lims(x = c(0,2.5), y = c(0,1)) +
+  scale_colour_manual(values = c("Upper Bound" = "blue", "Lower Bound" = "red", "eta" = "yellow", "Probability Correct" = "black")) +
+  labs(colour = "Legend",
+       x = "Speed (RPS)",
+       y = "P(Correct)",
+       title = "Example of Psychometric Function")
+```
+
+# Generating Data
 
 ```{r}
 #| echo: false
@@ -72,67 +140,6 @@ fakedata2 <- fakedata2 %>%
   ) 
 
 glimpse(fakedata2)
-
-```
-
-# Psychometric Function
-
-The data is generated based on our psychometric function for the sake of model recovery. Using (citation) we obtained the function
-
-$$
-P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg) 
-$$
-
-**Where**
-
--   $C$ is the chance rate of selecting the correct target (i.e. $\frac{1}{\text{# objects}}$) and represents a lower boundary of the function.
-
--   $L$ is the lapse rate parameter (i.e. the rate at which participants fail due to lapses in attention) and is included in the calculation of the upper boundary of the function.
-
--   $X$ is the speed in which objects move in a trial (RPS)
-
--   $\eta$ is the location parameter, representative of the $X$ in which $P(\text{Correct})$ is halfway between the upper boundary $(1-L(1-C))$ and lower boundary $C$ of the function.
-
--   $\sigma$ represents the scale parameter, representative of the shape/steepness about $\eta$. (We later use $\log(\sigma)$ for numerical stability in the model.)
-
-**Note:**
-
--   We take the negative of $(X-\eta)$ in $\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)$ is taken in order to reflect the function (as speed increases, $P(\text{Correct})$ decreases)
-
--   The support of the function itself is $(-\infty,\infty)$ but speed is always positive. The model is not technically accurate but still useful with the right parameters.
-
-## Example of the function (for illustrative purposes)
-
-Here we have an example in which
-
--   $C=1/4$
-
--   $L = 0.1$
-
--   $\eta = 0.9$
-
--   $\sigma = 0.2$
-
-```{r}
-example <- dplyr::tibble(
-    speed = seq(0,2.5, length.out = 500),
-    C = 0.25,
-    L = 0.1, # for il
-    eta = 0.9,
-    sigma = 0.2,
-    phi = pnorm(-speed, -eta, sigma),
-    probability_correct = C + (1-C - L*(1-C))*phi,
-    upper_bound = 1 - L*(1-C)
-)
-
-ggplot(example) + aes(x = speed, y = probability_correct) +
-  geom_hline(yintercept = example$upper_bound, colour = "blue", linetype = "dashed") +
-  geom_hline(yintercept = 0.25 , colour = "red", linetype = "dashed") +
-  geom_line() +
-  lims(x = c(0,2.5), y = c(0,1)) +
-  theme_linedraw()
-  
-
 
 ```
 
