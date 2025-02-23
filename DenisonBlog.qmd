@@ -14,9 +14,9 @@ library(brms)
 
 # Introduction
 
-Holcombe lab did a replication and extension experiment based on Rodaia and Faubert's 2017 study on the effect of aging on temporal resolution in attentional tracking. We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe's replication experiment and Rodaia and Faubert (2017) using BRMS. In order to achieve this, we conducted? a model recovery to determine if our model could accurately captured key patterns and estimate important parameters of fake data that simulated expected results/experimental conditions.
+Holcombe lab did a replication and extension experiment based on Rodaia and Faubert's 2017 study on the effect of aging on temporal resolution in attentional tracking. We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe's replication experiment and Rodaia and Faubert (2017) using BRMS (citation). In order to achieve this, we conducted? a model recovery to determine if our model could accurately captured key patterns and estimate important parameters of fake data that simulated expected results/experimental conditions.
 
-# The Experiment 
+# The Experiment
 
 Participants in both experiments were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Rodaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring. 
 
@@ -89,7 +89,7 @@ ggplot(example) +
 
 # Creating Simulated Data
 
-In order to build and test our model in BRMS, we must first create a simulated data set that is similar to our actual experiment data but has arbitrary values for unknown parameters. This allows us to confirm the BRMS model is working and estimating parameters correctly before applying it to our real experimental data.
+In order to build and test our model in BRMS, we must first create a simulated data set that is similar to our actual experiment data but has arbitrary values for unknown parameters. This allows us to confirm the BRMS model is working and estimating parameters correctly before applying it to our real experimental data. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between $\eta$ (location) of age groups (older vs younger).
 
 ```{r}
 #| echo: false
@@ -99,10 +99,10 @@ set.seed(999) #ensures reproducible response for testing
 lapse <- 0.03
 sigma <- 0.2
 location_parameter_younger <-0.91 
-location_parameter_older <-0.5 #differing location parameter by age to test if our model is able to detect group differences
+location_parameter_older <-0.5
 
 #generate data frame for simulated data
-fakedata <- tidyr::expand_grid(
+simdata <- tidyr::expand_grid(
     subj = seq(1, 50), #number of subjects
     rep = seq(1,5), #replicants of each trial combination
     num_target = c(2,3), #number of targets particpant tracks
@@ -111,7 +111,7 @@ fakedata <- tidyr::expand_grid(
 #note: Holcombe lab's experiment had both a set number of trials at certain speeds and a speed staircase. Rodaia and Faubert (2017) had a set number of trails at certain intervals based on benchmark speeds and then a Bayesian adaptive procedure for the rest of the trials.
 
 #Introducing demographic data and seperating the two labs
-fakedata <- fakedata %>%
+simdata <- simdata %>%
   group_by(subj) %>%
   mutate(
     gender = sample(c("M","F"), 1, replace = TRUE),
@@ -121,7 +121,7 @@ fakedata <- fakedata %>%
   ungroup()
 
 # Splitting number of objects per ring based on lab
-fakedata <- fakedata %>%
+simdata <- simdata %>%
   mutate(
     obj_per_ring = case_when(
       lab == "rf" ~ sample(c(5,10), n(), replace=TRUE), #Rodaia and Faubert (2017) tested only 5 and 10 objects per ring
@@ -133,7 +133,7 @@ fakedata <- fakedata %>%
 
 #Add column for the probability of each trial being correct based on our psychometric function
 #then add column to generate if the subject got the trial correct
-fakedata <- fakedata %>%
+simdata <- simdata %>%
   mutate(
     chance_rate = 1/obj_per_ring,
     phi = ifelse(age_group == "younger",
@@ -144,7 +144,7 @@ fakedata <- fakedata %>%
   )
 
 #Convert these variables from vectors to factors
-fakedata <- fakedata %>%
+simdata <- simdata %>%
   mutate(
     gender = as_factor(gender),
     age_group = as_factor(age_group),
@@ -152,7 +152,7 @@ fakedata <- fakedata %>%
     gender = as_factor(gender)
   ) 
 
-glimpse(fakedata)
+glimpse(simdata)
 
 ```
 
@@ -248,9 +248,10 @@ prior1 <- c(
 
 # Setting our Model in BRMS
 
+The model we use is based off our psychometric function used to generate the data mentioned previously. However, we estimate the parameter of $\log(\sigma)$ rather than $\sigma$ for the sake of model stability in brms.
+
 ```{r}
 #| echo: false
-
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
   eta ~ age_group, 
@@ -261,17 +262,14 @@ model_formula <- bf(
 )
 ```
 
-just looking at age group for now for simplicity
-
 # Fitting Model to Simulated Data
 
-<<<<<<< HEAD
 ```{r}
 #| echo: false
 
 fit <- brm(
   model_formula,
-  data = fakedata2,
+  data = simdata,
   #control = list(adapt_delta = 0.99),
   prior = prior1,
   silent = 0,
