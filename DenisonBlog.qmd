@@ -3,7 +3,7 @@ title: "DenisonBlog"
 format: html
 ---
 
-#Title Here
+# Title Here
 
 ## Load in required packages
 
@@ -160,7 +160,7 @@ glimpse(simdata)
 
 Explanation of what priors are ...
 
-## Prior on Lapse
+## Prior on Lapse $(L)$ 
 
 -   We set a prior on lapse using a beta distribution that was bounded between 0 and 1
 
@@ -184,7 +184,7 @@ ggplot(prior_lapse) + aes(x = x, y = y) +
   )
 ```
 
-## Prior on Location
+## Prior on Location $(\eta)$ 
 
 -   We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5
 
@@ -210,7 +210,7 @@ ggplot(prior_location) + aes(x = x, y = y) +
   )
 ```
 
-## Prior on Sigma (Scale)
+## Prior on Sigma/Scale $(\sigma)$
 
 -   Values of sigma can get extremely small and include many decimal points. Therefore, our BRMS model and by extention our prior transforms sigma into logsigma
 
@@ -225,7 +225,7 @@ ggplot(prior_location) + aes(x = x, y = y) +
 ```{r}
 prior_scale <- dplyr::tibble(
     x = seq(-5, 5, length.out = 500),
-    y = dunif(x, -3, 1.6)
+    y = dunif(x, -2, 1.6)
 )
 
 ggplot(prior_scale) + aes(x = x, y = y) +
@@ -246,23 +246,37 @@ prior1 <- c(
 )
 ```
 
-# Setting our Model in BRMS
+# Setting up our Model in BRMS
 
-The model we use is based off our psychometric function used to generate the data mentioned previously. However, we estimate the parameter of $\log(\sigma)$ rather than $\sigma$ for the sake of model stability in brms.
+The model we use is based off our psychometric function used to generate the data mentioned previously. However, we estimate the parameter of $\log(\sigma)$ rather than $\sigma$ to increase model stability **(FACT CHECK)**. Moreover, the only explicitly coded difference in this simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allow $\eta$ and $\log(\sigma)$ to vary by age group.
+
+Notes:
+
+-   Since we explicitly included the non-linear function in the formula, we don't need a link function.
+
+-   Phi is the inverse probit (normal CDF)
 
 ```{r}
 #| echo: false
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)),
   eta ~ age_group, 
-  lapse ~ 1,
+  lapse ~ 1, #constant/intercept only
   logsigma ~ age_group,
   family = bernoulli(link="identity"), #because otherwise default link logit would be used
-  nl = TRUE
+  nl = TRUE #non-linear model
 )
 ```
 
 # Fitting Model to Simulated Data
+
+Now that we have our model, priors, and simulated data we can begin fitting.
+
+Note:
+
+-   some arguments of `brm()` are correspond to utilizing your computer's resources (cores etc.) efficiently.
+
+-   silent =
 
 ```{r}
 #| echo: false
@@ -270,11 +284,10 @@ model_formula <- bf(
 fit <- brm(
   model_formula,
   data = simdata,
-  #control = list(adapt_delta = 0.99),
   prior = prior1,
-  silent = 0,
-  init = 0,
-  chains = 4,
+  silent = 0, #print more detailed messages (helps debug)
+  init = 0, #starting at
+  chains = 4, # the more chains, the greater convergence in the model
   cores = 4, #how many parallel processes, speeds up model 
   iter = 2000, #default number of iterations 
   threads = threading(2) #how many cores work per chain
@@ -283,6 +296,9 @@ fit <- brm(
 summary(fit)
 ```
 
+# References
+
 # Acknowledgements
 
 -   Extensive use of Microsoft Copilot
+-   Alex Holcombe
