@@ -160,13 +160,31 @@ glimpse(fakedata)
 
 Explanation of what priors are ...
 
-Prior on Lapse
+## Prior on Lapse
 
 -   We set a prior on lapse using a beta distribution that was bounded between 0 and 1
 
--   We know through previous literature (citation) that lapse is often between 0.03 and 0.04. Moreover, lapse is bounded between zero and one as it represents a rate. We then chose the beta distribution with a mode of 0.03 as …. - need to finish explaination
+-   We know through previous literature (citation) that lapse is often between 0.03 and 0.04. Moreover, lapse is bounded between zero and one as it represents a rate. We then chose the beta distribution with a mode of 0.03 as …. - need to finish explanation
 
-Prior on Location
+### Plot beta(2, 33.33)
+
+```{r}
+prior_lapse <- dplyr::tibble(
+    x = seq(0, 1, length.out = 500),
+    y = dbeta(x, 2, 33.33)
+)
+
+ggplot(prior_lapse) + aes(x = x, y = y) +
+  geom_area(fill = "red", alpha = 0.2) +
+  geom_line()+
+  theme_light() +
+  labs(
+    x = "",
+    y = ""
+  )
+```
+
+## Prior on Location
 
 -   We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5
 
@@ -174,7 +192,25 @@ Prior on Location
 
 -   From previous research ( citations here) we know that a speed threshold and tracking ability over 2.5 revolutions per second are extremely rare. 
 
-Prior on Sigma
+### Plot uniform(0, 2.5)
+
+```{r}
+prior_location <- dplyr::tibble(
+    x = seq(-1, 10, length.out = 500),
+    y = dunif(x, 0, 2.5)
+)
+
+ggplot(prior_location) + aes(x = x, y = y) +
+  geom_area(fill = "red", alpha = 0.2) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "",
+    y = ""
+  )
+```
+
+## Prior on Sigma (Scale)
 
 -   Values of sigma can get extremely small and include many decimal points. Therefore, our BRMS model and by extention our prior transforms sigma into logsigma
 
@@ -184,13 +220,31 @@ Prior on Sigma
 
 -   Converting this, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
 
-    ```{r}
-    prior1 <- c(
-      set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
-      set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-      set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) 
-    )
-    ```
+### Plot uniform(0, 2.5)
+
+```{r}
+prior_scale <- dplyr::tibble(
+    x = seq(-5, 5, length.out = 500),
+    y = dunif(x, -3, 1.6)
+)
+
+ggplot(prior_scale) + aes(x = x, y = y) +
+  geom_area(fill = "red", alpha = 0.2) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "",
+    y = ""
+  )
+```
+
+```{r}
+prior1 <- c(
+  set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
+  set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) 
+)
+```
 
 # Setting our Model in BRMS
 
@@ -211,6 +265,7 @@ just looking at age group for now for simplicity
 
 # Fitting Model to Simulated Data
 
+<<<<<<< HEAD
 ```{r}
 #| echo: false
 
