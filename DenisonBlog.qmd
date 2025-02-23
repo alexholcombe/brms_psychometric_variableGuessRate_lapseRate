@@ -9,53 +9,54 @@ format: html
 #| echo: false
 set.seed(999) #ensures reproducible response for testing
 
-#Set known values for parameters
+#Set arbitrary/known values for parameters
 lapse <- 0.03
 sigma <- 0.2
+location_parameter_younger <-0.91 
+location_parameter_older <-0.5 #differing location parameter by age to test if our model is able to detect group differences
 
 #generate data frame for simulated data
 fakedata2 <- tidyr::expand_grid(
     subj = seq(1, 50), #number of subjects
     rep = seq(1,5), #replicants of each trial combination
     num_target = c(2,3), #number of targets particpant tracks
-    speed = seq(.02,1.8, length.out = 12) #12 different speeds between .02 and 1.8
+    speed = seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   )
-#note- 
+#note: Holcombe lab's experiment had both a set number of trials at certain speeds and a speed staircase. Rodaia and Faubert (2017) had a set number of trails at certain intervals based on benchmark speeds and then a Bayesian adaptive procedure for the rest of the trials.
 
+#Introducing demographic data and seperating the two labs
 fakedata2 <- fakedata2 %>%
   group_by(subj) %>%
   mutate(
     gender = sample(c("M","F"), 1, replace = TRUE),
     age_group = sample(c("younger", "older"), 1, replace = TRUE),
-    lab = sample(c("rf", "holcombe"), 1, replace = TRUE)
+    lab = sample(c("rf", "holcombe"), 1, replace = TRUE) 
   ) %>%
   ungroup()
 
+# Splitting number of objects per ring based on lab
 fakedata2 <- fakedata2 %>%
   mutate(
     obj_per_ring = case_when(
-      lab == "rf" ~ sample(c(5,10), n(), replace=TRUE),
-      lab == "holcombe" ~ sample(c(4,8), n(), replace = TRUE)
+      lab == "rf" ~ sample(c(5,10), n(), replace=TRUE), #Rodaia and Faubert (2017) tested only 5 and 10 objects per ring
+      lab == "holcombe" ~ sample(c(4,8), n(), replace = TRUE) #Holcombes lab tested only 4 and 8 objects per ring
     )
   )
 
-fakedata2 <- fakedata2 %>%
-  mutate(
-    response_ring = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
-  ) 
+#removed prompted ring for response from data
 
-fakedata2 <- fakedata2 %>%
-  left_join(location_parameter_data, by = c("age_group", "obj_per_ring", "num_target")
-  )
 
 fakedata2 <- fakedata2 %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    phi = pnorm(-speed, -location, sigma),
+    phi = ifelse(age_group == "younger",
+                 pnorm(-speed, -location_parameter_younger, sigma),
+                 pnorm(-speed, -location_parameter_older, sigma)),
     probability_correct = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi,
     correct = rbinom(n=length(probability_correct), size = 1, prob = probability_correct)
   )
 
+#Convert these variables from vectors to factors
 fakedata2 <- fakedata2 %>%
   mutate(
     gender = as_factor(gender),
