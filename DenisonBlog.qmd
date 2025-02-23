@@ -5,3 +5,67 @@ format: html
 
 #Title Here
 
+```{r}
+#| echo: false
+set.seed(999) #ensures reproducible response for testing
+
+#Set known values for parameters
+lapse <- 0.03
+sigma <- 0.2
+
+#generate data frame for simulated data
+fakedata2 <- tidyr::expand_grid(
+    subj = seq(1, 50), #number of subjects
+    rep = seq(1,5), #replicants of each trial combination
+    num_target = c(2,3), #number of targets particpant tracks
+    speed = seq(.02,1.8, length.out = 12) #12 different speeds between .02 and 1.8
+  )
+#note- 
+
+fakedata2 <- fakedata2 %>%
+  group_by(subj) %>%
+  mutate(
+    gender = sample(c("M","F"), 1, replace = TRUE),
+    age_group = sample(c("younger", "older"), 1, replace = TRUE),
+    lab = sample(c("rf", "holcombe"), 1, replace = TRUE)
+  ) %>%
+  ungroup()
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    obj_per_ring = case_when(
+      lab == "rf" ~ sample(c(5,10), n(), replace=TRUE),
+      lab == "holcombe" ~ sample(c(4,8), n(), replace = TRUE)
+    )
+  )
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    response_ring = sample(c("inner", "middle", "outer"), n(), replace = TRUE)
+  ) 
+
+fakedata2 <- fakedata2 %>%
+  left_join(location_parameter_data, by = c("age_group", "obj_per_ring", "num_target")
+  )
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    chance_rate = 1/obj_per_ring,
+    phi = pnorm(-speed, -location, sigma),
+    probability_correct = chance_rate + (1-chance_rate - lapse*(1-chance_rate))*phi,
+    correct = rbinom(n=length(probability_correct), size = 1, prob = probability_correct)
+  )
+
+fakedata2 <- fakedata2 %>%
+  mutate(
+    gender = as_factor(gender),
+    age_group = as_factor(age_group),
+    lab = as_factor(lab),
+    gender = as_factor(gender),
+    response_ring = as_factor(response_ring)
+  ) 
+
+glimpse(fakedata2)
+
+```
+
