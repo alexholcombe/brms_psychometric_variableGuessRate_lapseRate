@@ -13,7 +13,7 @@ set.seed(999) #ensures reproducible response for testing
 lapse <- 0.03
 sigma <- 0.2
 location_parameter_younger <-0.91 
-location_parameter_older <-0.5 #differing location parameter by age to test if our model is able to detect group differents
+location_parameter_older <-0.5 #differing location parameter by age to test if our model is able to detect group differences
 
 #generate data frame for simulated data
 fakedata2 <- tidyr::expand_grid(
