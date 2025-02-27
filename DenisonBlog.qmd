@@ -3,7 +3,7 @@ title: "DenisonBlog"
 format: html
 ---
 
-# Title Here
+# Bayesian Analysis for Multiple Object Tracking using BRMS
 
 ## Load in required packages
 
@@ -52,9 +52,9 @@ $$
 
 -   The support of the function itself is $(-\infty,\infty)$ but speed is always positive. The model is not technically accurate but still useful with the right parameters.
 
-## Example of the function (for illustrative purposes)
+## Example of the function 
 
-Here we have an example in which
+Here we have an example plot of our psychometric function. For illustrative purposes only, the parameters are:
 
 -   $C=1/4$
 
@@ -112,7 +112,7 @@ simdata <- tidyr::expand_grid(
     num_target = c(2,3), #number of targets particpant tracks
     speed = seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   )
-#note: Holcombe lab's experiment had both a set number of trials at certain speeds and a speed staircase. Rodaia and Faubert (2017) had a set number of trails at certain intervals based on benchmark speeds and then a Bayesian adaptive procedure for the rest of the trials.
+#note: Holcombe lab's experiment had both a set number of trials at certain speeds and a speed staircase. Rodaia and Faubert (2017) had a set number of trails at certain intervals based on benchmark speeds and then a Bayesian adaptive procedure for the rest of the trials. For simplicity, the simulated data will have an even number of trials at each speed.
 
 #Introducing demographic data and seperating the two labs
 simdata <- simdata %>%
@@ -132,7 +132,6 @@ simdata <- simdata %>%
       lab == "holcombe" ~ sample(c(4,8), n(), replace = TRUE) #Holcombes lab tested only 4 and 8 objects per ring
     )
   )
-
 
 #Add column for the probability of each trial being correct based on our psychometric function
 #then add column to generate if the subject got the trial correct
@@ -164,9 +163,11 @@ A prior distribution in Bayesian analysis will assign a probability to each poss
 
 ## Prior on Lapse $(L)$
 
--   We set a prior on lapse using a beta distribution that was bounded between 0 and 1
+-   Since lapse represents a rate, it is bounded between 0 and 1. We know through previous literature (citation) that lapse is often between 0.03 and 0.04.
 
--   We know through previous literature (citation) that lapse is often between 0.03 and 0.04. Moreover, lapse is bounded between zero and one as it represents a rate. We then chose the beta distribution with a mode of 0.03 as …. - need to finish explanation
+-   how did we know lapse should have mode of 0.03-0.04?
+
+-   ...as the tested population was probably fairly motivated, high lapse valuables were unlikely but not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.
 
 ### Plot beta(2, 33.33)
 
@@ -188,7 +189,7 @@ ggplot(prior_lapse) + aes(x = x, y = y) +
 
 ## Prior on Location $(\eta)$
 
-We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5 The lower bound was set at 0 as you cannot have negative speed From previous research ( citations here) we know that a speed threshold and tracking ability over 2.5 revolutions per second are extremely rare. 
+We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5 The lower bound was set at 0 as you cannot have negative speed . Holcombe and Chen (2013) found that the average participant would have a speed threshold of less than 2 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) as found that tracking of a single object on a mechanical display which is not confounded by a displays refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.
 
 ### Plot uniform(0, 2.5)
 
@@ -260,9 +261,7 @@ model_formula <- bf(
 
 # Fitting Model to Simulated Data
 
-Now that we have our model, priors, and simulated data we can begin fitting. Fitting the model will give you an estimation of the average parameter value of the participants. The brm() function is used to fit the model.
-
-For more information on each of the arguments see[ https://paulbuerkner.com/brms/reference/brm.html](https://paulbuerkner.com/brms/reference/brm.html)
+Fitting the model will give you an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see[ https://paulbuerkner.com/brms/reference/brm.html](https://paulbuerkner.com/brms/reference/brm.html)
 
 ```{r}
 #| echo: false
@@ -282,15 +281,27 @@ fit <- brm(
 summary(fit)
 ```
 
-Errors we are still running into, imperfections etc...
+In the above output, Error Est for the intecepts is the average of each participants eta, lapse, logsigma. The eta_age \_groupyounger represents the average difference in eta for the younger age group. The above output has estimated the difference to be 0.38 which is close to the 0.41 difference in the simulated data. The estimate difference in logsigma is small, not far off the 0 difference in our data.
+
+# Model Improvements
+
+Although we have made significant progress over the course of 6 weeks, there is still work to be done and errors we are running into in our model recovery. In particular, when we alter the simulated data and model fit to include group-level effects for variables such as number of targets or objects per ring, the estimations are very inaccurate. We also have yet to test changes to group level values of sigma and are unsure whether the lapse rate may have a group effect for various conditions or population groups.
+
+Another key area to look into is the BRMS syntax and fitting for nested variables. BRMS allows nesting of variable using parameter\~ (1 \| nested group), but have not yet researched this or added it to our model.
 
 # References
 
-Rodaia and Faubert 2017
+Holcombe, Alex O, and Wei-ying Chen. 2013. “Splitting Attention Reduces Temporal Resolution from 7 Hz for Tracking One Object to <\<3 Hz When Tracking Three.” *Journal of Vision* 13 (1): 1–19. <https://doi.org/10.1167/13.1.12>.
 
-Schütt et al., 2016 -\> Painfree and accurate Bayesian estimation of psychometric functions for (potentially) overdispersed data
+Holcombe, A O, and Chen, W-Y. 2020. “The Speed Limit on Attentional Tracking.”
+
+Roudaia, E, & Faubert, J. 2017. "Different effects of aging and gender on the temporal resolution in attentional tracking." *Journal of Vision*, 17 (11): 1-1. <https://doi.org/10.1167/17.11.1>
+
+Schütt, Heiko H., Stefan Harmeling, Jakob H. Macke, and Felix A. Wichmann. 2016. "Painfree and accurate Bayesian estimation of psychometric functions for (potentially) overdispersed data." *Vision research* 122: 105-123.
 
 # Acknowledgements
 
--   Extensive use of Microsoft Copilot
--   Alex Holcombe
+We would like to extend a special thanks to our supervisor Professor Alex Holcombe for....
+
+-   Mention use of Microsoft Copilot?
+-   do we need to thank anyone else?
