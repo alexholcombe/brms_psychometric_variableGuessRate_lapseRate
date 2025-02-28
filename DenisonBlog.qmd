@@ -297,7 +297,7 @@ Another key area to look into is the brms syntax and fitting for nested variable
 
 Holcombe, Alex O, and Wei-ying Chen. 2013. “Splitting Attention Reduces Temporal Resolution from 7 Hz for Tracking One Object to \<\<3 Hz When Tracking Three.” *Journal of Vision* 13 (1): 1–19. <https://doi.org/10.1167/13.1.12>.
 
-Holcombe, A O, and Chen, W-Y. 2020. “The Speed Limit on Attentional Tracking.”
+Holcombe, A O, and Chen, W-Y. (2020 unpublished manuscript). “The Speed Limit on Attentional Tracking.” *Journal of Vision*.
 
 Roudaia, E, & Faubert, J. 2017. "Different effects of aging and gender on the temporal resolution in attentional tracking." *Journal of Vision*, 17 (11): 1-1. <https://doi.org/10.1167/17.11.1>
 
@@ -308,4 +308,4 @@ Schütt, Heiko H., Stefan Harmeling, Jakob H. Macke, and Felix A. Wichmann. 2016
 We would like to extend a special thanks to our supervisor Professor Alex Holcombe for....
 
 -   Mention use of Microsoft Copilot?
--   do we need to thank anyone else?
+-   do we need to thank anyone else? MAYBE JUST THE VOLUNTEERS WHO SHOWED YOU THE EXPERIMENT, STELLA KATSOULIS. WAS SARAH CRONJE ALSO THERE?
