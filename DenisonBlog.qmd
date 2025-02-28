@@ -26,7 +26,7 @@ Participants in both experiments were given a stimulus that involved tracking tw
 
 Figure 1: Fixate on the central white dot and try to track the two targets which initially flash white as the speed increases.
 
-# Psychometric Function 
+# Psychometric Function
 
 The fake data is generated based on our psychometric function. Using Schütt et al. (2016) we obtained the function
 
@@ -52,7 +52,7 @@ $$
 
 -   The support of the function itself is $(-\infty,\infty)$ but speed is always positive. The model is not technically accurate but still useful with the right parameters.
 
-## Example of the function 
+## Example of the function
 
 Here we have an example plot of our psychometric function. For illustrative purposes only, the parameters are:
 
@@ -243,7 +243,7 @@ prior1 <- c(
 
 Setting a model formula in BRMS allows the use of multilevel additive models, where there is a hierarchical structure in the data.
 
-The bf() function allows the specification of a formula. The parameter can be defined by population effects, where the parameter effect is fixed, or group level effects where the parameter varies across a variable such as age. The family argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see[ https://paulbuerkner.com/brms/reference/brmsformula.html](https://paulbuerkner.com/brms/reference/brmsformula.html)
+The bf() function allows the specification of a formula. The parameter can be defined by population effects, where the parameter effect is fixed, or group level effects where the parameter varies across a variable such as age. The family argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see<https://paulbuerkner.com/brms/reference/brmsformula.html>
 
 The model we used is based off our psychometric function used to generate the data mentioned previously. The only explicitly coded difference in our simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allowed $\eta$ and $\log(\sigma)$ to vary by age group. Moreover, explicitly included a non-linear function in the formula so we don't need a link function.
 
@@ -261,7 +261,7 @@ model_formula <- bf(
 
 # Fitting Model to Simulated Data
 
-Fitting the model will give you an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see[ https://paulbuerkner.com/brms/reference/brm.html](https://paulbuerkner.com/brms/reference/brm.html)
+Fitting the model will give you an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see<https://paulbuerkner.com/brms/reference/brm.html>
 
 ```{r}
 #| echo: false
@@ -291,7 +291,7 @@ Another key area to look into is the BRMS syntax and fitting for nested variable
 
 # References
 
-Holcombe, Alex O, and Wei-ying Chen. 2013. “Splitting Attention Reduces Temporal Resolution from 7 Hz for Tracking One Object to <\<3 Hz When Tracking Three.” *Journal of Vision* 13 (1): 1–19. <https://doi.org/10.1167/13.1.12>.
+Holcombe, Alex O, and Wei-ying Chen. 2013. “Splitting Attention Reduces Temporal Resolution from 7 Hz for Tracking One Object to \<\<3 Hz When Tracking Three.” *Journal of Vision* 13 (1): 1–19. <https://doi.org/10.1167/13.1.12>.
 
 Holcombe, A O, and Chen, W-Y. 2020. “The Speed Limit on Attentional Tracking.”
 
