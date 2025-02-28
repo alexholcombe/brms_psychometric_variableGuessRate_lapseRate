@@ -3,7 +3,7 @@ title: "DenisonBlog"
 format: html
 ---
 
-# Bayesian Analysis for Multiple Object Tracking using BRMS
+# Bayesian Analysis for Multiple Object Tracking using brms
 
 ## Load in required packages
 
@@ -12,23 +12,27 @@ library(tidyverse)
 library(brms)
 ```
 
+ALEX: AT END OF POST, EXPLAIN WHY DIDN'T USE LINK FUNCTION "Because the psychometric function doesn't map onto a canonical link function, we use the non-linear estimation capability of brms rather than linear regression with a link function."
+
 # Introduction
 
-As undergraduate science students we (Vince and Rachel) were given the opportunity to apply for a six week summer research project under the supervision of Professor Alex Holcombe. In 2024, the Holcombe lab did a replication and extension experiment based on Rodaia and Faubert's 2017 study on the effect of aging on temporal resolution in attentional tracking. We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe's replication experiment and Rodaia and Faubert's (2017) experiment using Bayesian Analysis. After learning how Baysian analysis works, we conducted a model recovery using the BRMS package in R studio to determine if our model could accurately captured key patterns and estimate important parameters of fake data that simulated the experimental conditions.
+As undergraduate science students we (Vince and Rachel) were given the opportunity to apply for a six week summer research project under the supervision of Professor Alex Holcombe. In 2024, the Holcombe lab did a replication and extension experiment based on Rodaia and Faubert's 2017 study on the effect of aging on temporal resolution in attentional tracking.
+
+We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe's replication experiment and Roudaia and Faubert's (2017) experiment using Bayesian analysis. After learning how Baysian analysis works, we conducted a model recovery exercise using the brms package in RStudio to determine if our model could accurately capture key patterns and estimate important parameters of fake data that simulated the experimental conditions.
 
 # The Experiment
 
-Participants in both experiments were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Rodaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring. The animation gives a small taste of the task but only has 2 concentric rings with 3 objects per ring with a gradually increasing speed.
+Participants in both experiments were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Roudaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring. The animation gives a small taste of the task but only has 2 concentric rings with 3 objects per ring with a gradually increasing speed.
 
 \*note need to check that the figure actually animates in blog, not just image, does it need a reference?
 
 ![](images/clipboard-2097963839.png){width="443"}
 
-Figure 1: Fixate on the central white dot and try to track the two targets which initially flash white as the speed increases.
+Figure 1: Fixate on the central white dot and try to track the two targets which initially flash white as the speed increases, as a quick assessment of the fastest speed at which you can track the initially-white targets.
 
 # Psychometric Function
 
-The fake data is generated based on our psychometric function. Using Schütt et al. (2016) we obtained the function
+The fake data is generated based on our psychometric function. Inspired by Schütt et al. (2016) we chose the function
 
 $$
 P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg) 
@@ -36,35 +40,35 @@ $$
 
 **Where**
 
--   $C$ is the chance rate of selecting the correct target (i.e. $\frac{1}{\text{# objects}}$) and represents a lower boundary of the function.
+-   $C$ is the chance rate of selecting the correct target (i.e. *1 / objects*) and represents a lower boundary of the function.
 
--   $L$ is the lapse rate parameter (i.e. the rate at which participants fail due to lapses in attention) and is included in the calculation of the upper boundary of the function.
+-   $L$ is the lapse rate parameter (i.e. the rate at which participants make a response not related to the answer, e.g. because of a lapse in attention) and is included in the calculation of the upper boundary of the function.
 
--   $X$ is the speed in which objects move in a trial (RPS)
+-   $X$ is the speed in which objects move in a trial (revolutions per second)
 
 -   $\eta$ is the location parameter, representative of the $X$ in which $P(\text{Correct})$ is halfway between the upper boundary $(1-L(1-C))$ and lower boundary $C$.
 
--   $\sigma$ represents the scale parameter, representative of the shape/steepness about $\eta$. (We later use $\log(\sigma)$ for numerical stability in the brms model.)
+-   $\sigma$ represents the scale parameter, representative of the shape/steepness of the function. (We later use $\log(\sigma)$ for numerical stability in the brms model.)
 
 **Note:**
 
--   We take the negative of $(X-\eta)$ in $\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)$ is taken in order to reflect the function (as speed increases, $P(\text{Correct})$ decreases)
+-   We take the negative of $(X-\eta)$ in $\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)$ in order to reflect the decreasing nature of the function (as speed increases, $P(\text{Correct})$ decreases)
 
 -   The support of the function itself is $(-\infty,\infty)$ but speed is always positive. The model is not technically accurate but still useful with the right parameters.
 
 ## Example of the function
 
-Here we have an example plot of our psychometric function. For illustrative purposes only, the parameters are:
+Below we have an example plot of our psychometric function. For illustrative purposes only, the parameters are:
 
--   $C=1/4$
+-   $C=1/4$ , which is true when there are 4 objects in the rings
 
--   $L = 0.1$
+-   $L = 0.1$ , participants make a random error in 10% of trials
 
--   $\eta = 0.9$
+-   $\eta = 0.9$ At 0.9 rps, their performance falls halfway to chance
 
--   $\sigma = 0.2$
+-   $\sigma = 0.2$ ; reasonable steepness for these psychometric functions based on past papers
 
-```{r}
+```{r }
 example <- dplyr::tibble(
     speed = seq(0,2.5, length.out = 500),
     C = 0.25,
@@ -86,14 +90,14 @@ ggplot(example) +
   lims(x = c(0,2.5), y = c(0,1)) +
   scale_colour_manual(values = c("Upper Bound" = "blue", "Lower Bound" = "red", "eta" = "yellow", "Probability Correct" = "black")) +
   labs(colour = "Legend",
-       x = "Speed (RPS)",
+       x = "Speed (revolutions per second)",
        y = "P(Correct)",
        title = "Example of Psychometric Function")
 ```
 
 # Creating Simulated Data
 
-In order to build and test our model in BRMS, we must first create a simulated data set that is similar to our actual experiment data but has arbitrary values for unknown parameters. This allows us to confirm the BRMS model is working and estimating parameters correctly before applying it to our real experimental data. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of age groups (older vs younger).
+In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data with arbitrary parameter values. This allows us to confirm the brms model is working and successfully recovers the parameters before applying it to our real experimental data. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
 ```{r}
 #| echo: false
@@ -159,15 +163,13 @@ simdata <- simdata %>%
 
 # Selecting Priors
 
-A prior distribution in Bayesian analysis will assign a probability to each possible value of a parameter. By specifying priors, BRMS takes into account not only the inputted data but also what is already known about the likelihood of certain parameter values to produce a more accurate estimation.
+A prior distribution in Bayesian analysis will assign a probability to each possible value of a parameter. By specifying priors, brms takes into account not only the inputted data but also what is already known about the likelihood of certain parameter values to produce a more accurate estimation.
 
 ## Prior on Lapse $(L)$
 
--   Since lapse represents a rate, it is bounded between 0 and 1. We know through previous literature (citation) that lapse is often between 0.03 and 0.04.
+Since lapse represents a rate, it is bounded between 0 and 1. We know from previous literature that a reasonable value of lapse is between 0.03 and 0.04.
 
--   how did we know lapse should have mode of 0.03-0.04?
-
--   ...as the tested population was probably fairly motivated, high lapse valuables were unlikely but not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.
+As the tested population was reasonably well-motivated, high lapse valuables were unlikely but not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.
 
 ### Plot beta(2, 33.33)
 
@@ -189,11 +191,11 @@ ggplot(prior_lapse) + aes(x = x, y = y) +
 
 ## Prior on Location $(\eta)$
 
-We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5 The lower bound was set at 0 as you cannot have negative speed . Holcombe and Chen (2013) found that the average participant would have a speed threshold of less than 2 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) as found that tracking of a single object on a mechanical display which is not confounded by a displays refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.
+We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5. The lower bound was set at 0 as you cannot have negative speed . Holcombe and Chen (2013) found that even the best participant would have a speed threshold of less than 2.5 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) found that tracking of a single object on a mechanical display which is not confounded by a display's refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.
 
 ### Plot uniform(0, 2.5)
 
-```{r}
+```{r echo=F}
 prior_location <- dplyr::tibble(
     x = seq(-1, 10, length.out = 500),
     y = dunif(x, 0, 2.5)
@@ -211,14 +213,16 @@ ggplot(prior_location) + aes(x = x, y = y) +
 
 ## Prior on Sigma/Scale $(\sigma)$
 
-Values of sigma can get extremely small and therefore tiny changes in the value of sigma can have significant effects, makeing it hard for BRMS to accurately estimate sigma. Therefore, our BRMS model and prior transforms sigma into logsigma. We concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants. Converting this, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
+Values of sigma can get extremely small and therefore tiny changes in the value of sigma can have significant effects, makeing it hard for brms to accurately estimate sigma. Therefore, our brms model is cast in terms of logsigma. We concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants based on looking at psychometric data from previous papers. Converting this with the log transform, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
 
-### Plot uniform(0, 2.5)
+IF HAVE TIME MAKE PLOTS OF THOSE SLOPES, -3 logsigma and 1.6 logsigma
 
-```{r}
+### Plot uniform(-3, 1.6)
+
+```{r echo=F}
 prior_scale <- dplyr::tibble(
     x = seq(-5, 5, length.out = 500),
-    y = dunif(x, -2, 1.6)
+    y = dunif(x, -3, 1.6)
 )
 
 ggplot(prior_scale) + aes(x = x, y = y) +
@@ -239,16 +243,15 @@ prior1 <- c(
 )
 ```
 
-# Setting up our Model in BRMS
+# Setting up our Model in brms
 
-Setting a model formula in BRMS allows the use of multilevel additive models, where there is a hierarchical structure in the data.
+Setting a model formula in brms allows the use of multilevel additive models, where there is a hierarchical structure in the data. But at this point we haven't made the model multi-level as we have been concentrating on the basics of brms.
 
-The bf() function allows the specification of a formula. The parameter can be defined by population effects, where the parameter effect is fixed, or group level effects where the parameter varies across a variable such as age. The family argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see<https://paulbuerkner.com/brms/reference/brmsformula.html>
+The bf() function of brms allows the specification of a formula. The parameter can be defined by population effects, where the parameter's effect is fixed, or group level effects where the parameter varies with a variable such as age. The family argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see<https://paulbuerkner.com/brms/reference/brmsformula.html>
 
-The model we used is based off our psychometric function used to generate the data mentioned previously. The only explicitly coded difference in our simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allowed $\eta$ and $\log(\sigma)$ to vary by age group. Moreover, explicitly included a non-linear function in the formula so we don't need a link function.
+The model we used is based off our psychometric function used to generate the data mentioned previously. The only explicitly-coded difference in our simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allowed $\eta$ and $\log(\sigma)$ to vary by age group in the model. Because the psychometric function doesn't map onto a canonical link function, we use the non-linear estimation capability of brms rather than linear regression with a link function.
 
 ```{r}
-#| echo: false
 model_formula <- bf(
   correct ~ chance_rate + (1-chance_rate - lapse*(1-chance_rate))*Phi(-(speed-eta)/exp(logsigma)), 
   eta ~ age_group, 
@@ -261,10 +264,9 @@ model_formula <- bf(
 
 # Fitting Model to Simulated Data
 
-Fitting the model will give you an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see<https://paulbuerkner.com/brms/reference/brm.html>
+Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see<https://paulbuerkner.com/brms/reference/brm.html>
 
 ```{r}
-#| echo: false
 
 fit <- brm(
   model_formula,
@@ -281,13 +283,15 @@ fit <- brm(
 summary(fit)
 ```
 
-In the above output, Error Est for the intecepts is the average of each participants eta, lapse, logsigma. The eta_age \_groupyounger represents the average difference in eta for the younger age group. The above output has estimated the difference to be 0.38 which is close to the 0.41 difference in the simulated data. The estimate difference in logsigma is small, not far off the 0 difference in our data.
+In the above output, Error Est for the intercepts is the average of each participant's eta, lapse, logsigma. The eta_age \_groupyounger represents the average eta advantage for the younger age group. The above output has estimated the difference to be 0.38 which is close to the 0.41 difference that was used to generate the data. The estimated difference in logsigma is small, not far off the 0 difference used to generate the data.
+
+SUCCESS!
 
 # Model Improvements
 
 Although we have made significant progress over the course of 6 weeks, there is still work to be done and errors we are running into in our model recovery. In particular, when we alter the simulated data and model fit to include group-level effects for variables such as number of targets or objects per ring, the estimations are very inaccurate. We also have yet to test changes to group level values of sigma and are unsure whether the lapse rate may have a group effect for various conditions or population groups.
 
-Another key area to look into is the BRMS syntax and fitting for nested variables. BRMS allows nesting of variable using parameter\~ (1 \| nested group), but have not yet researched this or added it to our model.
+Another key area to look into is the brms syntax and fitting for nested variables to create a multilevel model. brms allows nesting of variables using parameter * (1 \| nested group) *, but have not yet researched this or added it to our model.
 
 # References
 
