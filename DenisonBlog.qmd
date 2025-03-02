@@ -24,7 +24,7 @@ We set out to compare the tracking ability of multiple objects between old and y
 
 Participants in both experiments were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Roudaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring. The animation gives a small taste of the task but only has 2 concentric rings with 3 objects per ring with a gradually increasing speed.
 
-\*note need to check that the figure actually animates in blog, not just image, does it need a reference?
+\*note need to check that the figure actually animates in blog, not just image
 
 ![](images/clipboard-2097963839.png){width="443"}
 
@@ -69,6 +69,7 @@ Below we have an example plot of our psychometric function. For illustrative pur
 -   $\sigma = 0.2$ ; reasonable steepness for these psychometric functions based on past papers
 
 ```{r }
+#| echo: false 
 example <- dplyr::tibble(
     speed = seq(0,2.5, length.out = 500),
     C = 0.25,
@@ -100,7 +101,7 @@ ggplot(example) +
 In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data with arbitrary parameter values. This allows us to confirm the brms model is working and successfully recovers the parameters before applying it to our real experimental data. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
 ```{r}
-#| echo: false
+#| echo: true 
 set.seed(999) #ensures reproducible response for testing
 
 #Set known values for parameters
@@ -174,6 +175,7 @@ As the tested population was reasonably well-motivated, high lapse valuables wer
 ### Plot beta(2, 33.33)
 
 ```{r}
+#| echo: false 
 prior_lapse <- dplyr::tibble(
     x = seq(0, 1, length.out = 500),
     y = dbeta(x, 2, 33.33)
@@ -195,7 +197,8 @@ We set a uniform prior for location with a lower bound of 0 and an upper bound o
 
 ### Plot uniform(0, 2.5)
 
-```{r echo=F}
+```{r}
+#| echo: false 
 prior_location <- dplyr::tibble(
     x = seq(-1, 10, length.out = 500),
     y = dunif(x, 0, 2.5)
@@ -215,11 +218,57 @@ ggplot(prior_location) + aes(x = x, y = y) +
 
 Values of sigma can get extremely small and therefore tiny changes in the value of sigma can have significant effects, makeing it hard for brms to accurately estimate sigma. Therefore, our brms model is cast in terms of logsigma. We concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants based on looking at psychometric data from previous papers. Converting this with the log transform, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
 
-IF HAVE TIME MAKE PLOTS OF THOSE SLOPES, -3 logsigma and 1.6 logsigma
+```{r}
+#| echo: false 
+lowerbound <- dplyr::tibble(
+    speed = seq(0,2.5, length.out = 500),
+    C = 0.25,
+    L = 0.1, # for il
+    eta = 0.9,
+    sigma = 0.05,
+    phi = pnorm(-speed, -eta, sigma), 
+    probability_correct = C + (1-C - L*(1-C))*phi,
+    upper_bound = 1 - L*(1-C)
+)
+
+upperbound <-dplyr::tibble(
+    speed = seq(0,2.5, length.out = 500),
+    C = 0.25,
+    L = 0.1, # for il
+    eta = 0.9,
+    sigma = 5,
+    phi = pnorm(-speed, -eta, sigma), 
+    probability_correct = C + (1-C - L*(1-C))*phi,
+    upper_bound = 1 - L*(1-C)
+)
+
+ggplot(lowerbound) + 
+  geom_line(aes(x = speed, y = probability_correct)) +
+
+  theme_light() +
+  lims(x = c(0,2.5), y = c(0,1)) +
+  labs(colour = "Legend",
+       x = "Speed (revolutions per second)",
+       y = "P(Correct)",
+       title = "Logsigma=-3")
+
+ggplot(upperbound) + 
+  geom_line(aes(x = speed, y = probability_correct)) +
+
+  theme_light() +
+  lims(x = c(0,2.5), y = c(0,1)) +
+  labs(colour = "Legend",
+       x = "Speed (revolutions per second)",
+       y = "P(Correct)",
+       title = "Logsigma=1.6")
+```
+
+Figure 2: Example plots of psychometric function with a logsigma of either -3 or 1.6. The chance rate, eta and lapse are all consistent with the previous example.
 
 ### Plot uniform(-3, 1.6)
 
-```{r echo=F}
+```{r}
+#| echo: false 
 prior_scale <- dplyr::tibble(
     x = seq(-5, 5, length.out = 500),
     y = dunif(x, -3, 1.6)
@@ -264,7 +313,7 @@ model_formula <- bf(
 
 # Fitting Model to Simulated Data
 
-Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see<https://paulbuerkner.com/brms/reference/brm.html>
+Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see <https://paulbuerkner.com/brms/reference/brm.html>
 
 ```{r}
 
@@ -272,7 +321,7 @@ fit <- brm(
   model_formula,
   data = simdata,
   prior = prior1,
-  silent = 0, #print more detailed messages (helps debug)
+  silent = 0, #prints more detailed messages (helps debug)
   init = 0, #starting at
   chains = 4, # the more chains, the greater convergence in the model
   cores = 4, #how many parallel processes, speeds up model 
@@ -285,13 +334,13 @@ summary(fit)
 
 In the above output, Error Est for the intercepts is the average of each participant's eta, lapse, logsigma. The eta_age \_groupyounger represents the average eta advantage for the younger age group. The above output has estimated the difference to be 0.38 which is close to the 0.41 difference that was used to generate the data. The estimated difference in logsigma is small, not far off the 0 difference used to generate the data.
 
-SUCCESS!
+We the fitted the model was aligned with the simulated data, meaning the model recovery was a success!!
 
 # Model Improvements
 
 Although we have made significant progress over the course of 6 weeks, there is still work to be done and errors we are running into in our model recovery. In particular, when we alter the simulated data and model fit to include group-level effects for variables such as number of targets or objects per ring, the estimations are very inaccurate. We also have yet to test changes to group level values of sigma and are unsure whether the lapse rate may have a group effect for various conditions or population groups.
 
-Another key area to look into is the brms syntax and fitting for nested variables to create a multilevel model. brms allows nesting of variables using parameter * (1 \| nested group) *, but have not yet researched this or added it to our model.
+Another key area to look into is the brms syntax and fitting for nested variables to create a multilevel model. brms allows nesting of variables using parameter \* (1 \| nested group) \*, but have not yet researched this or added it to our model.
 
 # References
 
@@ -305,7 +354,4 @@ Schütt, Heiko H., Stefan Harmeling, Jakob H. Macke, and Felix A. Wichmann. 2016
 
 # Acknowledgements
 
-We would like to extend a special thanks to our supervisor Professor Alex Holcombe for....
-
--   Mention use of Microsoft Copilot?
--   do we need to thank anyone else? MAYBE JUST THE VOLUNTEERS WHO SHOWED YOU THE EXPERIMENT, STELLA KATSOULIS. WAS SARAH CRONJE ALSO THERE?
+We would like to extend a special thanks to our supervisor Professor Alex Holcombe for his guidance and support on the project. Additionally, we would like to extend thanks to Stella Katsoulis and Sarah Cronje who ran through the experiment with us, allowing us to have a fundamental understanding of what the data was actually representing. We acknowledge the use of Microsoft Copilot in assisting debugging our code and figuring out various RStudio functions and syntax.
