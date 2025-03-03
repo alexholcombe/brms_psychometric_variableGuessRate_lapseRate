@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>DenisonBlog</title>
+<title>Bayesian analysis of psychophysical data using brms</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -33,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -68,7 +68,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="DenisonBlog_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="DenisonBlog_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -108,7 +108,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">DenisonBlog</h1>
+<h1 class="title">Bayesian analysis of psychophysical data using brms</h1>
 </div>
 
 
@@ -125,75 +125,47 @@ window.Quarto = {
 </header>
 
 
-<section id="bayesian-analysis-for-multiple-object-tracking-using-brms" class="level1">
-<h1>Bayesian Analysis for Multiple Object Tracking using brms</h1>
-<section id="load-in-required-packages" class="level2">
-<h2 class="anchored" data-anchor-id="load-in-required-packages">Load in required packages</h2>
+<p>As undergraduate science students, we were given the opportunity to apply for a six week summer research project under the supervision of Professor Alex Holcombe. Our project was to learn to analyse psychophysical data using R with the brms package.</p>
+<p>After learning how Bayesian analysis works, we conducted a model recovery exercise using the brms package to determine if our model could accurately capture key patterns and estimate important parameters of fake data that simulated the experimental conditions.</p>
+<p>To get started, we load the required packages.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.0.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Rcpp
-Loading 'brms' package (version 2.22.0). Useful instructions
-can be found by typing help('brms'). A more detailed introduction
-to the package is available through vignette('brms_overview').
-
-Attaching package: 'brms'
-
-The following object is masked from 'package:stats':
-
-    ar</code></pre>
-</div>
-</div>
-<p>ALEX: AT END OF POST, EXPLAIN WHY DIDN’T USE LINK FUNCTION “Because the psychometric function doesn’t map onto a canonical link function, we use the non-linear estimation capability of brms rather than linear regression with a link function.”</p>
-</section>
-</section>
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
-<p>As undergraduate science students we (Vince and Rachel) were given the opportunity to apply for a six week summer research project under the supervision of Professor Alex Holcombe. In 2024, the Holcombe lab did a replication and extension experiment based on Rodaia and Faubert’s 2017 study on the effect of aging on temporal resolution in attentional tracking.</p>
-<p>We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe’s replication experiment and Roudaia and Faubert’s (2017) experiment using Bayesian analysis. After learning how Baysian analysis works, we conducted a model recovery exercise using the brms package in RStudio to determine if our model could accurately capture key patterns and estimate important parameters of fake data that simulated the experimental conditions.</p>
+<section id="the-data" class="level1">
+<h1>The data</h1>
+<p>In 2024, the Holcombe lab did a replication and extension experiment based on Rodaia and Faubert’s 2017 study on the effect of aging on temporal resolution in attentional tracking.</p>
+<p>We set out to compare the tracking ability of multiple objects between old and young people by analysing data from Holcombe’s replication experiment and Roudaia and Faubert’s (2017) experiment using Bayesian analysis.</p>
 </section>
 <section id="the-experiment" class="level1">
 <h1>The Experiment</h1>
-<p>Participants in both experiments were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Roudaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring. The animation gives a small taste of the task but only has 2 concentric rings with 3 objects per ring with a gradually increasing speed.</p>
-<p>*note need to check that the figure actually animates in blog, not just image</p>
-<p><img src="images/clipboard-2097963839.png" class="img-fluid" width="443"></p>
-<p>Figure 1: Fixate on the central white dot and try to track the two targets which initially flash white as the speed increases, as a quick assessment of the fastest speed at which you can track the initially-white targets.</p>
+<p>Participants in both labs were given a stimulus that involved tracking two or three targets as they moved within rings. This stimulus had 3 concentric rings which each included 4, 5, 8 or 10 identical objects. Roudaia and Faubert (2017) tested participants with 5 and 10 objects while the Holcombe lab tested 4 and 8 objects to account for crowding zones. Each ring would rotate at a consistent speed for a set period of time and have a maximum of one target. Following the rotation, participants were asked to select the target on a prompted ring.</p>
+<p>The animation below provides a small taste of the task, with 9 objects per ring. At the beginning of the movie, the two targets to track are white before becoming identical to the other objects. Although this did not occur in the experiment, the animation gradually increases in speed so that you can get a sense of the speed at which you can no longer track.</p>
+<p><img src="images/2targets9objectsPerArray.gif" class="img-fluid"> Figure 1: Fixate on the central white dot and try to track the two targets which initially flash white. The speed increases, providing a quick assessment of the fastest speed at which you can track the initially-white targets.</p>
 </section>
-<section id="psychometric-function" class="level1">
-<h1>Psychometric Function</h1>
-<p>The fake data is generated based on our psychometric function. Inspired by Schütt et al.&nbsp;(2016) we chose the function</p>
+<section id="the-psychometric-function" class="level1">
+<h1>The psychometric function</h1>
+<p>We generated fake data with the same structure as the real data, to practice analysing with brms.</p>
+<p>For the psychometric function that generates the data, inspired by Schütt et al.&nbsp;(2016) as well as previously-collected data with this paradigm, we chose the function</p>
 <p><span class="math display">\[
 P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 \]</span></p>
-<p><strong>Where</strong></p>
+<p>wherein:</p>
 <ul>
-<li><p><span class="math inline">\(C\)</span> is the chance rate of selecting the correct target (i.e.&nbsp;<em>1 / objects</em>) and represents a lower boundary of the function.</p></li>
-<li><p><span class="math inline">\(L\)</span> is the lapse rate parameter (i.e.&nbsp;the rate at which participants make a response not related to the answer, e.g.&nbsp;because of a lapse in attention) and is included in the calculation of the upper boundary of the function.</p></li>
-<li><p><span class="math inline">\(X\)</span> is the speed in which objects move in a trial (revolutions per second)</p></li>
-<li><p><span class="math inline">\(\eta\)</span> is the location parameter, representative of the <span class="math inline">\(X\)</span> in which <span class="math inline">\(P(\text{Correct})\)</span> is halfway between the upper boundary <span class="math inline">\((1-L(1-C))\)</span> and lower boundary <span class="math inline">\(C\)</span>.</p></li>
+<li><p><span class="math inline">\(C\)</span> is the chance rate of selecting the correct target (i.e.&nbsp;<em>1 / objects</em>) and represents a lower boundary (floor or minimum percent correct)</p></li>
+<li><p><span class="math inline">\(L\)</span> is the lapse rate parameter (i.e.&nbsp;the rate at which participants make a response not related to the answer, e.g.&nbsp;because of a lapse in attention), and affects the upper boundary (ceiling or maximum percent correct)</p></li>
+<li><p><span class="math inline">\(X\)</span> is the speed in which objects move in a trial (in revolutions per second)</p></li>
+<li><p><span class="math inline">\(\eta\)</span> is the location parameter, in particular is the <span class="math inline">\(X\)</span> in which <span class="math inline">\(P(\text{Correct})\)</span> is halfway between the upper boundary <span class="math inline">\((1-L(1-C))\)</span> and lower boundary <span class="math inline">\(C\)</span>.</p></li>
 <li><p><span class="math inline">\(\sigma\)</span> represents the scale parameter, representative of the shape/steepness of the function. (We later use <span class="math inline">\(\log(\sigma)\)</span> for numerical stability in the brms model.)</p></li>
 </ul>
 <p><strong>Note:</strong></p>
 <ul>
 <li><p>We take the negative of <span class="math inline">\((X-\eta)\)</span> in <span class="math inline">\(\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)\)</span> in order to reflect the decreasing nature of the function (as speed increases, <span class="math inline">\(P(\text{Correct})\)</span> decreases)</p></li>
-<li><p>The support of the function itself is <span class="math inline">\((-\infty,\infty)\)</span> but speed is always positive. The model is not technically accurate but still useful with the right parameters.</p></li>
+<li><p>The support of the function is <span class="math inline">\((-\infty,\infty)\)</span> but speed is always positive. Thus the model is not technically accurate but is still useful with the right parameters.</p></li>
 </ul>
 <section id="example-of-the-function" class="level2">
 <h2 class="anchored" data-anchor-id="example-of-the-function">Example of the function</h2>
-<p>Below we have an example plot of our psychometric function. For illustrative purposes only, the parameters are:</p>
+<p>Below is an example plot of our psychometric function. For illustrative purposes only, the parameters are:</p>
 <ul>
 <li><p><span class="math inline">\(C=1/4\)</span> , which is true when there are 4 objects in the rings</p></li>
 <li><p><span class="math inline">\(L = 0.1\)</span> , participants make a random error in 10% of trials</p></li>
@@ -201,6 +173,30 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 <li><p><span class="math inline">\(\sigma = 0.2\)</span> ; reasonable steepness for these psychometric functions based on past papers</p></li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>example <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">speed =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="fl">2.5</span>, <span class="at">length.out =</span> <span class="dv">500</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">C =</span> <span class="fl">0.25</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">L =</span> <span class="fl">0.1</span>, <span class="co"># for il</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">eta =</span> <span class="fl">0.9</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma =</span> <span class="fl">0.2</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">phi =</span> <span class="fu">pnorm</span>(<span class="sc">-</span>speed, <span class="sc">-</span>eta, sigma), </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">probability_correct =</span> C <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>C <span class="sc">-</span> L<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>C))<span class="sc">*</span>phi,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper_bound =</span> <span class="dv">1</span> <span class="sc">-</span> L<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>C)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(example) <span class="sc">+</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept =</span> upper_bound, <span class="at">colour =</span> <span class="st">"Upper Bound"</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept =</span> <span class="fl">0.25</span> , <span class="at">colour =</span> <span class="st">"Lower Bound"</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fl">0.9</span>, <span class="at">colour =</span> <span class="st">"eta"</span>)) <span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> speed, <span class="at">y =</span> probability_correct,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">colour =</span> <span class="st">"Probability Correct"</span>)) <span class="sc">+</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lims</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="fl">2.5</span>), <span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Upper Bound"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"Lower Bound"</span> <span class="ot">=</span> <span class="st">"red"</span>, <span class="st">"eta"</span> <span class="ot">=</span> <span class="st">"yellow"</span>, <span class="st">"Probability Correct"</span> <span class="ot">=</span> <span class="st">"black"</span>)) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">colour =</span> <span class="st">"Legend"</span>,</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Speed (revolutions per second)"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"P(Correct)"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Example of Psychometric Function"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -213,64 +209,64 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 </section>
 <section id="creating-simulated-data" class="level1">
 <h1>Creating Simulated Data</h1>
-<p>In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data with arbitrary parameter values. This allows us to confirm the brms model is working and successfully recovers the parameters before applying it to our real experimental data. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the <span class="math inline">\(\eta\)</span> (location) of the two age groups (older vs younger).</p>
+<p>In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the <span class="math inline">\(\eta\)</span> (location) of the two age groups (older vs younger).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">999</span>) <span class="co">#ensures reproducible response for testing</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Set known values for parameters</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>lapse <span class="ot">&lt;-</span> <span class="fl">0.03</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>location_parameter_younger <span class="ot">&lt;-</span><span class="fl">0.91</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>location_parameter_older <span class="ot">&lt;-</span><span class="fl">0.5</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Generate data frame for simulated data</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">expand_grid</span>(</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">subj =</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">50</span>), <span class="co">#number of subjects</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">rep =</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>), <span class="co">#replicants of each trial combination</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">num_target =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>), <span class="co">#number of targets particpant tracks</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">speed =</span> <span class="fu">seq</span>(.<span class="dv">02</span>,<span class="fl">1.8</span>, <span class="at">length.out =</span> <span class="dv">12</span>) <span class="co"># trials at 12 different speeds between .02 and 1.8</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#note: Holcombe lab's experiment had both a set number of trials at certain speeds and a speed staircase. Rodaia and Faubert (2017) had a set number of trails at certain intervals based on benchmark speeds and then a Bayesian adaptive procedure for the rest of the trials. For simplicity, the simulated data will have an even number of trials at each speed.</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#Introducing demographic data and seperating the two labs</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(subj) <span class="sc">%&gt;%</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">gender =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"M"</span>,<span class="st">"F"</span>), <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"younger"</span>, <span class="st">"older"</span>), <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">lab =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"rf"</span>, <span class="st">"holcombe"</span>), <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) </span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Splitting number of objects per ring based on lab</span></span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">obj_per_ring =</span> <span class="fu">case_when</span>(</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>      lab <span class="sc">==</span> <span class="st">"rf"</span> <span class="sc">~</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">10</span>), <span class="fu">n</span>(), <span class="at">replace=</span><span class="cn">TRUE</span>), <span class="co">#Rodaia and Faubert (2017) tested only 5 and 10 objects per ring</span></span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>      lab <span class="sc">==</span> <span class="st">"holcombe"</span> <span class="sc">~</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">8</span>), <span class="fu">n</span>(), <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="co">#Holcombes lab tested only 4 and 8 objects per ring</span></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="co">#Add column for the probability of each trial being correct based on our psychometric function</span></span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="co">#then add column to generate if the subject got the trial correct</span></span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">chance_rate =</span> <span class="dv">1</span><span class="sc">/</span>obj_per_ring,</span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">phi =</span> <span class="fu">ifelse</span>(age_group <span class="sc">==</span> <span class="st">"younger"</span>,</span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">pnorm</span>(<span class="sc">-</span>speed, <span class="sc">-</span>location_parameter_younger, sigma),</span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">pnorm</span>(<span class="sc">-</span>speed, <span class="sc">-</span>location_parameter_older, sigma)),</span>
-<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">probability_correct =</span> chance_rate <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate <span class="sc">-</span> lapse<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>chance_rate))<span class="sc">*</span>phi, <span class="co">#Phi is the inverse probit (normal CDF)</span></span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">correct =</span> <span class="fu">rbinom</span>(<span class="at">n=</span><span class="fu">length</span>(probability_correct), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probability_correct)</span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="co">#Convert these variables from vectors to factors</span></span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">gender =</span> <span class="fu">as_factor</span>(gender),</span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group =</span> <span class="fu">as_factor</span>(age_group),</span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">lab =</span> <span class="fu">as_factor</span>(lab),</span>
-<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">gender =</span> <span class="fu">as_factor</span>(gender)</span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">999</span>) <span class="co">#ensures reproducible response for testing</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Set known values for parameters</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>lapse <span class="ot">&lt;-</span> <span class="fl">0.03</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>location_parameter_younger <span class="ot">&lt;-</span><span class="fl">0.91</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>location_parameter_older <span class="ot">&lt;-</span><span class="fl">0.5</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Generate data frame for simulated data</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> tidyr<span class="sc">::</span><span class="fu">expand_grid</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">subj =</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">50</span>), <span class="co">#number of subjects</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">rep =</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">5</span>), <span class="co">#replicants of each trial combination</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">num_target =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>), <span class="co">#number of targets particpant tracks</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">speed =</span> <span class="fu">seq</span>(.<span class="dv">02</span>,<span class="fl">1.8</span>, <span class="at">length.out =</span> <span class="dv">12</span>) <span class="co"># trials at 12 different speeds between .02 and 1.8</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#note: Holcombe lab's experiment had both a set number of trials at certain speeds and a speed staircase. Rodaia and Faubert (2017) had a set number of trails at certain intervals based on benchmark speeds and then a Bayesian adaptive procedure for the rest of the trials. For simplicity, the simulated data will have an even number of trials at each speed.</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#Introducing demographic data and seperating the two labs</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(subj) <span class="sc">%&gt;%</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">gender =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"M"</span>,<span class="st">"F"</span>), <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"younger"</span>, <span class="st">"older"</span>), <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">lab =</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="st">"rf"</span>, <span class="st">"holcombe"</span>), <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Splitting number of objects per ring based on lab</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">obj_per_ring =</span> <span class="fu">case_when</span>(</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>      lab <span class="sc">==</span> <span class="st">"rf"</span> <span class="sc">~</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">5</span>,<span class="dv">10</span>), <span class="fu">n</span>(), <span class="at">replace=</span><span class="cn">TRUE</span>), <span class="co">#Rodaia and Faubert (2017) tested only 5 and 10 objects per ring</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>      lab <span class="sc">==</span> <span class="st">"holcombe"</span> <span class="sc">~</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">8</span>), <span class="fu">n</span>(), <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="co">#Holcombes lab tested only 4 and 8 objects per ring</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#Add column for the probability of each trial being correct based on our psychometric function</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#then add column to generate if the subject got the trial correct</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">chance_rate =</span> <span class="dv">1</span><span class="sc">/</span>obj_per_ring,</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">phi =</span> <span class="fu">ifelse</span>(age_group <span class="sc">==</span> <span class="st">"younger"</span>,</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">pnorm</span>(<span class="sc">-</span>speed, <span class="sc">-</span>location_parameter_younger, sigma),</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">pnorm</span>(<span class="sc">-</span>speed, <span class="sc">-</span>location_parameter_older, sigma)),</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">probability_correct =</span> chance_rate <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate <span class="sc">-</span> lapse<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>chance_rate))<span class="sc">*</span>phi, <span class="co">#Phi is the inverse probit (normal CDF)</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">correct =</span> <span class="fu">rbinom</span>(<span class="at">n=</span><span class="fu">length</span>(probability_correct), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> probability_correct)</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#Convert these variables from vectors to factors</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>simdata <span class="ot">&lt;-</span> simdata <span class="sc">%&gt;%</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">gender =</span> <span class="fu">as_factor</span>(gender),</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">age_group =</span> <span class="fu">as_factor</span>(age_group),</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">lab =</span> <span class="fu">as_factor</span>(lab),</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">gender =</span> <span class="fu">as_factor</span>(gender)</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>  ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="selecting-priors" class="level1">
@@ -278,11 +274,22 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 <p>A prior distribution in Bayesian analysis will assign a probability to each possible value of a parameter. By specifying priors, brms takes into account not only the inputted data but also what is already known about the likelihood of certain parameter values to produce a more accurate estimation.</p>
 <section id="prior-on-lapse-l" class="level2">
 <h2 class="anchored" data-anchor-id="prior-on-lapse-l">Prior on Lapse <span class="math inline">\((L)\)</span></h2>
-<p>Since lapse represents a rate, it is bounded between 0 and 1. We know from previous literature that a reasonable value of lapse is between 0.03 and 0.04.</p>
-<p>As the tested population was reasonably well-motivated, high lapse valuables were unlikely but not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.</p>
-<section id="plot-beta2-33.33" class="level3">
-<h3 class="anchored" data-anchor-id="plot-beta2-33.33">Plot beta(2, 33.33)</h3>
+<p>Since lapse is a rate, it is bounded between 0 and 1. We know from previous literature that a reasonable value of lapse is between 0.03 and 0.04.</p>
+<p>As the tested population was reasonably well-motivated, high lapse valuables were unlikely, although not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>prior_lapse <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">500</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">dbeta</span>(x, <span class="dv">2</span>, <span class="fl">33.33</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(prior_lapse) <span class="sc">+</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_area</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">""</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">""</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -292,12 +299,9 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 </div>
 </div>
 </section>
-</section>
 <section id="prior-on-location-eta" class="level2">
 <h2 class="anchored" data-anchor-id="prior-on-location-eta">Prior on Location <span class="math inline">\((\eta)\)</span></h2>
 <p>We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5. The lower bound was set at 0 as you cannot have negative speed&nbsp;. Holcombe and Chen (2013) found that even the best participant would have a speed threshold of less than 2.5 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) found that tracking of a single object on a mechanical display which is not confounded by a display’s refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.</p>
-<section id="plot-uniform0-2.5" class="level3">
-<h3 class="anchored" data-anchor-id="plot-uniform0-2.5">Plot uniform(0, 2.5)</h3>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -307,7 +311,6 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 </div>
 </div>
 </div>
-</section>
 </section>
 <section id="prior-on-sigmascale-sigma" class="level2">
 <h2 class="anchored" data-anchor-id="prior-on-sigmascale-sigma">Prior on Sigma/Scale <span class="math inline">\((\sigma)\)</span></h2>
@@ -329,8 +332,6 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 </div>
 </div>
 <p>Figure 2: Example plots of psychometric function with a logsigma of either -3 or 1.6. The chance rate, eta and lapse are all consistent with the previous example.</p>
-<section id="plot-uniform-3-1.6" class="level3">
-<h3 class="anchored" data-anchor-id="plot-uniform-3-1.6">Plot uniform(-3, 1.6)</h3>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -341,60 +342,90 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>prior1 <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_prior</span>(<span class="st">"beta(2,33.33)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"lapse"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="dv">1</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_prior</span>(<span class="st">"uniform(0, 2.5)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"eta"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="fl">2.5</span>),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_prior</span>(<span class="st">"uniform(-3, 1.6)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"logsigma"</span>, <span class="at">lb =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">ub =</span> <span class="fl">1.6</span>) </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>prior1 <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_prior</span>(<span class="st">"beta(2,33.33)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"lapse"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="dv">1</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_prior</span>(<span class="st">"uniform(0, 2.5)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"eta"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="fl">2.5</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_prior</span>(<span class="st">"uniform(-3, 1.6)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"logsigma"</span>, <span class="at">lb =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">ub =</span> <span class="fl">1.6</span>) </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section>
 </section>
 </section>
 <section id="setting-up-our-model-in-brms" class="level1">
 <h1>Setting up our Model in brms</h1>
 <p>Setting a model formula in brms allows the use of multilevel additive models, where there is a hierarchical structure in the data. But at this point we haven’t made the model multi-level as we have been concentrating on the basics of brms.</p>
-<p>The bf() function of brms allows the specification of a formula. The parameter can be defined by population effects, where the parameter’s effect is fixed, or group level effects where the parameter varies with a variable such as age. The family argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see<a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="uri">https://paulbuerkner.com/brms/reference/brmsformula.html</a></p>
+<p>The bf() function of brms allows the specification of a formula. The parameter can be defined by population effects, where the parameter’s effect is fixed, or group level effects where the parameter varies with a variable such as age. The “family” argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see<a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="uri">https://paulbuerkner.com/brms/reference/brmsformula.html</a></p>
 <p>The model we used is based off our psychometric function used to generate the data mentioned previously. The only explicitly-coded difference in our simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allowed <span class="math inline">\(\eta\)</span> and <span class="math inline">\(\log(\sigma)\)</span> to vary by age group in the model. Because the psychometric function doesn’t map onto a canonical link function, we use the non-linear estimation capability of brms rather than linear regression with a link function.</p>
+<p><em>Alex’s note: Using the nonlinear option is also what allowed us to set a prior on the thresholds <span class="math inline">\(\eta\)</span>, because we could then parametrize the function in terms of the x-intercept, whereas with a link-function approach, we are stuck with the conventional parameterization of a line, which <a href="https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z">has a term for the y-intercept but not the x-intercept</a> </em></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model_formula <span class="ot">&lt;-</span> <span class="fu">bf</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  correct <span class="sc">~</span> chance_rate <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate <span class="sc">-</span> lapse<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>chance_rate))<span class="sc">*</span><span class="fu">Phi</span>(<span class="sc">-</span>(speed<span class="sc">-</span>eta)<span class="sc">/</span><span class="fu">exp</span>(logsigma)), </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  eta <span class="sc">~</span> age_group, </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  lapse <span class="sc">~</span> <span class="dv">1</span>, <span class="co">#constant/intercept only</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  logsigma <span class="sc">~</span> age_group,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">bernoulli</span>(<span class="at">link=</span><span class="st">"identity"</span>), <span class="co">#Otherwise the default link 'logit' would be applied</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">nl =</span> <span class="cn">TRUE</span> <span class="co">#non-linear model</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model_formula <span class="ot">&lt;-</span> <span class="fu">bf</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  correct <span class="sc">~</span> chance_rate <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate <span class="sc">-</span> lapse<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>chance_rate))<span class="sc">*</span><span class="fu">Phi</span>(<span class="sc">-</span>(speed<span class="sc">-</span>eta)<span class="sc">/</span><span class="fu">exp</span>(logsigma)), </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  eta <span class="sc">~</span> age_group, </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  lapse <span class="sc">~</span> <span class="dv">1</span>, <span class="co">#constant/intercept only</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  logsigma <span class="sc">~</span> age_group,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">bernoulli</span>(<span class="at">link=</span><span class="st">"identity"</span>), <span class="co">#Otherwise the default link 'logit' would be applied</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">nl =</span> <span class="cn">TRUE</span> <span class="co">#non-linear model</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="fitting-model-to-simulated-data" class="level1">
 <h1>Fitting Model to Simulated Data</h1>
 <p>Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see <a href="https://paulbuerkner.com/brms/reference/brm.html" class="uri">https://paulbuerkner.com/brms/reference/brm.html</a></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  model_formula,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> simdata,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> prior1,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">silent =</span> <span class="dv">0</span>, <span class="co">#prints more detailed messages (helps debug)</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">init =</span> <span class="dv">0</span>, <span class="co">#starting at</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>, <span class="co"># the more chains, the greater convergence in the model</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> <span class="dv">4</span>, <span class="co">#how many parallel processes, speeds up model </span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>, <span class="co">#default number of iterations </span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">threads =</span> <span class="fu">threading</span>(<span class="dv">2</span>) <span class="co">#how many cores work per chain</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  model_formula,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> simdata,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> prior1,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">silent =</span> <span class="dv">0</span>, <span class="co">#prints more detailed messages (helps debug)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">init =</span> <span class="dv">0</span>, <span class="co">#starting at</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>, <span class="co"># the more chains, the greater convergence in the model</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> <span class="dv">4</span>, <span class="co">#how many parallel processes, speeds up model </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>, <span class="co">#default number of iterations </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">threads =</span> <span class="fu">threading</span>(<span class="dv">2</span>) <span class="co">#how many cores work per chain</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Compiling Stan program...</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Start sampling</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Family: bernoulli 
+  Links: mu = identity 
+Formula: correct ~ chance_rate + (1 - chance_rate - lapse * (1 - chance_rate)) * Phi(-(speed - eta)/exp(logsigma)) 
+         eta ~ age_group
+         lapse ~ 1
+         logsigma ~ age_group
+   Data: simdata (Number of observations: 6000) 
+  Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
+         total post-warmup draws = 4000
+
+Regression Coefficients:
+                          Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
+eta_Intercept                 0.52      0.01     0.49     0.54 1.00     1848
+eta_age_groupyounger          0.38      0.02     0.35     0.41 1.00     2074
+lapse_Intercept               0.03      0.01     0.02     0.04 1.00     3308
+logsigma_Intercept           -1.61      0.08    -1.76    -1.46 1.00     2458
+logsigma_age_groupyounger    -0.05      0.10    -0.24     0.15 1.00     2391
+                          Tail_ESS
+eta_Intercept                 2298
+eta_age_groupyounger          2092
+lapse_Intercept               2418
+logsigma_Intercept            2095
+logsigma_age_groupyounger     2508
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
 </div>
-<p>In the above output, Error Est for the intercepts is the average of each participant’s eta, lapse, logsigma. The eta_age _groupyounger represents the average eta advantage for the younger age group. The above output has estimated the difference to be 0.38 which is close to the 0.41 difference that was used to generate the data. The estimated difference in logsigma is small, not far off the 0 difference used to generate the data.</p>
-<p>We the fitted the model was aligned with the simulated data, meaning the model recovery was a success!!</p>
+</div>
+<p>The fit converged with no errors!! :grinning: (this doesn’t always happen, when for example we use more complicated models)</p>
+<p>In the above output, “Error Est” for the intercepts is the average of each participant’s estimated eta, lapse, logsigma. The eta_age _groupyounger represents the average eta advantage for the younger age group. The above output has estimated the difference to be 0.38 which is close to the 0.41 difference that was used to generate the data. The estimated difference in logsigma is small, not far off the 0 difference used to generate the data.</p>
+<p>The fitted model’s estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!</p>
 </section>
 <section id="model-improvements" class="level1">
 <h1>Model Improvements</h1>
-<p>Although we have made significant progress over the course of 6 weeks, there is still work to be done and errors we are running into in our model recovery. In particular, when we alter the simulated data and model fit to include group-level effects for variables such as number of targets or objects per ring, the estimations are very inaccurate. We also have yet to test changes to group level values of sigma and are unsure whether the lapse rate may have a group effect for various conditions or population groups.</p>
+<p>Although we have learned a lot and made significant progress over the course of 6 weeks, there is still work to be done and errors we are running into in our model recovery. In particular, when we alter the simulated data and model fit to include group-level effects for variables such as number of targets or objects per ring, the estimations are very inaccurate. We also have yet to test changes to group level values of sigma and are unsure whether the lapse rate may have a group effect for various conditions or population groups.</p>
 <p>Another key area to look into is the brms syntax and fitting for nested variables to create a multilevel model. brms allows nesting of variables using parameter * (1 | nested group) *, but have not yet researched this or added it to our model.</p>
 </section>
 <section id="references" class="level1">
@@ -407,6 +438,7 @@ P(\text{Correct}) =C+(1-C-L(1-C)) \times\Phi\bigg(\frac{-(X-\eta)}{\sigma}\bigg)
 <section id="acknowledgements" class="level1">
 <h1>Acknowledgements</h1>
 <p>We would like to extend a special thanks to our supervisor Professor Alex Holcombe for his guidance and support on the project. Additionally, we would like to extend thanks to Stella Katsoulis and Sarah Cronje who ran through the experiment with us, allowing us to have a fundamental understanding of what the data was actually representing. We acknowledge the use of Microsoft Copilot in assisting debugging our code and figuring out various RStudio functions and syntax.</p>
+<p>— Vince Tafea and Rachel K. Wong</p>
 </section>
 
 </main>
@@ -446,7 +478,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const onCopySuccess = function(e) {
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -478,47 +521,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
   });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
-    });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -553,11 +556,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
+      return note.innerHTML;
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
