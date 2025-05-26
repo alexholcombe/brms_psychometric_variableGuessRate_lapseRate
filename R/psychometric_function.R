@@ -28,9 +28,9 @@ phi<- function(speed,eta,sigma) {
 #That yields: c + (1 - c - lambda)p , but using that would prevent putting a prior on lapse
 #So we don't adopt that aspect below.
 
-psychometric_function<- function(c,l, speed,eta,sigma) {
-  #c is chance_rate
-  #l is lapse_rate
+psychometric_function<- function(chance_rate,lapse_rate, speed,eta,sigma) {
+  c <- chance_rate
+  l <- lapse_rate
   
   #range - amplitude of percent correct as constrained by lapse rate and chance rate
   #min = c
@@ -50,10 +50,11 @@ psychometric_function<- function(c,l, speed,eta,sigma) {
   return (ans)
 }
 
+#Self tests below (really ought to use usethis)
 make_example_plot <- TRUE
 if (make_example_plot) {
   
-  example <- dplyr::tibble(
+  example_psychometric <- dplyr::tibble(
     speed = seq(0,2.5, length.out = 500),
     c = 0.25,
     l = 0.1, 
@@ -63,17 +64,18 @@ if (make_example_plot) {
     p_correct = psychometric_function(c,l,speed,eta,sigma)
   )
 
-  ggplot(example) + 
+  ggplot(example_psychometric) + 
     geom_hline(aes(yintercept = upper_bound, colour = "Upper Bound"), linetype = "dashed") +
-    geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
-    geom_vline(aes(xintercept = 0.9, colour = "eta")) +
+    geom_hline(aes(yintercept = c , colour = "Lower Bound"), linetype = "dashed") +
+    geom_vline(aes(xintercept = eta, colour = "eta")) +
     geom_line(aes(x = speed, y = p_correct,
                   colour = "Probability Correct")) +
     theme_light() +
     lims(x = c(0,2.5), y = c(0,1)) +
-    scale_colour_manual(values = c("Upper Bound" = "blue", "Lower Bound" = "red", "eta" = "yellow", "Probability Correct" = "black")) +
+    scale_colour_manual(values = c("Upper Bound" = "blue", "Lower Bound" = "red", 
+                                   "eta" = "green", "Probability Correct" = "black")) +
     labs(colour = "Legend",
          x = "Speed (revolutions per second)",
-         y = "P(Correct)",
+         y = "p(correct)",
          title = "Example of Psychometric Function")
 }
