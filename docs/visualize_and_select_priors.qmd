@@ -1,0 +1,137 @@
+---
+title: "Visualize and select priors"
+format: html
+---
+
+To get started, we load the required packages.
+
+```{r}
+#| warning: false 
+#| output: false
+library(tidyverse)
+library(brms)
+```
+
+# Selecting Priors
+
+A prior distribution in Bayesian analysis will assign a probability to each possible value of a parameter. By specifying priors, brms takes into account not only the inputted data but also what is already known about the likelihood of certain parameter values to produce a more accurate estimation.
+
+## Prior on Lapse $(L)$
+
+Since lapse is a rate, it is bounded between 0 and 1. We know from previous literature that a reasonable value of lapse is between 0.03 and 0.04.
+
+As the tested population was reasonably well-motivated, high lapse valuables were unlikely, although not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.
+
+```{r}
+prior_lapse <- dplyr::tibble(
+    x = seq(0, 1, length.out = 500),
+    y = dbeta(x, 2, 33.33)
+)
+
+ggplot(prior_lapse) + aes(x = x, y = y) +
+  geom_area(fill = "red", alpha = 0.2) +
+  geom_line()+
+  theme_light() +
+  labs(
+    x = "",
+    y = ""
+  )
+```
+
+## Prior on Location $(\eta)$
+
+We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5. The lower bound was set at 0 as you cannot have negative speed . Holcombe and Chen (2013) found that even the best participant would have a speed threshold of less than 2.5 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) found that tracking of a single object on a mechanical display which is not confounded by a display's refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.
+
+```{r}
+#| echo: false 
+prior_location <- dplyr::tibble(
+    x = seq(-1, 10, length.out = 500),
+    y = dunif(x, 0, 2.5)
+)
+
+ggplot(prior_location) + aes(x = x, y = y) +
+  geom_area(fill = "red", alpha = 0.2) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "",
+    y = ""
+  )
+```
+
+## Prior on Sigma/Scale $(\sigma)$
+
+Values of sigma can get extremely small and therefore tiny changes in the value of sigma can have significant effects, makeing it hard for brms to accurately estimate sigma. Therefore, our brms model is cast in terms of logsigma. We concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants based on looking at psychometric data from previous papers. Converting this with the log transform, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
+
+```{r}
+#| echo: false 
+lowerbound <- dplyr::tibble(
+    speed = seq(0,2.5, length.out = 500),
+    C = 0.25,
+    L = 0.1, # for il
+    eta = 0.9,
+    sigma = 0.05,
+    phi = pnorm(-speed, -eta, sigma), 
+    probability_correct = C + (1-C - L*(1-C))*phi,
+    upper_bound = 1 - L*(1-C)
+)
+
+upperbound <-dplyr::tibble(
+    speed = seq(0,2.5, length.out = 500),
+    C = 0.25,
+    L = 0.1, # for il
+    eta = 0.9,
+    sigma = 5,
+    phi = pnorm(-speed, -eta, sigma), 
+    probability_correct = C + (1-C - L*(1-C))*phi,
+    upper_bound = 1 - L*(1-C)
+)
+
+ggplot(lowerbound) + 
+  geom_line(aes(x = speed, y = probability_correct)) +
+
+  theme_light() +
+  lims(x = c(0,2.5), y = c(0,1)) +
+  labs(colour = "Legend",
+       x = "Speed (revolutions per second)",
+       y = "P(Correct)",
+       title = "Logsigma=-3")
+
+ggplot(upperbound) + 
+  geom_line(aes(x = speed, y = probability_correct)) +
+
+  theme_light() +
+  lims(x = c(0,2.5), y = c(0,1)) +
+  labs(colour = "Legend",
+       x = "Speed (revolutions per second)",
+       y = "P(Correct)",
+       title = "Logsigma=1.6")
+```
+
+Figure 2: Example plots of psychometric function with a logsigma of either -3 or 1.6. The chance rate, eta and lapse are all consistent with the previous example.
+
+```{r}
+#| echo: false 
+prior_scale <- dplyr::tibble(
+    x = seq(-5, 5, length.out = 500),
+    y = dunif(x, -3, 1.6)
+)
+
+ggplot(prior_scale) + aes(x = x, y = y) +
+  geom_area(fill = "red", alpha = 0.2) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "",
+    y = ""
+  )
+```
+
+Here is the code you can use when calling brms:
+```{r}
+my_priors <- c(
+  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  brms::set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
+  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) 
+)
+```
