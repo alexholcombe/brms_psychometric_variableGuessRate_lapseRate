@@ -130,8 +130,8 @@ ggplot(prior_scale) + aes(x = x, y = y) +
 Here is the code you can use when calling brms:
 ```{r}
 my_priors <- c(
-  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapse", lb = 0, ub = 1),
+  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
   brms::set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logsigma", lb = -2, ub = 1.6) 
+  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logSigma", lb = -2, ub = 1.6) 
 )
 ```
