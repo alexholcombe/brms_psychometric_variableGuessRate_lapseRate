@@ -23,8 +23,8 @@ In order to build and test our model in brms, we must first create a simulated d
 #| echo: true 
 set.seed(999) #ensures reproducibility for testing
 
-source("R/simulate_data.R") #Load my needed custom function
-source("R/psychometric_function.R") #Load my needed custom function
+source("../R/simulate_data.R") #Load my needed custom function
+source("../R/psychometric_function.R") #Load my needed custom function
 
 numSubjects<- 50
 trialsPerCondition<- 5

@@ -51,5 +51,7 @@ if (self_test) {
   speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   
   trials <- generate_conditions_both_labs(numSubjects,trialsPerCondition,targetNumConds,speeds)
+  
+
 }
 
