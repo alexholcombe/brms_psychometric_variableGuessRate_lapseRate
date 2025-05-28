@@ -16,7 +16,7 @@ generate_conditions_both_labs<- function(numSubjects,trialsPerCondition,targetNu
   sim_conditions <- tidyr::expand_grid(
     subj = seq(1, numSubjects), #subjects
     rep = seq(1,trialsPerCondition), #replicates of each trial combination
-    num_target = targetNumConds, #number of targets particpant tracks
+    num_targets = targetNumConds, #number of targets particpant tracks
     speed = speeds
   )
   
@@ -26,15 +26,15 @@ generate_conditions_both_labs<- function(numSubjects,trialsPerCondition,targetNu
     mutate(
       gender = sample(c("M","F"), 1, replace = TRUE),
       age_group = sample(c("younger", "older"), 1, replace = TRUE),
-      lab = sample(c("rf", "holcombe"), 1, replace = TRUE) 
+      lab = sample(c("Roudaia", "Holcombe"), 1, replace = TRUE) 
     ) %>% ungroup()
   
   # Set number of objects per ring based on lab
   sim_conditions <- sim_conditions %>%
     mutate(
       obj_per_ring = case_when(
-        lab == "rf" ~ sample(c(5,10), n(), replace=TRUE), #Rodaia and Faubert (2017) tested only 5 and 10 objects per ring
-        lab == "holcombe" ~ sample(c(4,8), n(), replace = TRUE) #Holcombes lab tested only 4 and 8 objects per ring
+        lab == "Roudaia" ~ sample(c(5,10), n(), replace=TRUE), #Rodaia and Faubert (2017) tested only 5 and 10 objects per ring
+        lab == "Holcombe" ~ sample(c(4,8), n(), replace = TRUE) #Holcombes lab tested only 4 and 8 objects per ring
       )
     )
   
@@ -48,10 +48,12 @@ if (self_test) {
   trialsPerCondition<- 5
   targetNumConds<- c(2,3)
   #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
-  speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
+  speeds<-seq(.02,1.7, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   
   trials <- generate_conditions_both_labs(numSubjects,trialsPerCondition,targetNumConds,speeds)
   
-
+  #Print number of unique values of each column
+  trials |> summarise(across(everything(), ~ n_distinct(.))) |>
+            pivot_longer(everything())
 }
 

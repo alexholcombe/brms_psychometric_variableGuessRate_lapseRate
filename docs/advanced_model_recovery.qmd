@@ -1,7 +1,12 @@
 ---
-title: "Basic  psychophysical model recovery using Bayesian brms"
+title: "Psychophysical model recovery using Bayesian brms"
 format: html
 ---
+
+TO-DO:
+
+  - add change in psychometric function based on number of targets
+  - Make it multilelvel, with multiple participants
 
 To get started, we load the required packages.
 
@@ -10,28 +15,40 @@ To get started, we load the required packages.
 #| output: false
 library(tidyverse)
 library(brms)
+
+source("../R/simulate_data.R") #Load my needed custom function
+source("../R/psychometric_function.R") #Load my needed custom function
+
+set.seed(999) #ensures reproducibility for testing
 ```
 
 # Create simulated trials
+
+Set up simulated experiment design.
+
+```{r}
+#| echo: true 
+numSubjects<- 50
+trialsPerCondition<- 8
+targetNumConds<- c(2,3)
+#Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
+speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
+
+```
 
 In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
 
 ```{r}
-#| echo: true 
-set.seed(999) #ensures reproducibility for testing
-
-source("../R/simulate_data.R") #Load my needed custom function
-source("../R/psychometric_function.R") #Load my needed custom function
-
-numSubjects<- 50
-trialsPerCondition<- 5
-targetNumConds<- c(2,3)
-#Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
-speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
+#| echo: false 
 
 trials <- generate_conditions_both_labs(numSubjects,trialsPerCondition,targetNumConds,speeds)
-#includes obj_per_ring
+
+#Print number of unique values of each column
+print('Number of values for each factor:')
+numValsPerFactor<- trials |> summarise(across(everything(), ~ n_distinct(.))) |>
+                              pivot_longer(everything())
+print( numValsPerFactor )
 
 ```
 
@@ -39,10 +56,22 @@ Choose values for psychometric function for younger and older
 
 ```{r}
 #| echo: true 
-lapse <- 0.03
+lapse <- 0.05
 sigma <- 0.2
-location_param_young <-0.91 
-location_param_old   <-0.5
+location_param_young_123targets <- c(1.5,0.91,0.6)
+age_penalty <- 0.4 #Old people have worse limit by this much
+gender_penalty <- 0
+Holcombe_lab_penalty <- 0
+
+#Using above parameters, need function to calculate a participant's location parameter
+location_param_calculate<- function(num_targets,age_group,gender,lab) {
+  
+  base_location_param <- location_param_young_123targets[num_targets]
+  after_penalties <- base_location_param - if_else(age_group=="older",1,0) * age_penalty -
+                    if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
+                    if_else(gender=="F",1,0) * gender_penalty
+  return (after_penalties)
+}
 ```
 
 Using the psychometric function, simulate whether participant is correct on each trial or not, and 
@@ -58,13 +87,11 @@ data_simulated<- trials
 data_simulated <- data_simulated %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    p_correct= ifelse(age_group == "younger",
-                      psychometric_function(1/obj_per_ring,lapse,speed,location_param_young,sigma),
-                      psychometric_function(1/obj_per_ring,lapse,speed,location_param_old,sigma)
-                      ),
+    location_param = location_param_calculate(num_targets,age_group,gender,lab),
+    p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
   )
-    
+        
 ```    
     
 # Plot data
@@ -72,12 +99,13 @@ data_simulated <- data_simulated %>%
 ```{r}
 #| echo: false
 
-ggplot(data_simulated, aes(x=speed,y=p_correct,color=age_group)) +
-  geom_point() +
+ggplot(data_simulated, aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
+  geom_point() + geom_line() +
   facet_grid(lab~obj_per_ring) +
   labs(x = "Speed (revolutions per second)",
         y = "P(Correct)",
-        title = "Simulated data")
+        title = "Simulated data") +
+  theme_bw()
 
     # geom_hline(aes(yintercept = upper_bound, colour = "Upper Bound"), linetype = "dashed") +
     # geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
@@ -112,11 +140,15 @@ The model we used is based off our psychometric function used to generate the da
 
 *Alex's note: Using the nonlinear option is also what allowed us to set a prior on the thresholds  $\eta$, because we could then parametrize the function in terms of the x-intercept, whereas with the link-function approach, we are stuck with the conventional parameterization of a line, which [has a term for the y-intercept but not the x-intercept](https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z) *
 
-psychometric_function(chanceRate,lapseRate, speed,eta,exp(logSigma))
 
 ```{r}
+my_formula <- brms::bf( 
+   correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
+  ) 
+my_formula <- my_formula$formula
+  
 my_brms_formula <- brms::bf(
-  correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
+  correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
   eta ~ age_group, 
   lapseRate ~ 1, #~1 means intercept only
   logSigma ~ age_group,
@@ -177,10 +209,11 @@ Check how close the fit estimates are to the true parameters.
 estimates<- as.data.frame( fixef(fit) )
 
 #Create corresponding true values dataframe, to compare
+trueVal_eta_young <- mean(location_param_young_123targets[2:3])
 trueValsNamesInBrmParlance<-
   c("eta_Intercept","eta_age_groupyounger","lapseRate_Intercept","logSigma_Intercept","logSigma_age_groupyonger")
-trueVal<- 
-  c(location_param_old, location_param_young-location_param_old, lapse, log(sigma), 0)
+trueVal<-c( 
+     trueVal_eta_young - age_penalty, age_penalty, lapse, log(sigma), 0)
 trueVal<- data.frame(trueVal)
 rownames(trueVal) <- trueValsNamesInBrmParlance
 
