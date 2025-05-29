@@ -57,16 +57,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="advanced_model_recovery_files/libs/clipboard/clipboard.min.js"></script>
-<script src="advanced_model_recovery_files/libs/quarto-html/quarto.js"></script>
-<script src="advanced_model_recovery_files/libs/quarto-html/popper.min.js"></script>
-<script src="advanced_model_recovery_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="advanced_model_recovery_files/libs/quarto-html/anchor.min.js"></script>
-<link href="advanced_model_recovery_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="advanced_model_recovery_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="advanced_model_recovery_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="advanced_model_recovery_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="advanced_model_recovery_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="all_factors_but_not_multilevel_files/libs/clipboard/clipboard.min.js"></script>
+<script src="all_factors_but_not_multilevel_files/libs/quarto-html/quarto.js"></script>
+<script src="all_factors_but_not_multilevel_files/libs/quarto-html/popper.min.js"></script>
+<script src="all_factors_but_not_multilevel_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="all_factors_but_not_multilevel_files/libs/quarto-html/anchor.min.js"></script>
+<link href="all_factors_but_not_multilevel_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="all_factors_but_not_multilevel_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="all_factors_but_not_multilevel_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="all_factors_but_not_multilevel_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="all_factors_but_not_multilevel_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -125,11 +125,6 @@ window.Quarto = {
 </header>
 
 
-<p>TO-DO:</p>
-<ul>
-<li>add change in psychometric function based on number of targets</li>
-<li>Make it multilelvel, with multiple participants</li>
-</ul>
 <p>To get started, we load the required packages.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
@@ -196,7 +191,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="advanced_model_recovery_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="all_factors_but_not_multilevel_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -267,91 +262,97 @@ make: *** [foo.o] Error 1</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "No errors when fitting."
 l' NOW (CHAIN 4).
-Chain 3: 
-Chain 3: Gradient evaluation took 0.001501 seconds
-Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 15.01 seconds.
-Chain 3: Adjust your expectations accordingly!
-Chain 3: 
-Chain 3: 
-Chain 4: 
-Chain 4: Gradient evaluation took 0.001294 seconds
-Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 12.94 seconds.
-Chain 4: Adjust your expectations accordingly!
-Chain 4: 
-Chain 4: 
 Chain 2: 
-Chain 2: Gradient evaluation took 0.00233 seconds
-Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 23.3 seconds.
+Chain 2: Gradient evaluation took 0.001412 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 14.12 seconds.
 Chain 2: Adjust your expectations accordingly!
 Chain 2: 
 Chain 2: 
-Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
+Chain Chain 3: 
+1Chain 3: : 
+Gradient evaluation took 0.001399 secondsChain 1: 
+Gradient evaluation took 0.001755 seconds
+Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 13.99 seconds.
+Chain 3: Adjust your expectations accordingly!
+Chain 3: 
+Chain 3: 
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 17.55 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 4: 
+Chain 4: Gradient evaluation took 0.001925 seconds
+Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 19.25 seconds.
+Chain 4: Adjust your expectations accordingly!
+Chain 4: 
+Chain 4: 
 Chain 3: Iteration:    1 / 2000 [  0%]  (Warmup)
-Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
+Chain 1: Iteration:    1 / 2000 [  0%]  (Warmup)
 Chain 2: Iteration:    1 / 2000 [  0%]  (Warmup)
-Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
-Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
-Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+Chain 4: Iteration:    1 / 2000 [  0%]  (Warmup)
 Chain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)
+Chain 4: Iteration:  200 / 2000 [ 10%]  (Warmup)
+Chain 3: Iteration:  200 / 2000 [ 10%]  (Warmup)
+Chain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)
 Chain 4: Iteration:  400 / 2000 [ 20%]  (Warmup)
-Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
 Chain 3: Iteration:  400 / 2000 [ 20%]  (Warmup)
 Chain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)
-Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
-Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
+Chain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)
 Chain 3: Iteration:  600 / 2000 [ 30%]  (Warmup)
+Chain 4: Iteration:  600 / 2000 [ 30%]  (Warmup)
 Chain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)
-Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
-Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
+Chain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)
 Chain 3: Iteration:  800 / 2000 [ 40%]  (Warmup)
+Chain 4: Iteration:  800 / 2000 [ 40%]  (Warmup)
 Chain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)
-Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
-Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+Chain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)
 Chain 3: Iteration: 1000 / 2000 [ 50%]  (Warmup)
 Chain 3: Iteration: 1001 / 2000 [ 50%]  (Sampling)
-Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
-Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
+Chain 4: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+Chain 4: Iteration: 1001 / 2000 [ 50%]  (Sampling)
 Chain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)
 Chain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)
-Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+Chain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)
+Chain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)
 Chain 3: Iteration: 1200 / 2000 [ 60%]  (Sampling)
-Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+Chain 4: Iteration: 1200 / 2000 [ 60%]  (Sampling)
 Chain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+Chain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)
+Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
 Chain 4: Iteration: 1400 / 2000 [ 70%]  (Sampling)
 Chain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)
-Chain 3: Iteration: 1400 / 2000 [ 70%]  (Sampling)
 Chain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)
+Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
 Chain 4: Iteration: 1600 / 2000 [ 80%]  (Sampling)
 Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
-Chain 3: Iteration: 1600 / 2000 [ 80%]  (Sampling)
 Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
-Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
-Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
 Chain 3: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+Chain 4: Iteration: 1800 / 2000 [ 90%]  (Sampling)
+Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
 Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
-Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
-Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
-Chain 4: 
-Chain 4:  Elapsed Time: 13.885 seconds (Warm-up)
-Chain 4:                13.068 seconds (Sampling)
-Chain 4:                26.953 seconds (Total)
-Chain 4: 
-Chain 2: 
-Chain 2:  Elapsed Time: 14.092 seconds (Warm-up)
-Chain 2:                12.868 seconds (Sampling)
-Chain 2:                26.96 seconds (Total)
-Chain 2: 
 Chain 3: Iteration: 2000 / 2000 [100%]  (Sampling)
 Chain 3: 
-Chain 3:  Elapsed Time: 13.964 seconds (Warm-up)
-Chain 3:                13.236 seconds (Sampling)
-Chain 3:                27.2 seconds (Total)
+Chain 3:  Elapsed Time: 13.302 seconds (Warm-up)
+Chain 3:                12.658 seconds (Sampling)
+Chain 3:                25.96 seconds (Total)
 Chain 3: 
+Chain 4: Iteration: 2000 / 2000 [100%]  (Sampling)
+Chain 4: 
+Chain 4:  Elapsed Time: 13.538 seconds (Warm-up)
+Chain 4:                12.487 seconds (Sampling)
+Chain 4:                26.025 seconds (Total)
+Chain 4: 
+Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
+Chain 2: 
+Chain 2:  Elapsed Time: 14.103 seconds (Warm-up)
+Chain 2:                12.608 seconds (Sampling)
+Chain 2:                26.711 seconds (Total)
+Chain 2: 
 Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
 Chain 1: 
-Chain 1:  Elapsed Time: 15.052 seconds (Warm-up)
-Chain 1:                13.167 seconds (Sampling)
-Chain 1:                28.219 seconds (Total)
+Chain 1:  Elapsed Time: 13.935 seconds (Warm-up)
+Chain 1:                13.155 seconds (Sampling)
+Chain 1:                27.09 seconds (Total)
 Chain 1: </code></pre>
 </div>
 </div>
@@ -362,12 +363,12 @@ Chain 1: </code></pre>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>             Row.names trueVal Estimate discrepancy Est.Error  Q2.5 Q97.5
-1        eta_Intercept    0.50     0.11        0.39      0.02  0.08  0.15
+1        eta_Intercept    0.50     0.11        0.39      0.02  0.07  0.15
 2 eta_age_groupyounger    0.40     0.40        0.00      0.02  0.37  0.43
 3          eta_genderM    0.20     0.21       -0.01      0.02  0.18  0.24
 4       eta_labRoudaia    0.20     0.18        0.02      0.01  0.15  0.21
 5  lapseRate_Intercept    0.05     0.05        0.00      0.01  0.04  0.07
-6   logSigma_Intercept   -1.61    -1.48       -0.13      0.07 -1.62 -1.34</code></pre>
+6   logSigma_Intercept   -1.61    -1.48       -0.13      0.07 -1.63 -1.34</code></pre>
 </div>
 </div>
 <p>The fit converged with no errors!! :grinning: (this doesn’t always happen, when for example we use more complicated models)</p>

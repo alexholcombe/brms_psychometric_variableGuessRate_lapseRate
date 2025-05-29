@@ -3,11 +3,6 @@ title: "Psychophysical model recovery using Bayesian brms"
 format: html
 ---
 
-TO-DO:
-
-  - add change in psychometric function based on number of targets
-  - Make it multilelvel, with multiple participants
-
 To get started, we load the required packages.
 
 ```{r}
