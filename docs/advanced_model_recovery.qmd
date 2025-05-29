@@ -230,15 +230,12 @@ estimates %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 2)))
 
 The fit converged with no errors!! :grinning: (this doesn't always happen, when for example we use more complicated models)
 
- The eta_age \_groupyounger represents the eta advantage for the younger age group. 
  eta_intercept is the eta for the older group
+
+ The eta_age \_groupyounger represents the eta advantage for the younger age group. 
  
 The logSigma estimate tends to have wide confidence intervals.
 
 The fitted model's estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!
 
-# Model Improvements
 
-Although we have learned a lot and made significant progress over the course of 6 weeks, there is still work to be done and errors we are running into in our model recovery. In particular, when we alter the simulated data and model fit to include group-level effects for variables such as number of targets or objects per ring, the estimations are very inaccurate. We also have yet to test changes to group level values of sigma and are unsure whether the lapse rate may have a group effect for various conditions or population groups.
-
-Another key area to look into is the brms syntax and fitting for nested variables to create a multilevel model. brms allows nesting of variables using parameter \* (1 \| nested group) \*, but have not yet researched this or added it to our model.
