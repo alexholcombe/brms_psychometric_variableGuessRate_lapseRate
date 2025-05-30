@@ -13,6 +13,7 @@ library(brms)
 
 source("../R/simulate_data.R") #Load my needed custom function
 source("../R/psychometric_function.R") #Load my needed custom function
+source("../R/helpers/checkCounterbalancing.R") #Load my needed custom function
 
 set.seed(999) #ensures reproducibility for testing
 ```
@@ -23,6 +24,7 @@ Set up simulated experiment design.
 
 ```{r}
 #| echo: true 
+laboratories<- c("Roudaia", "Holcombe")
 numSubjects<- 50
 trialsPerCondition<- 8
 targetNumConds<- c(2,3)
@@ -37,17 +39,35 @@ In order to build and test our model in brms, we must first create a simulated d
 ```{r}
 #| echo: false 
 
-trials <- generate_conditions_both_labs(numSubjects,trialsPerCondition,targetNumConds,speeds)
+trials <- generate_conditions_both_labs(laboratories,numSubjects,trialsPerCondition,
+                                        targetNumConds,speeds)
 
 #Print number of unique values of each column
 print('Number of values for each factor:')
 numValsPerFactor<- trials |> summarise(across(everything(), ~ n_distinct(.))) |>
                               pivot_longer(everything())
 print( numValsPerFactor )
-
+checkCombosOccurEqually(trials |> filter(lab=="Holcombe"),
+                        c("subj","num_targets","speed"),dropZeros=FALSE) 
+checkCombosOccurEqually(trials |> filter(lab=="Holcombe"),
+                        c("subj","num_targets","speed","gender","age_group"),dropZeros=FALSE) 
+  
 ```
 
-Choose values for psychometric function for younger and older
+```{r}
+#| echo: true
+  #So far I don't have a trial number for the subject, I only have a trialThisCond column
+  #Calculate a trial number numbering the entirety of the trials the subject is given
+  #Assume the within-participant factors are obj_per_ring,num_targets, and speed
+  trials <- trials |> group_by(lab,trialThisCond,age_group,gender,subj) |> 
+                      mutate(trial = row_number())
+```
+
+Determine how the parameters are different for each condition, lab, gender, etc.
+
+Create between-subject variability within each group, to create a potential multilevel modeling advantage. Can do this by passing the participant number to the location-parameter calculating function. Because that function will be called over and over, separately, the location parameter needs to be a deterministic function of the participant number. So it needs to calculate a hash or something to determine the location parameter. E.g. it could calculate the remainder, but then the location parameters wouldn't be centered on the intended value for that condition. To do that, I think I need to know the number of participants in the condition, n, and number them 1..n. Then I can give e.g. participant 1 the extreme value on one side of the condition-determined value and give participant n the extreme value on the other side.
+So I even number participants separately within age*gender to maintain the age and gender penalties.
+
 
 ```{r}
 #| echo: true 
