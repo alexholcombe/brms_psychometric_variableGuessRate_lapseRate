@@ -54,37 +54,67 @@ checkCombosOccurEqually(trials |> filter(lab=="Holcombe"),
   
 ```
 
+
+Determine how the parameters are different for each condition, lab, gender, etc.
+
+Create between-subject variability within each group, to create a potential multilevel modeling advantage. Can do this by passing the participant number to the location-parameter calculating function. Because that function will be called over and over, separately, the location parameter needs to be a deterministic function of the participant number. So it needs to calculate a hash or something to determine the location parameter. E.g. it could calculate the remainder, but then the location parameters wouldn't be centered on the intended value for that condition. To do that, I think I need to know the number of participants in the condition, n, and number them 1..n. Then I can give e.g. participant 1 the extreme value on one side of the condition-determined value and give participant n the extreme value on the other side.
+So I number participants separately even within age*gender to maintain the age and gender penalties, but not within speed, of course. Also not within num_targets or obj_per_ring.
+
+Because the present purpose of numbering participants is to inject the right amount of between-participant variability, I will number the participants with a range of numbers that has  unit standard deviation. Will call this column "subjStandardized".
+
 ```{r}
-#| echo: true
-  #So far I don't have a trial number for the subject, I only have a trialThisCond column
+#| echo: false
+
+  #Create subject number within condition, which I'll use to create between-subject variance
+  # that is not related to condition
+  trials <- trials |> group_by(lab,age_group,gender) |> 
+                      mutate( subjWithinCond = cur_group_id() )
+  numSsPerCond <- length( sort(unique(trials$subjWithinCond)) )
+  cat('Num participants per condition = ',numSsPerCond)
+  
+  #Renumber subjWithinCond to be standardized, centered on zero and have unit standard deviation, so that that person's unique params 
+  # can be assigned by multiplying subjWithinCond by the variance, because then the standard
+  # deviation 
+  # adding it to the designated mean val.
+  center_on_zero_and_standardize_std <- function(x,vals) {
+    centered <- (x - mean(vals)) / sd(vals)
+    return(centered)
+  }
+
+  trials<-trials |> 
+    mutate( subj_std = center_on_zero_and_standardize_std(subjWithinCond,
+                                                          unique(trials$subjWithinCond))
+          )
+  
+  #I also need a trial number, so far I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
   #Assume the within-participant factors are obj_per_ring,num_targets, and speed
   trials <- trials |> group_by(lab,trialThisCond,age_group,gender,subj) |> 
                       mutate(trial = row_number())
 ```
 
-Determine how the parameters are different for each condition, lab, gender, etc.
-
-Create between-subject variability within each group, to create a potential multilevel modeling advantage. Can do this by passing the participant number to the location-parameter calculating function. Because that function will be called over and over, separately, the location parameter needs to be a deterministic function of the participant number. So it needs to calculate a hash or something to determine the location parameter. E.g. it could calculate the remainder, but then the location parameters wouldn't be centered on the intended value for that condition. To do that, I think I need to know the number of participants in the condition, n, and number them 1..n. Then I can give e.g. participant 1 the extreme value on one side of the condition-determined value and give participant n the extreme value on the other side.
-So I even number participants separately within age*gender to maintain the age and gender penalties.
-
 
 ```{r}
 #| echo: true 
 lapse <- 0.05
 sigma <- 0.2
+sigma_between_participant_variance <- 0.2 
+
 location_param_young_123targets <- c(1.7,1.0,0.8)
 age_penalty <- 0.4 #Old people have worse limit by this much
 gender_penalty <- 0.2
 Holcombe_lab_penalty <- 0.2
 
 #Using above parameters, need function to calculate a participant's location parameter
-location_param_calculate<- function(num_targets,age_group,gender,lab) {
+location_param_calculate<- function(num_targets,age_group,gender,lab,subjStandardized) {
   
   base_location_param <- location_param_young_123targets[num_targets]
-  after_penalties <- base_location_param - if_else(age_group=="older",1,0) * age_penalty -
-                    if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
-                    if_else(gender=="F",1,0) * gender_penalty
+  #calculate offset for this participant based on desired sigma_between_participant_variance
+  location_param <- base_location_param + subjStandardized * sigma_between_participant_variance
+  
+  after_penalties <-location_param - if_else(age_group=="older",1,0) * age_penalty -
+                      if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
+                      if_else(gender=="F",1,0) * gender_penalty
   return (after_penalties)
 }
 ```
@@ -95,14 +125,13 @@ add that to the simulated data, trials
 ```{r}
 #| echo: false
 
-data_simulated<- trials
+data_simulated<- trials |> mutate( chance_rate = 1/obj_per_ring,
+      location_param = location_param_calculate(num_targets,age_group,gender,lab,subj_std) )
 
 #Add column for the probability of each trial being correct based on our psychometric function
 #then use that to add column to generate if the subject got the trial correct
 data_simulated <- data_simulated %>%
   mutate(
-    chance_rate = 1/obj_per_ring,
-    location_param = location_param_calculate(num_targets,age_group,gender,lab),
     p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
   )
@@ -111,18 +140,38 @@ data_simulated <- data_simulated %>%
     
 # Plot data
 
+    upper_bound = 1 - L*(1-C)
+
 ```{r}
 #| echo: false
-
-ggplot(data_simulated, aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
-  geom_point() + geom_line() +
+#data_simulated |> mutate( upper_bound = 1 - lapse*(1 - chance_rate) )
+  
+gg<- ggplot(data_simulated,
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
+  #stat_summary(fun=mean,geom="point") +
+  stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
   labs(x = "Speed (revolutions per second)",
         y = "P(Correct)",
         title = "Simulated data") +
   theme_bw()
 
-    # geom_hline(aes(yintercept = upper_bound, colour = "Upper Bound"), linetype = "dashed") +
+#Also show variability
+range <- function(x) {
+  data.frame(
+    y = mean(x),
+    ymin = min(x),
+    ymax = max(x)
+  )
+}
+#Can show variability as range or as CI
+gg<-gg+stat_summary(fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2)
+#Add 95% confidence ribbon to show variability. Don't understand why this doesn't work!
+#gg<-gg+stat_summary(fun.data = mean_cl_normal, fun.args = list(conf.int = 0.99),
+#                    geom="ribbon", fill = "grey80", alpha = 0.5)
+show(gg)
+
+#geom_hline(aes(yintercept = 1-lapse*(1-chance_rate), colour = "Upper Bound"), linetype = "dashed") +
     # geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
     # geom_vline(aes(xintercept = 0.9, colour = "eta")) +
     # geom_line(aes(x = speed, y = probability_correct,

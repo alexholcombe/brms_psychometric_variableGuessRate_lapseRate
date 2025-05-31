@@ -81,9 +81,7 @@ if (self_test) {
     print("The conditions somehow don't have trialsPerCondition trials")
   }
     
-  #trialThisSubject numbers trials by subject rather than by subj*cond
-  # |> distinct(trialThisCond)
-
+  #Create "trial" that numbers trials by subject rather than by subj*cond
   #So far I don't have a trial number for the subject, I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
   #Assume the within-participant factors are obj_per_ring,num_targets, and speed
