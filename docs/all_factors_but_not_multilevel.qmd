@@ -197,10 +197,14 @@ if (numSsPerGroup != subjectsPerGroup) {
 ```{r}
 #| echo: false
 
+data_sim_annotated <- data_simulated
+data_sim_annotated<-data_sim_annotated |> mutate( chance)
+
+
 #data_one_subject_group <- data_simulated |> 
 #  filter(age_group=="younger",gender=="M",lab=="Holcombe")
 #data_one_condition <- data_one_subject_group |> filter(num_targets==2)
-  
+
 gg<- ggplot(data_simulated, #data_one_condition, 
             aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
   #stat_summary(fun=mean,geom="point") +
@@ -227,11 +231,18 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-#gg<-gg+stat_summary(fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2)
+#gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+#                     fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
-gg<-gg+stat_summary(fun.data = mean_cl_normal, fun.args = list(conf.int = 0.99),
-#                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
+gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),
+                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
+#Show floor  and ceiling with lines
+gg + geom_hline( aes(yintercept = chance_rate), colour = "purple", alpha=0.2 ) +
+     geom_hline( aes(yintercept = 1-lapse*(1-chance_rate)), colour = "yellow3", alpha=0.4 ) +
 show(gg)
+
+  
 
 #geom_hline(aes(yintercept = 1-lapse*(1-chance_rate), colour = "Upper Bound"), linetype = "dashed") +
     # geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
