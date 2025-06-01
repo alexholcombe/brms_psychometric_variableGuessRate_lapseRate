@@ -141,7 +141,7 @@ data_one_condition <- data_simulated |>
 data_one_subject_group <- trials |> 
   filter(age_group=="younger",gender=="M",lab=="Holcombe")
 numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
-if (numSsPerGroup != subjectsPerGroup) {
+if (numSsPerGroup != subjPerGroup) {
   print("Not sure num subjects worked right.")
 }
 
@@ -152,8 +152,10 @@ distinctTrialsPerSubject <- unique(subjectsTrials)
 if (length(distinctTrialsPerSubject) > 1) {
   print('Somehow different subjects have different numbers of trials.')
 }
-cat('Trials per participant should be ',trialsPerSubject,
-    'and it is:',as.numeric(subjectsTrials[1]))
+if ( as.numeric(subjectsTrials[1]) != trialsPerSubject ) {
+  cat('Trials per participant should be ',trialsPerSubject,
+      'and it is:',as.numeric(subjectsTrials[1]))
+}
   
 ```
 
@@ -167,7 +169,7 @@ data_simulated<- trials |> mutate( chance_rate = 1/obj_per_ring, location_param 
 data_one_subject_group <- data_simulated |> 
   filter(age_group=="younger",gender=="M",lab=="Holcombe")
 numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
-if (numSsPerGroup != subjectsPerGroup) {
+if (numSsPerGroup != subjPerGroup) {
   print("Not sure num subjects worked right.")
 }
 
@@ -183,7 +185,7 @@ data_simulated <- data_simulated %>%
 data_one_subject_group <- data_simulated |> 
   filter(age_group=="younger",gender=="M",lab=="Holcombe")
 numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
-if (numSsPerGroup != subjectsPerGroup) {
+if (numSsPerGroup != subjPerGroup) {
   print("Not sure num subjects worked right.")
 }
 
@@ -293,13 +295,14 @@ my_nonlinear_predictor <-  correct ~ chance_rate +
                                 (1-chance_rate - lapseRate * (1-chance_rate)) * 
                                 Phi(-(speed-eta)/exp(logSigma))
 
-#But if you only want random intercepts at both levels (which is the most common case), then:
-#In the case of 
+#Notes on Multi-level modeling. Two potential levels: lab and subject.
+# Going all the way would mean having different effects of gender and age_group on eta in each lab.
+# More common is to just have random intercepts for each lab and subject    (1 | lab/subjWithinGroup)
+# eta ~ age_group + gender + lab +  (1 | lab/subjWithinGroup)
 
 my_brms_formula <- brms::bf(
   my_nonlinear_predictor,
-  eta ~ age_group + gender + lab,  # + gender + lab
-#  eta ~ 1 + (1 | lab/subjWithinGroup),
+  eta ~ lab + age_group + gender + num_targets,  
   lapseRate ~ 1, #~1 means intercept only
   logSigma ~ age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -309,7 +312,7 @@ my_brms_formula <- brms::bf(
 
 # Set priors
 
-See [visualize_and_select_priors.html](visualize_and_select_priors.html) for some motivation and visualisation.
+See [visualize_and_select_priors.html](visualize_and_select_priors.html) for motivation and visualisation.
 
 ```{r}
 #| echo: true 
@@ -322,7 +325,7 @@ my_priors <- c(
 
 ```
 
-# Fitting Model to Simulated Data
+# Fit Model to Simulated Data
 
 Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see <https://paulbuerkner.com/brms/reference/brm.html>
 
@@ -340,13 +343,13 @@ time <- try( system.time({
       prior = my_priors,
       silent = 0, #prints more detailed messages (helps debug)
       #init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
-      #chains = 4, #4 is the default to check consistent convergence
-      iter = 2000 #default number of iterations 
+      chains = 3, #4 is the default to check consistent convergence
+      iter = 1000 #2000 is default number of iterations 
     ) 
   }), #end of system.time
  silent=FALSE) #End of try
 
-cat('Time taken =', time$elapsed)
+cat('Time taken (min) =', round( time["elapsed"] / 60. ,1) )
 
 if (inherits(time, "try-error")) {
   message("An error occurred!")
@@ -356,11 +359,16 @@ if (inherits(time, "try-error")) {
 
 summary(fit)
 ```
-eta_intercept is the eta for the older group
 
-eta_age_groupyounger represents the eta advantage for the younger age group. 
+## Understanding the brms estimand names
+
+eta_Intercept is the eta for the older group
+
+eta_age_groupolder is the eta offset for the older age group. 
+eta_genderF is the eta offset for female.
  
 The logSigma estimate tends to have wide confidence intervals.
+logSigma_age_groupolder is the logSigma offset for the older age group.
 
 Check how close the fit estimates are to the true parameters.
 ```{r}
@@ -372,24 +380,26 @@ estimates<- as.data.frame( fixef(fit) )
 #Create corresponding true values dataframe, to compare
 trueVal_eta_young <- mean(location_param_young_123targets[2:3])
 trueValsNamesInBrmParlance<-
-  c("eta_Intercept","eta_age_groupyounger","eta_genderM", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept","logSigma_age_groupyonger")
+  c("eta_Intercept","eta_age_groupolder","eta_genderF", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept","logSigma_age_groupolder")
 trueVal<-c( 
-     trueVal_eta_young - age_penalty, age_penalty, gender_penalty, Holcombe_lab_penalty, lapse, log(sigma), 0)
+     trueVal_eta_young - age_penalty, age_penalty, gender_penalty, 
+     Holcombe_lab_penalty, lapse, log(sigma), 0 )
 trueVal<- data.frame(trueVal)
 rownames(trueVal) <- trueValsNamesInBrmParlance
 
+#Put estimates and trueVals in same dataframe
 estimates <- merge(estimates, trueVal, by = "row.names", sort=FALSE)
 #Move trueVals column to second column so next to Estimate
 estimates <- estimates %>% select(1, trueVal, everything())
-
+#Calculate error in estimate
 estimates <- estimates %>%
   mutate(discrepancy = trueVal - Estimate, .after = Estimate)
 
-#pretty print
+#pretty print estimates and discrepancies
 estimates %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 2)))
 ```
 
-The fit converged with no errors!! :grinning: (this doesn't always happen, when for example we use more complicated models)
+The fit converged with no errors!!  (this doesn't always happen, when for example we use more complicated models)
 
 With injection of subject heterogeneity, fit is not great and takes much longer
 
