@@ -42,7 +42,7 @@ generate_conditions_both_labs<- function(labs,numSubjectsPerGroup,trialsPerCondi
 }
 
 
-self_test<-TRUE#FALSE
+self_test<-FALSE
 if (self_test) {
   laboratories<- c("Roudaia", "Holcombe")
   subjectsPerGroup<- 50
@@ -104,9 +104,7 @@ if (self_test) {
   cat('Trials per participant should be ',trialsPerSubject,
       'and it is:',as.numeric(subjectsTrials[1]))
   
-  check all_factors_but
-  
-    numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
+  numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
   if (numSsPerGroup != subjectsPerGroup) {
     print("Not sure num subjects worked right.")
   }
