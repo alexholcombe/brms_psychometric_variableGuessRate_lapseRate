@@ -67,11 +67,14 @@ Because the present purpose of numbering participants is to inject the right amo
 
   #Create subject number within condition, which I'll use to create between-subject variance
   # that is not related to condition
-  trials <- trials |> group_by(lab,age_group,gender) |> 
-                      mutate( subjWithinCond = cur_group_id() )
-  numSsPerCond <- length( sort(unique(trials$subjWithinCond)) )
-  cat('Num participants per condition = ',numSsPerCond)
-  
+ #MARKED FOR DELETION
+  # trials <- trials |> group_by(lab,age_group,gender) |> 
+  #                     mutate( subjWithinCond = cur_group_id() )
+  # numSsPerCond <- length( sort(unique(trials$subjWithinCond)) )
+  # cat('Num participants per condition = ',numSsPerCond)
+  # 
+
+
   #Renumber subjWithinCond to be standardized, centered on zero and have unit standard deviation, so that that person's unique params 
   # can be assigned by multiplying subjWithinCond by the variance, because then the standard
   # deviation 
@@ -82,14 +85,14 @@ Because the present purpose of numbering participants is to inject the right amo
   }
 
   trials<-trials |> 
-    mutate( subj_std = center_on_zero_and_standardize_std(subjWithinCond,
-                                                          unique(trials$subjWithinCond))
+    mutate( subj_standardzd = center_on_zero_and_standardize_std(subjWithinGroup,
+                                                          unique(trials$subjWithinGroup))
           )
   
   #I also need a trial number, so far I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
   #Assume the within-participant factors are obj_per_ring,num_targets, and speed
-  trials <- trials |> group_by(lab,trialThisCond,age_group,gender,subjWithinCond) |> 
+  trials <- trials |> group_by(lab,age_group,gender,subjWithinGroup) |> 
                       mutate(trial = row_number())
 ```
 
@@ -125,39 +128,67 @@ add that to the simulated data, trials
 Before screwup of subjects in each condition, 50 of 'em
 ```{r}
 data_one_condition <- trials |> 
-    filter(num_targets==2,age_group=="younger",gender=="M",lab=="Holcombe")
+    filter(age_group=="younger",gender=="M",lab=="Holcombe")
 table(data_one_condition$subjWithinGroup)
-nrow(data_one_condition)
+```
+```{r}
+#| echo: false
+data_simulated<- trials |> mutate( chance_rate = 1/obj_per_ring)
+data_one_condition <- data_simulated |> 
+  filter(num_targets==2,age_group=="younger",gender=="M",lab=="Holcombe")
+table(data_one_condition$subjWithinGroup)
+
+data_one_subject_group <- trials |> 
+  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
+if (numSsPerGroup != subjectsPerGroup) {
+  print("Not sure num subjects worked right.")
+}
+
+
+trialsPerSubject<- length(targetNumConds) * 2 * length(speeds) * trialsPerCondition
+subjectsTrials<- table(data_one_subject_group$subjWithinGroup)
+distinctTrialsPerSubject <- unique(subjectsTrials)
+if (length(distinctTrialsPerSubject) > 1) {
+  print('Somehow different subjects have different numbers of trials.')
+}
+cat('Trials per participant should be ',trialsPerSubject,
+    'and it is:',as.numeric(subjectsTrials[1]))
+  
 ```
 
 ```{r}
 #| echo: false
 
-data_simulated<- trials |> mutate( chance_rate = 1/obj_per_ring,
-      location_param = location_param_calculate(num_targets,age_group,gender,lab,subj_std) )
+data_simulated<- trials |> mutate( chance_rate = 1/obj_per_ring, location_param = 
+          location_param_calculate( num_targets,age_group,gender,lab,subj_standardzd ) )
+
+#Check num subjects not screwed up
+data_one_subject_group <- data_simulated |> 
+  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
+if (numSsPerGroup != subjectsPerGroup) {
+  print("Not sure num subjects worked right.")
+}
 
 #Add column for the probability of each trial being correct based on our psychometric function
 #then use that to add column to generate if the subject got the trial correct
 data_simulated <- data_simulated %>%
-  mutate(
-    p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
-    correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
-  )
+   mutate(
+     p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
+     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
+   )
+
+#Check num subjects not screwed up
+data_one_subject_group <- data_simulated |> 
+  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
+if (numSsPerGroup != subjectsPerGroup) {
+  print("Not sure num subjects worked right.")
+}
+
         
 ```    
-    
-After screwup
-```{r}
-#| echo: false
-  
-data_one_condition <- data_simulated |> 
-  filter(num_targets==2,age_group=="younger",gender=="M",lab=="Holcombe")
-table(data_one_condition$subjWithinCond)
-nrow(data_one_condition)
-
-#Looks like subjWithinCond not working, because only one of them and 50 subj
-
-```
 
 # Plot data
 
@@ -166,7 +197,11 @@ nrow(data_one_condition)
 ```{r}
 #| echo: false
 
-gg<- ggplot(data_one_condition, #data_simulated,
+#data_one_subject_group <- data_simulated |> 
+#  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+#data_one_condition <- data_one_subject_group |> filter(num_targets==2)
+  
+gg<- ggplot(data_simulated, #data_one_condition, 
             aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
   #stat_summary(fun=mean,geom="point") +
   stat_summary(fun=mean,geom="line")  +
@@ -192,10 +227,10 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-gg<-gg+stat_summary(fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2)
-#Add 95% confidence ribbon to show variability. Don't understand why this doesn't work!
-#gg<-gg+stat_summary(fun.data = mean_cl_normal, fun.args = list(conf.int = 0.99),
-#                    geom="ribbon", fill = "grey80", alpha = 0.5)
+#gg<-gg+stat_summary(fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2)
+#Add confidence interval ribbon to show variability.
+gg<-gg+stat_summary(fun.data = mean_cl_normal, fun.args = list(conf.int = 0.99),
+#                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
 show(gg)
 
 #geom_hline(aes(yintercept = 1-lapse*(1-chance_rate), colour = "Upper Bound"), linetype = "dashed") +

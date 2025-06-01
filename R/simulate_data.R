@@ -92,9 +92,32 @@ if (self_test) {
   cat('Trials per participant should be ',2*length(targetNumConds)*length(speeds),
         'and it is:',max(trials$trial))
 
-  data_one_condition <- trials |> 
+  #Check that subject behaves like I expect.
+  data_one_subject_group <- trials |> 
+    filter(age_group=="younger",gender=="M",lab=="Holcombe")
+  trialsPerSubject<- length(targetNumConds) * 2 * length(speeds) * trialsPerCondition
+  subjectsTrials<- table(data_one_subject_group$subjWithinGroup)
+  distinctTrialsPerSubject <- unique(subjectsTrials)
+  if (length(distinctTrialsPerSubject) > 1) {
+    print('Somehow different subjects have different numbers of trials.')
+  }
+  cat('Trials per participant should be ',trialsPerSubject,
+      'and it is:',as.numeric(subjectsTrials[1]))
+  
+  check all_factors_but
+  
+    numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
+  if (numSsPerGroup != subjectsPerGroup) {
+    print("Not sure num subjects worked right.")
+  }
+  
+  data_one_subject_cond <- trials |> 
     filter(num_targets==2,age_group=="younger",gender=="M",lab=="Holcombe")
- #table(data_one_condition$subjWithinGroup,data_one_condition$subjWithinGroup)
-  table(data_one_condition$subjWithinGroup)
+    
+  numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
+  if (numSsPerGroup != subjectsPerGroup) {
+    print("Not sure num subjects worked right.")
+  }
+  
 }
 
