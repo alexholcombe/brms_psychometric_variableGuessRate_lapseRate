@@ -13,6 +13,8 @@ To get started, we load the required packages.
 ```{r}
 #| warning: false 
 #| output: false
+rm(list = ls())
+
 library(tidyverse)
 library(brms)
 
