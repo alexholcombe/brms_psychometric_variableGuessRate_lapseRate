@@ -24,13 +24,6 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
     speed = speeds
   )
   
-  #Assign half of subjects to each lab, and set gender and age for each subject
-  # sim_conditions <- sim_conditions %>%
-  #   group_by(subjWithinGroup) %>%
-  #   mutate(
-  #     age_group = sample(c("younger", "older"), 1, replace = TRUE),
-  #   ) %>% ungroup()
-  
   # Set number of objects per ring based on lab
   sim_conditions <- sim_conditions %>%
     mutate(
