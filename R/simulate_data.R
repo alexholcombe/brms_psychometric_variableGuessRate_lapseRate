@@ -19,6 +19,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
     age_group = c("older","younger"),
     subjWithinGroup = seq(1, numSubjects), #subjects
     num_targets = targetNumConds, #number of targets particpant tracks
+    obj_per_ring = c("fewer","more"),
     trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
     speed = speeds
   )
@@ -33,17 +34,14 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
   # Set number of objects per ring based on lab
   sim_conditions <- sim_conditions %>%
     mutate(
-      obj_per_ring = case_when(
-        lab == "Roudaia" ~ sample(c(5,10), n(), replace=TRUE), #Rodaia and Faubert (2017) tested only 5 and 10 objects per ring
-        lab == "Holcombe" ~ sample(c(4,8), n(), replace = TRUE) #Holcombes lab tested only 4 and 8 objects per ring
-      )
+      obj_per_ring = if_else(lab=="Holcombe",if_else(obj_per_ring=="fewer",4,8),
+                                             if_else(obj_per_ring=="fewer",5,10)) #Roudaia lab
     )
   
   return (sim_conditions)
 }
 
-
-self_test<-FALSE
+self_test<-TRUE
 if (self_test) {
   laboratories<- c("Roudaia", "Holcombe")
   subjPerGroup<- 50
