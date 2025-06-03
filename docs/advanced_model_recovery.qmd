@@ -45,7 +45,7 @@ In order to build and test our model in brms, we must first create a simulated d
 trials <- generate_conditions_both_labs(numSubjects,trialsPerCondition,targetNumConds,speeds)
 
 #Print number of unique values of each column
-print('Number of values for each factor:')
+#print('Number of values for each factor:')
 numValsPerFactor<- trials |> summarise(across(everything(), ~ n_distinct(.))) |>
                               pivot_longer(everything())
 print( numValsPerFactor )
@@ -96,18 +96,80 @@ data_simulated <- data_simulated %>%
     
 # Plot data
 
+upper_bound = 1 - L*(1-C)
+
 ```{r}
 #| echo: false
 
-ggplot(data_simulated, aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
-  geom_point() + geom_line() +
+#Calculate threshold (eta) for each group*condition
+
+#data_one_subject_group <- data_simulated |> 
+#  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+#data_one_condition <- data_one_subject_group |> filter(num_targets==2)
+
+gg<- ggplot(data_simulated, #data_one_condition, 
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
+  #stat_summary(fun=mean,geom="point") +
+  stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
   labs(x = "Speed (revolutions per second)",
         y = "P(Correct)",
         title = "Simulated data") +
-  theme_bw()
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
 
-    # geom_hline(aes(yintercept = upper_bound, colour = "Upper Bound"), linetype = "dashed") +
+#Also show between-subject variability
+range <- function(x) {
+  data.frame(
+    y = mean(x), ymin = min(x), ymax = max(x)
+  )
+}
+SDrange <- function(x) {
+  data.frame(
+    y = mean(x),
+    ymin = mean(x) - 0.5*sd(x),
+    ymax = mean(x) + 0.5*sd(x)
+  )
+}
+
+#Can show variability as range or as CI
+#gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+#                     fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
+#Add confidence interval ribbon to show variability.
+gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),
+                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
+#Show floor  and ceiling with lines
+gg<- gg + geom_hline( aes(yintercept = chance_rate),
+                      colour = "purple", alpha=0.2 ) +
+     geom_hline( aes(yintercept = 1-lapse*(1-chance_rate)), 
+                 colour = "yellow3", alpha=0.8 )
+
+#Add threshold (location_parameter) lines by calculating average for each group of subjects,
+#including midpoint (threshold percent correct level)
+calc_midpoint <- function( chance_rate, lapse ) {
+  (chance_rate + 1-lapse*(1-chance_rate)) / 2
+}
+
+#calculate the threshold percent correct level, which differs by num_objects as well as lapse
+loc_param_each_group <- data_simulated |>
+        group_by(age_group, lab, num_targets) %>%
+        summarise(location_param = mean(location_param, na.rm = TRUE),
+                  #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
+                  midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
+                  .groups = "drop")
+
+gg<-  gg+ geom_segment(data = loc_param_each_group,
+                   aes(x = location_param, xend = location_param,
+                       y = 0, yend = midpoint,
+                       color=factor(num_targets)),
+                       linetype = "dashed",alpha=.4)#, color = "grey3")
+#This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
+gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
+show(gg)
+
+
+#geom_hline(aes(yintercept = 1-lapse*(1-chance_rate), colour = "Upper Bound"), linetype = "dashed") +
     # geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
     # geom_vline(aes(xintercept = 0.9, colour = "eta")) +
     # geom_line(aes(x = speed, y = probability_correct,
@@ -117,18 +179,6 @@ ggplot(data_simulated, aes(x=speed,y=p_correct,linetype=age_group,color=factor(n
     # scale_colour_manual(values = c("Upper Bound" = "blue", "Lower Bound" = "red", "eta" = "yellow", "Probability Correct" = "black")) +
 
 ```  
-
-#Convert these variables from vectors to factors
-data_simulated <- data_simulated %>%
-  mutate(
-    gender = as_factor(gender),
-    age_group = as_factor(age_group),
-    lab = as_factor(lab),
-    gender = as_factor(gender)
-  ) 
-
-
-
 
 # Setting up our Model in brms
 
@@ -171,6 +221,87 @@ my_priors <- c(
 )
 
 ```
+
+# Set priors
+
+See [visualize_and_select_priors.html](visualize_and_select_priors.html) for motivation.
+
+```{r}
+#| echo: false 
+lapse_param1<- 2
+lapse_param2<- 33.33
+
+eta_param1<- 0
+eta_param2<- 2.5
+
+logsigma_param1<- -3
+logsigma_param2<- 1.6
+
+#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
+lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
+eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
+
+# my_priors <- c(
+#   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+#   brms::set_prior(eta_prior_distribution, class = "b", nlpar = "eta", lb = 0, ub = 2.5),
+#   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+# )
+
+# define my priors
+my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
+                            class = "b", lb=0,ub=1),
+                brms::prior_string(eta_prior_distribution, nlpar="eta", 
+                            class = "b", lb=0,ub=2.5),
+                brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
+                            class="b",lb=-2,ub=1.6)  )
+
+```
+
+Visualize priors, by plotting them all together (with arbitrary height).
+
+```{r}
+#| echo: false
+
+# Create tibbles for each prior with a parameter label
+prior_lapse <- tibble(
+  x = seq(0, 1, length.out = 500),
+  y = dbeta(x, lapse_param1, lapse_param2),
+  parameter = "lapse"
+) |>
+  mutate(y = y / max(y)) #Normalize so has peak of 1
+
+prior_location <- tibble(
+  x = seq(-1, 10, length.out = 500),
+  y = dunif(x, eta_param1, eta_param2),
+  parameter = "location"
+) |>
+  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
+
+prior_scale <- tibble(
+  x = seq(-5, 5, length.out = 500),
+  y = dunif(x, logsigma_param1, logsigma_param2),
+  parameter = "log(sigma)"
+) |>
+  mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
+
+# Combine all priors
+priors_all <- bind_rows(prior_lapse, prior_location, prior_scale)
+
+# Plot
+ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "Parameter value",
+    y = "Density",
+    color = "Parameter"
+  ) + 
+  coord_cartesian( xlim=c(-4,4) ) +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
+```
+
 
 # Fitting Model to Simulated Data
 
