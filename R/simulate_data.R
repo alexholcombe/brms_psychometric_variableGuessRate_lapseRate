@@ -15,6 +15,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
   #Generate data frame for simulated data
   sim_conditions <- tidyr::expand_grid(
     subjWithinGroup = seq(1, numSubjects), #subjects
+    gender = c("F","M"),
     trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
     num_targets = targetNumConds, #number of targets particpant tracks
     speed = speeds
@@ -24,7 +25,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
   sim_conditions <- sim_conditions %>%
     group_by(subjWithinGroup) %>%
     mutate(
-      gender = sample(c("M","F"), 1, replace = TRUE),
+      #gender = sample(c("M","F"), 1, replace = TRUE),
       age_group = sample(c("younger", "older"), 1, replace = TRUE),
       lab = sample(laboratories, 1, replace = TRUE) 
     ) %>% ungroup()
@@ -42,7 +43,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
 }
 
 
-self_test<-TRUE
+self_test<-FALSE
 if (self_test) {
   laboratories<- c("Roudaia", "Holcombe")
   subjPerGroup<- 50

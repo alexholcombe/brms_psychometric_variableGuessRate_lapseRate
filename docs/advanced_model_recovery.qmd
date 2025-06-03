@@ -28,6 +28,7 @@ Set up simulated experiment design.
 
 ```{r}
 #| echo: true 
+laboratories<- c("Holcombe","Roudaia")
 numSubjects<- 50
 trialsPerCondition<- 8
 targetNumConds<- c(2,3)
@@ -42,7 +43,7 @@ In order to build and test our model in brms, we must first create a simulated d
 ```{r}
 #| echo: false 
 
-trials <- generate_conditions_both_labs(numSubjects,trialsPerCondition,targetNumConds,speeds)
+trials <- generate_conditions(laboratories,numSubjects,trialsPerCondition,targetNumConds,speeds)
 
 #Print number of unique values of each column
 #print('Number of values for each factor:')
@@ -201,7 +202,7 @@ my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
   eta ~ age_group + gender + lab,  # + gender + lab
   lapseRate ~ 1, #~1 means intercept only
-  logSigma ~ age_group,
+  logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
   nl = TRUE #non-linear model
 )
