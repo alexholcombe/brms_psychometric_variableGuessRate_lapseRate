@@ -14,6 +14,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
   
   #Generate data frame for simulated data
   sim_conditions <- tidyr::expand_grid(
+    lab= laboratories,
     subjWithinGroup = seq(1, numSubjects), #subjects
     gender = c("F","M"),
     trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
@@ -27,7 +28,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
     mutate(
       #gender = sample(c("M","F"), 1, replace = TRUE),
       age_group = sample(c("younger", "older"), 1, replace = TRUE),
-      lab = sample(laboratories, 1, replace = TRUE) 
+      #lab = sample(laboratories, 1, replace = TRUE) 
     ) %>% ungroup()
   
   # Set number of objects per ring based on lab
