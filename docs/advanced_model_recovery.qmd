@@ -258,7 +258,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ age_group + num_targets + lab,#  + gender
+  eta ~ num_targets,# age_group + num_targets + lab,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -387,6 +387,10 @@ Fitting the model gives an estimation of the average parameter value of the part
 # } else {
 #   print('No errors when fitting.') #print(result)
 # }
+
+cores_available <- parallel::detectCores()
+#set mc.cores option which is used by brms by default 
+options(mc.cores = cores_available)
 
 time <- try( system.time({ 
   fit <-
