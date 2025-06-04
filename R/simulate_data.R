@@ -34,7 +34,7 @@ generate_conditions<- function(laboratories,numSubjects,trialsPerCondition,targe
   return (sim_conditions)
 }
 
-self_test<-TRUE
+self_test<-FALSE
 if (self_test) {
   laboratories<- c("Roudaia", "Holcombe")
   subjPerGroup<- 50
