@@ -94,7 +94,7 @@ age_penalty <- 0.4 #Old people have worse limit by this much
 gender_penalty <- 0.1
 Holcombe_lab_penalty <- 0.2
 #Set parameters for differences between Ss in a group
-eta_between_subject_sd <- .2 #0.2 
+eta_between_subject_sd <- .01 #0.2 
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
@@ -369,23 +369,45 @@ Fitting the model gives an estimation of the average parameter value of the part
 ```{r}
 #| echo: false 
 
-fit <- try( brm(
-  my_brms_formula,
-  data = data_simulated,
-  prior = my_priors,
-  silent = 0, #prints more detailed messages (helps debug)
-  init = 0, #starting at
-  chains = 4, # the more chains, the greater convergence in the model
-  cores = 4, #how many parallel processes, speeds up model 
-  iter = 2000, #default number of iterations 
-  threads = threading(2) #how many cores work per chain
-  ), silent=FALSE
-)
+# fit <- try( brm(
+#   my_brms_formula,
+#   data = data_simulated,
+#   prior = my_priors,
+#   silent = 0, #prints more detailed messages (helps debug)
+#   init = 0, #starting at
+#   chains = 4, # the more chains, the greater convergence in the model
+#   cores = 4, #how many parallel processes, speeds up model 
+#   iter = 2000, #default number of iterations 
+#   threads = threading(2) #how many cores work per chain
+#   ), silent=FALSE
+# )
+# 
+# if (inherits(fit, "try-error")) {
+#   message("An error occurred!")
+# } else {
+#   print('No errors when fitting.') #print(result)
+# }
 
-if (inherits(fit, "try-error")) {
+time <- try( system.time({ 
+  fit <-
+    brm(
+      my_brms_formula,
+      data = data_simulated,
+      prior = my_priors,
+      silent = 0, #prints more detailed messages (helps debug)
+      init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
+      chains = 4, #4 is the default to check consistent convergence
+      iter = 1000 #2000 is default number of iterations 
+    ) 
+  }), #end of system.time
+ silent=FALSE) #End of try
+
+cat('Time taken (min) =', round( time["elapsed"] / 60. ,1) )
+
+if (inherits(time, "try-error")) {
   message("An error occurred!")
 } else {
-  print('No errors when fitting.') #print(result)
+  print('No errors when fitting.')
 }
 
 summary(fit)
@@ -403,12 +425,36 @@ Check how close the fit estimates are to the true parameters.
 #Grab the estimates column of the parameter estimates
 estimates<- as.data.frame( fixef(fit) )
 
+#Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
+#brms returns estimates relative to baseline eta_Intercept, 
+#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and num_targets, the reference group might be:
+# lab == "Holcombe" (if "Holcombe" is first alphabetically)
+#age_group == "younger" ( "older" is first alphabetically), gender == "F"
+#num_targets == 2 (if 2 is first)
+
+#So I need to calculate that reference value
+eta_reference_group <- data_simulated |> filter(lab=="Holcombe",age_group=="older",
+                                                gender=="F", num_targets==2)
+eta_reference<- eta_reference_group |> 
+                  summarise(eta_avg = mean(location_param), .groups="drop")
+eta_reference<- mean(eta_reference$eta_avg)
+print(eta_reference)
+
+# ground truth overall eta
+# The easiest way might be to group my data_simulated by all the factors and average those
+# location_param together
+eta_each_group <- data_simulated |>
+              group_by(lab,age_group,gender,num_targets) |>
+              summarise(eta_avg = mean(location_param), .groups="drop")
+true_eta_Intercept = mean(eta_each_group$eta_avg)
+
 #Create corresponding true values dataframe, to compare
 trueVal_eta_young <- mean(location_param_young_123targets[2:3])
 trueValsNamesInBrmParlance<-
-  c("eta_Intercept","eta_age_groupyounger","eta_genderM", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept","logSigma_age_groupyounger")
+  c("eta_Intercept","eta_age_groupyounger","eta_genderM", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_age_groupyounger")
 trueVal<-c( 
-     trueVal_eta_young - age_penalty, age_penalty, gender_penalty, Holcombe_lab_penalty, lapse, log(sigma), 0)
+     true_eta_Intercept, age_penalty, gender_penalty, Holcombe_lab_penalty,
+     lapse, log(sigma))#, 0)
 trueVal<- data.frame(trueVal)
 rownames(trueVal) <- trueValsNamesInBrmParlance
 
@@ -423,8 +469,7 @@ estimates <- estimates %>%
 estimates %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 2)))
 ```
 
-The fit converged with no errors!! :grinning: (this doesn't always happen, when for example we use more complicated models)
-
+The fit converged with no errors!!  (this doesn't always happen, when for example we use more complicated models)
 
 
 The fitted model's estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!
