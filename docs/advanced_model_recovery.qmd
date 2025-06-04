@@ -258,7 +258,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ age_group + gender + lab,  # + gender + lab
+  eta ~ age_group + gender + lab + num_targets,  # + gender + lab
   lapseRate ~ 1, #~1 means intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
