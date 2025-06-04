@@ -31,7 +31,7 @@ Set up simulated experiment design.
 ```{r}
 #| echo: true 
 laboratories<- c("Holcombe","Roudaia")
-numSubjects<- 50
+numSubjects<- 25
 trialsPerCondition<- 8
 targetNumConds<- c(2,3)
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
@@ -90,9 +90,9 @@ Choose values for psychometric function for younger and older
 lapse <- 0.05
 sigma <- 0.2
 location_param_young_123targets <- c(1.7,1.0,0.8)
-age_penalty <- 0.4 #Old people have worse limit by this much
-gender_penalty <- 0.1 #Female worse by this much
-Holcombe_lab_penalty <- 0.2
+age_penalty <- 0#0.4 #Old people have worse limit by this much
+gender_penalty <- 0#0.1 #Female worse by this much
+Holcombe_lab_penalty <- 0#0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- .01 #0.2 
 
@@ -251,6 +251,10 @@ The model we used is based off our psychometric function used to generate the da
 
 
 ```{r}
+#Create qualitative target load in case it being numeric is the problem for brms
+data_simulated<- data_simulated |> mutate( target_load = 
+                                      if_else(num_targets==2,"less","more") )
+
 my_formula <- brms::bf( 
    correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
   ) 
@@ -258,7 +262,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ num_targets,# age_group + num_targets + lab,#  + gender
+  eta ~ target_load,# age_group + num_targets + lab,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
