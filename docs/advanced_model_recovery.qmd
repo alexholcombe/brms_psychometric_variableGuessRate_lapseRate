@@ -406,7 +406,7 @@ estimates<- as.data.frame( fixef(fit) )
 #Create corresponding true values dataframe, to compare
 trueVal_eta_young <- mean(location_param_young_123targets[2:3])
 trueValsNamesInBrmParlance<-
-  c("eta_Intercept","eta_age_groupyounger","eta_genderM", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept","logSigma_age_groupyonger")
+  c("eta_Intercept","eta_age_groupyounger","eta_genderM", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept","logSigma_age_groupyounger")
 trueVal<-c( 
      trueVal_eta_young - age_penalty, age_penalty, gender_penalty, Holcombe_lab_penalty, lapse, log(sigma), 0)
 trueVal<- data.frame(trueVal)
