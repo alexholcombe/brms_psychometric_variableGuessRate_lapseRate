@@ -89,10 +89,10 @@ Choose values for psychometric function for younger and older
 lapse <- 0.05
 sigma <- 0.2
 
-location_param_base<-1.8 #location_param_young_123targets <- c(1.7,1.0,0.8)
+location_param_base<-1.7 #location_param_young_123targets <- c(1.7,1.0,0.8)
 target_penalty<-0.15
 
-age_penalty <- 0#0.4 #Old people have worse limit by this much
+age_penalty <- 0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.1 #Female worse by this much
 Holcombe_lab_penalty <- 0#0.2
 #Set parameters for differences between Ss in a group
@@ -112,7 +112,7 @@ location_param_calculate<- function(num_targets,age_group,gender,lab,
                       if_else(age_group=="older",1,0) * age_penalty -
                       if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
                       if_else(gender=="F",1,0) * gender_penalty -
-                      num_targets * target_penalty
+                      if_else(num_targets==3,1,0) * target_penalty
   return (after_penalties)
 }
 
@@ -256,7 +256,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ num_targets,# age_group + num_targets + lab,#  + gender
+  eta ~ num_targets + age_group,# + num_targets + lab,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
