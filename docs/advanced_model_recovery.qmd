@@ -32,7 +32,7 @@ Set up simulated experiment design.
 laboratories<- c("Holcombe","Roudaia")
 numSubjects<- 25
 trialsPerCondition<- 8
-targetNumConds<- c(2,3)
+targetLoads<-c("less","more") #targetNumConds<- c(2,3)
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
 speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
 
@@ -44,7 +44,7 @@ In order to build and test our model in brms, we must first create a simulated d
 ```{r}
 #| echo: false 
 
-trials <- generate_conditions(laboratories,numSubjects,trialsPerCondition,targetNumConds,speeds)
+trials <- generate_conditions(laboratories,numSubjects,trialsPerCondition,targetLoads,speeds)
 
 #Print number of unique values of each column
 #print('Number of values for each factor:')
@@ -54,7 +54,7 @@ print( numValsPerFactor )
 
 ```
 Create between-subject variability within each group, to create a potential multilevel modeling advantage. Can do this by passing the participant number to the location-parameter calculating function. Because that function will be called over and over, separately, the location parameter needs to be a deterministic function of the participant number. So it needs to calculate a hash or something to determine the location parameter. E.g. it could calculate the remainder, but then the location parameters wouldn't be centered on the intended value for that condition. To do that, I think I need to know the number of participants in the condition, n, and number them 1..n. Then I can give e.g. participant 1 the extreme value on one side of the condition-determined value and give participant n the extreme value on the other side.
-So I number participants separately even within age*gender to maintain the age and gender penalties, but not within speed, of course. Also not within num_targets or obj_per_ring.
+So I number participants separately even within age*gender to maintain the age and gender penalties, but not within speed, of course. Also not within targetLoad or obj_per_ring.
 
 Because the present purpose of numbering participants is to inject the right amount of between-participant variability, I will number the participants with a range of numbers that has  unit standard deviation. Will call this column "subjStandardized".
 
@@ -77,7 +77,7 @@ Because the present purpose of numbering participants is to inject the right amo
   
   #In case I need trial number, so far I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
-  #Assume the within-participant factors are obj_per_ring,num_targets, and speed
+  #Assume the within-participant factors are obj_per_ring,targetLoad, and speed
   trials <- trials |> group_by(lab,age_group,gender,subjWithinGroup) |> 
                       mutate(trial = row_number())
 ```
@@ -100,10 +100,10 @@ eta_between_subject_sd <- .01 #0.2
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
-location_param_calculate<- function(num_targets,age_group,gender,lab,
+location_param_calculate<- function(targetLoad,age_group,gender,lab,
                                     subjStandardized,eta_between_subject_sd) {
   
-  base_location_param <- location_param_base#location_param_young_123targets[num_targets]
+  base_location_param <- location_param_base#location_param_young_123targets[targetLoad]
   #calculate offset for this participant based on desired sigma_between_participant_variance
   location_param <- base_location_param + 
                     subjStandardized * eta_between_subject_sd
@@ -112,14 +112,14 @@ location_param_calculate<- function(num_targets,age_group,gender,lab,
                       if_else(age_group=="older",1,0) * age_penalty -
                       if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
                       if_else(gender=="F",1,0) * gender_penalty -
-                      if_else(num_targets==3,1,0) * target_penalty
+                      if_else(targetLoad=="more",1,0) * target_penalty
   return (after_penalties)
 }
 
 #Need version with fixed eta_between_subject_sd for use in mutate
-location_param_calc_for_mutate<- function(num_targets,age_group,gender,lab,
+location_param_calc_for_mutate<- function(targetLoad,age_group,gender,lab,
                                                subjStandardized) {
-  location_param_calculate(num_targets,age_group,gender,lab,
+  location_param_calculate(targetLoad,age_group,gender,lab,
                            subjStandardized, eta_between_subject_sd)
 }
   
@@ -138,7 +138,7 @@ data_simulated<- trials
 data_simulated <- data_simulated %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    location_param = location_param_calc_for_mutate(num_targets,age_group,gender,
+    location_param = location_param_calc_for_mutate(targetLoad,age_group,gender,
                                                     lab,subj_standardzd),
     p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
@@ -146,7 +146,7 @@ data_simulated <- data_simulated %>%
 
 #Create qualitative target load in case it being numeric is the problem for brms
 #data_simulated<- data_simulated |> mutate( target_load = 
-#                                      if_else(num_targets==2,"less","more") )
+#                                      if_else(targetLoad==2,"less","more") )
 
 ```    
     
@@ -161,10 +161,10 @@ upper_bound = 1 - L*(1-C)
 
 #data_one_subject_group <- data_simulated |> 
 #  filter(age_group=="younger",gender=="M",lab=="Holcombe")
-#data_one_condition <- data_one_subject_group |> filter(num_targets==2)
+#data_one_condition <- data_one_subject_group |> filter(targetLoad==2)
 
 gg<- ggplot(data_simulated, #data_one_condition, 
-            aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(targetLoad))) +
   #stat_summary(fun=mean,geom="point") +
   stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
@@ -189,10 +189,10 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
                      fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
-#gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+#gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
 #                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),
 #                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
 #Show floor  and ceiling with lines
@@ -209,7 +209,7 @@ calc_midpoint <- function( chance_rate, lapse ) {
 
 #calculate the threshold percent correct level, which differs by num_objects as well as lapse
 loc_param_each_group <- data_simulated |>
-        group_by(age_group, lab, num_targets) %>%
+        group_by(age_group, lab, targetLoad) %>%
         summarise(location_param = mean(location_param, na.rm = TRUE),
                   #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
                   midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
@@ -218,7 +218,7 @@ loc_param_each_group <- data_simulated |>
 gg<-  gg+ geom_segment(data = loc_param_each_group,
                    aes(x = location_param, xend = location_param,
                        y = 0, yend = midpoint,
-                       color=factor(num_targets)),
+                       color=factor(targetLoad)),
                        linetype = "dashed",alpha=.4)#, color = "grey3")
 #This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
 gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
@@ -256,7 +256,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ num_targets + age_group,# + num_targets + lab,#  + gender
+  eta ~ targetLoad + age_group,# + lab,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -429,13 +429,13 @@ estimates<- as.data.frame( fixef(fit) )
 
 #Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
 #brms returns estimates relative to baseline eta_Intercept, 
-#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and num_targets, the reference group might be:
+#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
 # lab == "Holcombe" (if "Holcombe" is first alphabetically)
 #age_group == "younger" ( "older" is first alphabetically), gender == "F"
-#num_targets == 2 (if 2 is first)
+#targetLoad == 2 (if 2 is first)
 #Calculate that reference value
 eta_reference_group <- data_simulated |> filter(lab=="Holcombe",age_group=="older",
-                                                gender=="F") #, num_targets==2)
+                                                gender=="F") #, targetLoad==2)
 true_eta_reference<- eta_reference_group |> 
                   summarise(eta_avg = mean(location_param), .groups="drop")
 true_eta_reference<- mean(true_eta_reference$eta_avg)
