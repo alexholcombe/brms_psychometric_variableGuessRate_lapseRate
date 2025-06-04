@@ -89,7 +89,10 @@ Choose values for psychometric function for younger and older
 #| echo: true 
 lapse <- 0.05
 sigma <- 0.2
-location_param_young_123targets <- c(1.7,1.0,0.8)
+
+location_param_base<-1.8 #location_param_young_123targets <- c(1.7,1.0,0.8)
+target_penalty<-0.15
+
 age_penalty <- 0#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.1 #Female worse by this much
 Holcombe_lab_penalty <- 0#0.2
@@ -101,7 +104,7 @@ eta_between_subject_sd <- .01 #0.2
 location_param_calculate<- function(num_targets,age_group,gender,lab,
                                     subjStandardized,eta_between_subject_sd) {
   
-  base_location_param <- location_param_young_123targets[num_targets]
+  base_location_param <- location_param_base#location_param_young_123targets[num_targets]
   #calculate offset for this participant based on desired sigma_between_participant_variance
   location_param <- base_location_param + 
                     subjStandardized * eta_between_subject_sd
@@ -109,7 +112,8 @@ location_param_calculate<- function(num_targets,age_group,gender,lab,
   after_penalties <-location_param - 
                       if_else(age_group=="older",1,0) * age_penalty -
                       if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
-                      if_else(gender=="F",1,0) * gender_penalty
+                      if_else(gender=="F",1,0) * gender_penalty -
+                      num_targets * target_penalty
   return (after_penalties)
 }
 
@@ -120,16 +124,6 @@ location_param_calc_for_mutate<- function(num_targets,age_group,gender,lab,
                            subjStandardized, eta_between_subject_sd)
 }
   
-#OLD
-#Using above parameters, need function to calculate a participant's location parameter
-# location_param_calculate<- function(num_targets,age_group,gender,lab) {
-#   
-#   base_location_param <- location_param_young_123targets[num_targets]
-#   after_penalties <- base_location_param - if_else(age_group=="older",1,0) * age_penalty -
-#                     if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
-#                     if_else(gender=="F",1,0) * gender_penalty
-#   return (after_penalties)
-# }
 ```
 
 
@@ -150,7 +144,11 @@ data_simulated <- data_simulated %>%
     p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
   )
-        
+
+#Create qualitative target load in case it being numeric is the problem for brms
+data_simulated<- data_simulated |> mutate( target_load = 
+                                      if_else(num_targets==2,"less","more") )
+
 ```    
     
 # Plot data
@@ -167,7 +165,7 @@ upper_bound = 1 - L*(1-C)
 #data_one_condition <- data_one_subject_group |> filter(num_targets==2)
 
 gg<- ggplot(data_simulated, #data_one_condition, 
-            aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(target_load))) +
   #stat_summary(fun=mean,geom="point") +
   stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
@@ -192,7 +190,7 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+gg<-gg+stat_summary( aes(group=interaction(age_group,target_load)),
                      fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
 #gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
@@ -212,7 +210,7 @@ calc_midpoint <- function( chance_rate, lapse ) {
 
 #calculate the threshold percent correct level, which differs by num_objects as well as lapse
 loc_param_each_group <- data_simulated |>
-        group_by(age_group, lab, num_targets) %>%
+        group_by(age_group, lab, target_load) %>%
         summarise(location_param = mean(location_param, na.rm = TRUE),
                   #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
                   midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
@@ -221,7 +219,7 @@ loc_param_each_group <- data_simulated |>
 gg<-  gg+ geom_segment(data = loc_param_each_group,
                    aes(x = location_param, xend = location_param,
                        y = 0, yend = midpoint,
-                       color=factor(num_targets)),
+                       color=factor(target_load)),
                        linetype = "dashed",alpha=.4)#, color = "grey3")
 #This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
 gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
@@ -251,9 +249,6 @@ The model we used is based off our psychometric function used to generate the da
 
 
 ```{r}
-#Create qualitative target load in case it being numeric is the problem for brms
-data_simulated<- data_simulated |> mutate( target_load = 
-                                      if_else(num_targets==2,"less","more") )
 
 my_formula <- brms::bf( 
    correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
