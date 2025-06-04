@@ -91,7 +91,7 @@ lapse <- 0.05
 sigma <- 0.2
 location_param_young_123targets <- c(1.7,1.0,0.8)
 age_penalty <- 0.4 #Old people have worse limit by this much
-gender_penalty <- 0.1
+gender_penalty <- 0.1 #Female worse by this much
 Holcombe_lab_penalty <- 0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- .01 #0.2 
@@ -258,8 +258,8 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ age_group + gender + lab + num_targets,  # + gender + lab
-  lapseRate ~ 1, #~1 means intercept only
+  eta ~ age_group + gender + lab,# + num_targets, 
+  lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
   nl = TRUE #non-linear model
@@ -396,7 +396,7 @@ time <- try( system.time({
       prior = my_priors,
       silent = 0, #prints more detailed messages (helps debug)
       init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
-      chains = 4, #4 is the default to check consistent convergence
+      chains = 3, #4 is the default to check consistent convergence
       iter = 1000 #2000 is default number of iterations 
     ) 
   }), #end of system.time
