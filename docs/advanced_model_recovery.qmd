@@ -162,7 +162,7 @@ upper_bound = 1 - L*(1-C)
 #data_one_condition <- data_one_subject_group |> filter(targetLoad==2)
 
 gg<- ggplot(data_simulated, #data_one_condition, 
-            aes(x=speed,y=p_correct,linetype=age_group,color=factor(targetLoad))) +
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(numTargets))) +
   #stat_summary(fun=mean,geom="point") +
   stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
@@ -187,7 +187,7 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
+gg<-gg+stat_summary( aes(group=interaction(age_group,numTargets)),
                      fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
 #gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
@@ -207,7 +207,7 @@ calc_midpoint <- function( chance_rate, lapse ) {
 
 #calculate the threshold percent correct level, which differs by num_objects as well as lapse
 loc_param_each_group <- data_simulated |>
-        group_by(age_group, lab, targetLoad) %>%
+        group_by(age_group, lab, numTargets) %>%
         summarise(location_param = mean(location_param, na.rm = TRUE),
                   #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
                   midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
@@ -216,7 +216,7 @@ loc_param_each_group <- data_simulated |>
 gg<-  gg+ geom_segment(data = loc_param_each_group,
                    aes(x = location_param, xend = location_param,
                        y = 0, yend = midpoint,
-                       color=factor(targetLoad)),
+                       color=factor(numTargets)),
                        linetype = "dashed",alpha=.4)#, color = "grey3")
 #This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
 gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
@@ -254,7 +254,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ age_group + lab,#  + gender
+  eta ~ age_group + numTargets,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
