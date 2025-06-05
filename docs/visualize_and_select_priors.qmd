@@ -23,9 +23,14 @@ Since lapse is a rate, it is bounded between 0 and 1. We know from previous lite
 As the tested population was reasonably well-motivated, high lapse valuables were unlikely, although not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.
 
 ```{r}
+lapse_param1<- 2
+lapse_param2<- 33.33
+```
+
+```{r}
 prior_lapse <- dplyr::tibble(
     x = seq(0, 1, length.out = 500),
-    y = dbeta(x, 2, 33.33)
+    y = dbeta(x, lapse_param1, lapse_param2)
 )
 
 ggplot(prior_lapse) + aes(x = x, y = y) +
@@ -43,10 +48,16 @@ ggplot(prior_lapse) + aes(x = x, y = y) +
 We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5. The lower bound was set at 0 as you cannot have negative speed . Holcombe and Chen (2013) found that even the best participant would have a speed threshold of less than 2.5 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) found that tracking of a single object on a mechanical display which is not confounded by a display's refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.
 
 ```{r}
+eta_param1<- 0
+eta_param2<- 2.5
+```
+
+
+```{r}
 #| echo: false 
 prior_location <- dplyr::tibble(
     x = seq(-1, 10, length.out = 500),
-    y = dunif(x, 0, 2.5)
+    y = dunif(x, eta_param1, eta_param2)
 )
 
 ggplot(prior_location) + aes(x = x, y = y) +
@@ -62,6 +73,12 @@ ggplot(prior_location) + aes(x = x, y = y) +
 ## Prior on Sigma/Scale $(\sigma)$
 
 Values of sigma can get extremely small and therefore tiny changes in the value of sigma can have significant effects, makeing it hard for brms to accurately estimate sigma. Therefore, our brms model is cast in terms of logsigma. We concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants based on looking at psychometric data from previous papers. Converting this with the log transform, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.
+
+```{r}
+logsigma_param1<- -3
+logsigma_param2<- 1.6
+```
+
 
 ```{r}
 #| echo: false 
@@ -125,6 +142,50 @@ ggplot(prior_scale) + aes(x = x, y = y) +
     x = "",
     y = ""
   )
+```
+
+Plot them all together
+
+```{r}
+#| echo: false
+
+# Create tibbles for each prior with a parameter label
+prior_lapse <- tibble(
+  x = seq(0, 1, length.out = 500),
+  y = dbeta(x, lapse_param1, lapse_param2),
+  parameter = "lapse"
+) |>
+  mutate(y = y / max(y)) #Normalize so has peak of 1
+
+
+prior_location <- tibble(
+  x = seq(-1, 10, length.out = 500),
+  y = dunif(x, eta_param1, eta_param2),
+  parameter = "location"
+) |>
+  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
+
+prior_scale <- tibble(
+  x = seq(-5, 5, length.out = 500),
+  y = dunif(x, logsigma_param1, logsigma_param2),
+  parameter = "log(sigma)"
+) |>
+  mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
+
+# Combine all priors
+priors_all <- bind_rows(prior_lapse, prior_location, prior_scale)
+
+# Plot
+ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "Parameter value",
+    y = "Density",
+    color = "Parameter"
+  ) + xlim(-4,4) +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
 ```
 
 Here is the code you can use when calling brms:

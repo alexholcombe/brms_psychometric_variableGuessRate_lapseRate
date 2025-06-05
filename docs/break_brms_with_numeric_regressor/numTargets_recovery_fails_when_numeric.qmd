@@ -17,8 +17,8 @@ rm(list = ls())
 library(tidyverse)
 library(brms)
 
-source("../R/simulate_data.R") #Load my needed custom function
-source("../R/psychometric_function.R") #Load my needed custom function
+source("simulate_data.R") #Load my needed custom function
+source("../../R/psychometric_function.R") #Load my needed custom function
 
 set.seed(999) #ensures reproducibility for testing
 
@@ -422,74 +422,46 @@ eta_age_groupyounger represents the eta advantage for the younger age group.
  
 The logSigma estimate tends to have wide confidence intervals.
 
-Check how close the fit estimates are to the true parameters.
+The numTargets estimate is broken if entered as numeric:
+
 ```{r}
 #| echo: false 
 
 #Grab the estimates column of the parameter estimates
-estimates<- as.data.frame( fixef(fit) )
+brms_estimates<- as.data.frame( fixef(fit) )
 
-#Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
-#brms returns estimates relative to baseline eta_Intercept, 
-#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
-# lab == "Holcombe" (if "Holcombe" is first alphabetically)
-#age_group == "younger" ( "older" is first alphabetically), gender == "F"
-#targetLoad == 2 (if 2 is first)
-#Calculate that reference value
-eta_reference_group <- data_simulated |> filter(lab=="Holcombe",age_group=="older",
-                                                gender=="F") #, targetLoad==2)
-true_eta_reference<- eta_reference_group |> 
-                  summarise(eta_avg = mean(location_param), .groups="drop")
-true_eta_reference<- mean(true_eta_reference$eta_avg)
-#print(eta_reference)
+estimates_numTargets<- brms_estimates["eta_numTargets", ]
 
-#Create corresponding true values dataframe, to compare
-trueVal_eta_young <- mean(location_param_young_123targets[2:3])
-trueValsNamesInBrmParlance<-
-  c("eta_Intercept","eta_age_groupyounger","eta_genderM", "eta_labRoudaia", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_age_groupyounger")
-trueVal<-c( 
-     true_eta_reference, age_penalty, gender_penalty, Holcombe_lab_penalty,
-     lapse, log(sigma))#, 0)
-trueVal<- data.frame(trueVal)
-rownames(trueVal) <- trueValsNamesInBrmParlance
-
-estimates <- merge(estimates, trueVal, by = "row.names", sort=FALSE)
-#Move trueVals column to second column so next to Estimate
-estimates <- estimates %>% select(1, trueVal, everything())
-
-
-
-#Assess size of discrepancies. Create new columns for that.
-estimates <- estimates %>%
-  mutate(discrepancy = trueVal - Estimate, .after = Estimate)
-estimates <- estimates %>%
-  mutate( outside_CI = 
-    case_when(
-      trueVal < Q2.5 ~ Q2.5 - trueVal,
-      trueVal > Q97.5 ~ trueVal - Q97.5,
-      TRUE ~ 0 #0 means it's not outside the CI
-    )
-  )
-
-#For some reason sigma is estimated inaccurately, so leave it out.
-est_no_sigma <- estimates %>% filter(!grepl("Sigma", Row.names))
-
-#round for pretty printing
-rounded<- estimates %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 2)))
-print(rounded)
-
-if (all(est_no_sigma$outside_CI==0)) {
-  print('All estimates (other than logSigma estimations) are within confidence interval of true value!')
-} else {
-  outside_CI_rows <- est_no_sigma %>% filter(outside_CI > 0)
-  cat('Estimates falling outside CI:')
-  outside_CI_rows_rounded <- outside_CI_rows %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 3)))
-  print( outside_CI_rows ) 
+if (break_brms_by_making_numTargets_numeric) {
+  print("See below brms' estimate for the effect of numTargets. It seems broken as the estimate is approximately zero with confidence interval of nearly zero width! Whereas when coded as a factor, it yields the correct estimate.")
+  print( round(estimates_numTargets,3) )
 }
 
+# Compare numTargets = 2 vs numTargets = 3 for a specific group:
+example_condition <- data.frame(
+  lab = "Holcombe",
+  age_group = "older",
+  gender = "F",
+  numTargets = c(2, 3),
+  # include other predictors as needed
+  speed = 1.5, # 
+  obj_per_ring = 8, 
+  subj_standardzd = 0,
+  chance_rate = 1/8
+)
+
+if (break_brms_by_making_numTargets_numeric) {
+  print("Similarly, predicting probability with 2 targets versus 3 yields a miniscule difference, as you'll see below.")
+
+}
+cat('Fitted values:')
+# Get fitted values (posterior mean of the linear predictor)
+fitted_values <- fitted(fit, newdata = example_condition, summary = TRUE)
+print(fitted_values)
+
+# Or get predicted probabilities (with uncertainty)
+predicted <- predict(fit, newdata = example_condition, summary = TRUE)
+
 ```
-
-
-The fitted model's estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!
 
 
