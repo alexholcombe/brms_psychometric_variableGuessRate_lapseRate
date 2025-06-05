@@ -18,7 +18,7 @@ generate_conditions<- function(laboratories,subjPerGroup,trialsPerCondition,targ
     gender = c("F","M"),
     age_group = c("older","younger"),
     subjWithinGroup = seq(1, subjPerGroup), #subjects
-    targetLoad = targetLoads#targetLoad = targetNumConds, #number of targets particpant tracks
+    targetLoad = targetLoads,#targetLoad = targetNumConds, #number of targets particpant tracks
     obj_per_ring = c("fewer","more"),
     trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
     speed = speeds
