@@ -95,7 +95,7 @@ target_penalty<-0.15
 
 age_penalty <- 0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.1 #Female worse by this much
-Holcombe_lab_penalty <- 0#0.2
+Holcombe_lab_penalty <- 0.07#0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- .01 #0.2 
 
@@ -110,6 +110,7 @@ location_param_calculate<- function(numTargets,age_group,gender,lab,
                     subjStandardized * eta_between_subject_sd
   
   after_penalties <-location_param - 
+                      if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
                       if_else(age_group=="older",1,0) * age_penalty -
                       if_else(numTargets=="three",1,0) * target_penalty -
                       if_else(gender=="F",1,0) * gender_penalty
@@ -256,7 +257,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ age_group + numTargets,#  + gender
+  eta ~ lab + age_group + numTargets,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
