@@ -365,6 +365,25 @@ ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
 Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see <https://paulbuerkner.com/brms/reference/brm.html>
 
 ```{r}
+#| echo: true 
+
+break_brms<- FALSE #Change factor to numeric
+if (break_brms) {
+  #Make numeric version of numTargets
+  data_simulated <- data_simulated |>
+    mutate(targets = case_when(
+      numTargets == "two" ~ 2,
+      numTargets == "three" ~ 3,
+      TRUE ~ 0
+    ))
+  #Delete old column
+  data_simulated$numTargets <- NULL #delete column
+  data_simulated <- data_simulated %>%
+    rename(numTargets = targets)
+}
+```
+
+```{r}
 #| echo: false 
 
 cores_available <- parallel::detectCores()
