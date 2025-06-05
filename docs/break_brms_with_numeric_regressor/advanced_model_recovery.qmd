@@ -17,8 +17,8 @@ rm(list = ls())
 library(tidyverse)
 library(brms)
 
-source("../R/simulate_data.R") #Load my needed custom function
-source("../R/psychometric_function.R") #Load my needed custom function
+source("simulate_data.R") #Load my needed custom function
+source("../../R/psychometric_function.R") #Load my needed custom function
 
 set.seed(999) #ensures reproducibility for testing
 
@@ -422,7 +422,19 @@ eta_age_groupyounger represents the eta advantage for the younger age group.
  
 The logSigma estimate tends to have wide confidence intervals.
 
-Check how close the fit estimates are to the true parameters.
+Show the numTargets estimate which is broken if entered as numeric.
+
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+estimates<- as.data.frame( fixef(fit) )
+
+eta_numTargetstwo
+estimates <- estimates %>% select
+
+```
+
 ```{r}
 #| echo: false 
 
