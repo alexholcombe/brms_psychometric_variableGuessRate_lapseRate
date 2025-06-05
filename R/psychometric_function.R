@@ -50,7 +50,7 @@ psychometric_function<- function(chance_rate,lapse_rate, speed,eta,sigma) {
   return (ans)
 }
 
-#Self tests below (really ought to use usethis)
+#Self tests below (really ought to use usethis, but that comes with all the package baggage)
 make_example_plot <- TRUE
 if (make_example_plot) {
   
