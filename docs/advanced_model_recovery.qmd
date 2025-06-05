@@ -17,12 +17,12 @@ rm(list = ls())
 library(tidyverse)
 library(brms)
 
-source("../R/simulate_data.R") #Load my needed custom function
-source("../R/psychometric_function.R") #Load my needed custom function
+source("simulate_data.R") #Load my needed custom function
+source("../../R/psychometric_function.R") #Load my needed custom function
 
 set.seed(999) #ensures reproducibility for testing
 
-break_brms_by_making_numTargets_numeric<- TRUE #Change factor to numeric, right before doing formula fit, so 
+break_brms_by_making_numTargets_numeric<- FALSE #Change factor to numeric, right before doing formula fit, so 
    #I know that it's brms that's the problem rather than the rest of my code
 ```
 
@@ -422,6 +422,56 @@ eta_age_groupyounger represents the eta advantage for the younger age group.
  
 The logSigma estimate tends to have wide confidence intervals.
 
+The numTargets estimate is broken if entered as numeric:
+
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+brms_estimates<- as.data.frame( fixef(fit) )
+
+estimates_numTargets<- brms_estimates["eta_numTargets", ]
+
+print("See below brms' estimate for the effect of numTargets.")
+
+if (break_brms_by_making_numTargets_numeric) {
+  print("It seems broken as the estimate is approximately zero with confidence interval of nearly zero width! Whereas when coded as a factor, it yields the correct estimate.")
+}
+print( round(estimates_numTargets,3) )
+
+
+# Compare numTargets = 2 vs numTargets = 3 for a specific group:
+example_condition <- data.frame(
+  lab = "Holcombe",
+  age_group = "older",
+  gender = "F",
+  numTargets = numTargetsConds,
+  speed = 1.5, # 
+  obj_per_ring = 8, 
+  subj_standardzd = 0,
+  chance_rate = 1/8
+)
+
+if (break_brms_by_making_numTargets_numeric) {
+  print("Similarly, predicting probability with 2 targets versus 3 yields a miniscule difference, as you'll see below.")
+
+}
+cat('Fitted values:')
+# Get fitted values (posterior mean of the linear predictor)
+fitted_values <- fitted(fit, newdata = example_condition, summary = TRUE)
+print(fitted_values)
+
+# Or get predicted probabilities (with uncertainty)
+predicted <- predict(fit, newdata = example_condition, summary = TRUE)
+
+```
+
+eta_intercept is the eta for the older group
+
+eta_age_groupyounger represents the eta advantage for the younger age group. 
+ 
+The logSigma estimate tends to have wide confidence intervals.
+
 Check how close the fit estimates are to the true parameters.
 ```{r}
 #| echo: false 
@@ -491,5 +541,6 @@ if (all(est_no_sigma$outside_CI==0)) {
 
 
 The fitted model's estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!
+
 
 
