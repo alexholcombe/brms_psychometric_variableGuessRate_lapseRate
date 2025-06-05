@@ -1,10 +1,9 @@
 library(tidyverse)
-library(brms)
 
 # Creating Simulated Data
 # In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
-generate_conditions<- function(laboratories,subjPerGroup,trialsPerCondition,targetLoads,speedsPerCond) {
+generate_conditions<- function(numTargets,subjPerGroup,trialsPerCondition,targetLoads,speedsPerCond) {
   #e.g.:
   #subjPerGroup<- 50
   #trialsPerCondition<- 5
@@ -14,7 +13,7 @@ generate_conditions<- function(laboratories,subjPerGroup,trialsPerCondition,targ
   
   #Generate data frame for simulated data
   sim_conditions <- tidyr::expand_grid(
-    lab= laboratories,
+    numTargets= numTargets,
     gender = c("F","M"),
     age_group = c("older","younger"),
     subjWithinGroup = seq(1, subjPerGroup), #subjects
@@ -24,6 +23,7 @@ generate_conditions<- function(laboratories,subjPerGroup,trialsPerCondition,targ
     speed = speeds
   )
   
+  sim_conditions$lab<-"Holcombe" #temp
   # Set number of objects per ring based on lab
   sim_conditions <- sim_conditions %>%
     mutate(
@@ -36,14 +36,14 @@ generate_conditions<- function(laboratories,subjPerGroup,trialsPerCondition,targ
 
 self_test<-FALSE
 if (self_test) {
-  laboratories<- c("Roudaia", "Holcombe")
+  numTargets<-c(2,3) #laboratories<- c("Roudaia", "Holcombe")
   subjPerGroup<- 25
   trialsPerCond<- 8
   targetLoads<-c("less","more") #targetNumConds<- c(2,3)
   #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
   speeds<-seq(.02,1.7, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   
-  trials <- generate_conditions(laboratories,subjPerGroup,
+  trials <- generate_conditions(numTargets,subjPerGroup,
                                 trialsPerCond,targetLoads,speeds)
   
   #Print number of unique values of each column

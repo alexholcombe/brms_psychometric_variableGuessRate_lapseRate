@@ -29,10 +29,10 @@ Set up simulated experiment design.
 
 ```{r}
 #| echo: true 
-laboratories<- c("Holcombe","Roudaia")
+numTargets<-c(2,3) #laboratories<- c("Holcombe","Roudaia")
 numSubjects<- 25
 trialsPerCondition<- 8
-targetLoads<-c("less","more") #targetNumConds<- c(2,3)
+targetLoads<-c("not used","not used") #targetNumConds<- c(2,3)
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
 speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
 
@@ -44,7 +44,7 @@ In order to build and test our model in brms, we must first create a simulated d
 ```{r}
 #| echo: false 
 
-trials <- generate_conditions(laboratories,numSubjects,trialsPerCondition,targetLoads,speeds)
+trials <- generate_conditions(numTargets,numSubjects,trialsPerCondition,targetLoads,speeds)
 
 #Print number of unique values of each column
 #print('Number of values for each factor:')
@@ -90,17 +90,17 @@ lapse <- 0.05
 sigma <- 0.2
 
 location_param_base<-1.7 #location_param_young_123targets <- c(1.7,1.0,0.8)
-target_penalty<-0
+target_penalty<-0.15
 
 age_penalty <- 0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.1 #Female worse by this much
-Holcombe_lab_penalty <- 0.15#0.2
+Holcombe_lab_penalty <- 0.1#0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- .01 #0.2 
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
-location_param_calculate<- function(targetLoad,age_group,gender,lab,
+location_param_calculate<- function(numTargets,age_group,gender,lab,
                                     subjStandardized,eta_between_subject_sd) {
   
   base_location_param <- location_param_base#location_param_young_123targets[targetLoad]
@@ -110,9 +110,10 @@ location_param_calculate<- function(targetLoad,age_group,gender,lab,
   
   after_penalties <-location_param - 
                       if_else(age_group=="older",1,0) * age_penalty -
+                      (numTargets-2) * target_penalty - 
                       if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
-                      if_else(gender=="F",1,0) * gender_penalty -
-                      if_else(targetLoad=="more",1,0) * target_penalty
+                      if_else(gender=="F",1,0) * gender_penalty 
+                      #if_else(targetLoad=="more",1,0) * target_penalty
   return (after_penalties)
 }
 
@@ -138,7 +139,7 @@ data_simulated<- trials
 data_simulated <- data_simulated %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    location_param = location_param_calc_for_mutate(targetLoad,age_group,gender,
+    location_param = location_param_calc_for_mutate(numTargets,age_group,gender,
                                                     lab,subj_standardzd),
     p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
@@ -164,7 +165,7 @@ upper_bound = 1 - L*(1-C)
 #data_one_condition <- data_one_subject_group |> filter(targetLoad==2)
 
 gg<- ggplot(data_simulated, #data_one_condition, 
-            aes(x=speed,y=p_correct,linetype=age_group,color=factor(targetLoad))) +
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(numTargets))) +
   #stat_summary(fun=mean,geom="point") +
   stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
@@ -189,10 +190,10 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
+gg<-gg+stat_summary( aes(group=interaction(age_group,numTargets)),
                      fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
-#gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
+#gg<-gg+stat_summary( aes(group=interaction(age_group,numTargets)),
 #                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),
 #                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
 #Show floor  and ceiling with lines
@@ -209,7 +210,7 @@ calc_midpoint <- function( chance_rate, lapse ) {
 
 #calculate the threshold percent correct level, which differs by num_objects as well as lapse
 loc_param_each_group <- data_simulated |>
-        group_by(age_group, lab, targetLoad) %>%
+        group_by(age_group, lab, numTargets) %>%
         summarise(location_param = mean(location_param, na.rm = TRUE),
                   #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
                   midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
@@ -218,7 +219,7 @@ loc_param_each_group <- data_simulated |>
 gg<-  gg+ geom_segment(data = loc_param_each_group,
                    aes(x = location_param, xend = location_param,
                        y = 0, yend = midpoint,
-                       color=factor(targetLoad)),
+                       color=factor(numTargets)),
                        linetype = "dashed",alpha=.4)#, color = "grey3")
 #This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
 gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
@@ -256,7 +257,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ age_group + lab,#  + gender
+  eta ~ age_group + numTargets,#lab,#  + gender
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
