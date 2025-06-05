@@ -3,7 +3,7 @@ library(tidyverse)
 # Creating Simulated Data
 # In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
-generate_conditions<- function(numTargetsConds,subjPerGroup,trialsPerCondition,speedsPerCond) {
+generate_conditions<- function(labs,numTargetsConds,subjPerGroup,trialsPerCondition,speedsPerCond) {
   #e.g.:
   #subjPerGroup<- 50
   #trialsPerCondition<- 5
@@ -20,7 +20,7 @@ generate_conditions<- function(numTargetsConds,subjPerGroup,trialsPerCondition,s
     obj_per_ring = c("fewer","more"),
     trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
     speed = speeds,
-    lab="Holcombe"
+    lab=labs
   )
   
   # Set number of objects per ring based on lab
@@ -36,12 +36,13 @@ generate_conditions<- function(numTargetsConds,subjPerGroup,trialsPerCondition,s
 self_test<-FALSE
 if (self_test) {
   numTargetsConds<- c("two", "three")
+  labs<- c("Holcombe","Roudaia")
   subjPerGroup<- 25
   trialsPerCond<- 8
   #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
   speeds<-seq(.02,1.7, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   
-  trials <- generate_conditions(numTargetsConds,subjPerGroup,
+  trials <- generate_conditions(labs,numTargetsConds,subjPerGroup,
                                 trialsPerCond,speeds)
   
   #Print number of unique values of each column
@@ -80,13 +81,13 @@ if (self_test) {
   #Assume the within-participant factors are obj_per_ring,targetLoad, and speed
   trials <- trials |> group_by(numTargets,trialThisCond,age_group,gender,subjWithinGroup) |> 
     mutate(trial = row_number())
-  cat('Trials per participant should be ',2*length(numTargets)*length(speeds),
+  cat('Trials per participant should be ',2*length(numTargetsConds)*length(speeds),
       'and it is:',max(trials$trial))
   
   #Check that subject behaves like I expect.
   data_one_subject_group <- trials |> 
     filter(age_group=="younger",gender=="M",lab=="Holcombe")
-  trialsPerSubject<- length(targetLoads) * 2 * length(speeds) * trialsPerCond
+  trialsPerSubject<- length(numTargetsConds) * 2 * length(speeds) * trialsPerCond
   subjectsTrials<- table(data_one_subject_group$subjWithinGroup)
   distinctTrialsPerSubject <- unique(subjectsTrials)
   if (length(distinctTrialsPerSubject) > 1) {
@@ -101,7 +102,7 @@ if (self_test) {
   }
   
   data_one_subject_cond <- trials |> 
-    filter(targetLoad=="less",age_group=="younger",gender=="M",lab=="Holcombe")
+    filter(numTargets=="three",age_group=="younger",gender=="M",lab=="Holcombe")
   
   numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
   if (numSsPerGroup != subjPerGroup) {
