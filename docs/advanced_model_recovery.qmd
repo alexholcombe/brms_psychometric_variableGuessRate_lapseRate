@@ -93,13 +93,13 @@ Choose values for psychometric function for younger and older
 lapse <- 0.05
 sigma <- 0.2
 
-location_param_base<-1.7 #location_param_young_123targets <- c(1.7,1.0,0.8)
-target_penalty<-0.15 #penalty for additional target
-age_penalty <- 0.2#0.4 #Old people have worse limit by this much
-gender_penalty <- 0.09#0.1 #Female worse by this much
-Holcombe_lab_penalty <- 0.07#0.2
+location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
+target_penalty<-0 #0.15 #penalty for additional target
+age_penalty <- 0 #0.2#0.4 #Old people have worse limit by this much
+gender_penalty <- 0 #0.09 #Female worse by this much
+Holcombe_lab_penalty <- 0 #0.07#0.2
 #Set parameters for differences between Ss in a group
-eta_between_subject_sd <- 0.2 
+eta_between_subject_sd <- 0 # 0.2 
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
