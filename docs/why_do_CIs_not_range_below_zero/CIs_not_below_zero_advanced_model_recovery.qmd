@@ -16,9 +16,11 @@ rm(list = ls())
 
 library(tidyverse)
 library(brms)
+library(here) #For finding home directory
 
-source("../R/simulate_data.R") #Load my needed custom function
-source("../R/psychometric_function.R") #Load my needed custom function
+ 
+source( here("R","simulate_data.R") )  #Load my needed custom function
+source( here("R","psychometric_function.R") ) #Load my needed custom function
 
 set.seed(999) #ensures reproducibility for testing
 
@@ -537,7 +539,7 @@ if (all(est_no_sigma$outside_CI==0)) {
   print('Other than overall and logSigma, all estimates are within confidence interval of true value!')
 } else {
   outside_CI_rows <- est_no_sigma %>% filter(outside_CI > 0)
-  cat('Estimates falling outside CI:')
+  print('Estimates falling outside CI:')
   outside_CI_rows_rounded <- outside_CI_rows %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 3)))
   print( outside_CI_rows ) 
 }
