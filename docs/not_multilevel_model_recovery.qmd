@@ -490,8 +490,8 @@ if (abs(discrepancy)<0.1) {
   print("Success. Looks like I/brms calculated/estimated the reference group logSigma correctly.")
 } else {
   cat("Discrepancy of",round(discrepancy,2),
-      "between my calculation of logSigma,",round(true_logSigma,2),
-        "and what brms calculated,",round(eta_logSigma,2))
+      "between true logSigma,",round(true_logSigma,2),
+        "and what brms estimated,",round(eta_logSigma,2))
 }
   
 ```
