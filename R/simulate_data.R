@@ -10,17 +10,26 @@ generate_conditions<- function(labs,numTargetsConds,subjPerGroup,trialsPerCondit
   #targetNumConds<- c(2,3)
   #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
   #speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
+
+  #For brms, to interpret coefficients, you need to know your factors' order.
+  #The first level of your factor is the reference in the model summary. Otherwise will use alphabetized
+  genders<- factor( c("M", "F"), 
+                    levels = c("M", "F") ) #This defines the factor order
+  age_groups<- factor( c("younger","older"),
+                       levels=c("younger","older") ) #This defines the factor order
+  obj_per_rings<- factor( c("fewer","more"),
+                          levels=c("fewer","more") ) #This defines the factor order
   
   #Generate data frame for simulated data
   sim_conditions <- tidyr::expand_grid(
-    numTargets= numTargetsConds,
-    gender = c("F","M"),
-    age_group = c("older","younger"),
+    lab = labs,
+    gender = genders,
+    age_group = age_groups,
     subjWithinGroup = seq(1, subjPerGroup), #subjects
-    obj_per_ring = c("fewer","more"),
-    trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
+    num_targets = numTargetsConds, #number of targets participant tracks
+    obj_per_ring = obj_per_rings,
     speed = speeds,
-    lab=labs
+    trialThisCond = seq(1,trialsPerCondition), #replicates of each trial combination
   )
   
   # Set number of objects per ring based on lab
@@ -35,14 +44,18 @@ generate_conditions<- function(labs,numTargetsConds,subjPerGroup,trialsPerCondit
 
 self_test<-FALSE
 if (self_test) {
-  numTargetsConds<- c("two", "three")
-  labs<- c("Holcombe","Roudaia")
+  numTargetsConds<- factor( c("two", "three"),
+                         levels=c("two", "three") ) #This defines the factor order
+  
+  laboratories<- factor( c("Roudaia", "Holcombe"),
+                         levels=c("Roudaia", "Holcombe") ) #This defines the factor order
+  
   subjPerGroup<- 25
   trialsPerCond<- 8
   #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
   speeds<-seq(.02,1.7, length.out = 12) # trials at 12 different speeds between .02 and 1.8
   
-  trials <- generate_conditions(labs,numTargetsConds,subjPerGroup,
+  trials <- generate_conditions(laboratories,numTargetsConds,subjPerGroup,
                                 trialsPerCond,speeds)
   
   #Print number of unique values of each column
@@ -57,7 +70,7 @@ if (self_test) {
   #so the combinations are not balanced.
   #If it has exactly one row, then all combinations occur equally often (i.e., are balanced).
   unbalanced<- trials %>% 
-    group_by(numTargets, gender, age_group, subjWithinGroup, obj_per_ring) %>%
+    group_by(num_targets, gender, age_group, subjWithinGroup, obj_per_ring) %>%
     summarise(numGroups = n(), .groups = "drop") %>%
     count(numGroups)
   unbalanced <- nrow(unbalanced) > 1
@@ -67,7 +80,7 @@ if (self_test) {
   }
   
   #Confirm that each condition has trials numbered 1 to trialsPerCond
-  groupedByCond<- trials |> group_by(numTargets,gender,age_group,subjWithinGroup,
+  groupedByCond<- trials |> group_by(num_targets,gender,age_group,subjWithinGroup,
                                      obj_per_ring,speed) 
   groupedByCond<- groupedByCond |> summarise(n=n(),.groups="drop") |> 
     select(n)  |> distinct() #Should be one row only
@@ -79,10 +92,10 @@ if (self_test) {
   #So far I don't have a trial number for the subject, I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
   #Assume the within-participant factors are obj_per_ring,targetLoad, and speed
-  trials <- trials |> group_by(numTargets,trialThisCond,age_group,gender,subjWithinGroup) |> 
+  trials <- trials |> group_by(num_targets,trialThisCond,age_group,gender,subjWithinGroup) |> 
     mutate(trial = row_number())
   cat('Trials per participant should be ',2*length(numTargetsConds)*length(speeds),
-      'and it is:',max(trials$trial))
+      'and it is:',max(trials$trial),'\n')
   
   #Check that subject behaves like I expect.
   data_one_subject_group <- trials |> 
@@ -94,7 +107,7 @@ if (self_test) {
     print('Somehow different subjects have different numbers of trials.')
   }
   cat('Trials per participant should be ',trialsPerSubject,
-      'and it is:',as.numeric(subjectsTrials[1]))
+      'and it is:',as.numeric(subjectsTrials[1]),'\n')
   
   numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
   if (numSsPerGroup != subjPerGroup) {
@@ -102,7 +115,7 @@ if (self_test) {
   }
   
   data_one_subject_cond <- trials |> 
-    filter(numTargets=="three",age_group=="younger",gender=="M",lab=="Holcombe")
+    filter(num_targets=="three",age_group=="younger",gender=="M",lab=="Holcombe")
   
   numSsPerGroup <- length( table(data_one_subject_group$subjWithinGroup) )
   if (numSsPerGroup != subjPerGroup) {
