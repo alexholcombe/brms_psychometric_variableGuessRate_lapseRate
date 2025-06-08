@@ -1,0 +1,733 @@
+---
+title: "Psychophysical model recovery using Bayesian brms"
+format: html
+---
+
+Will generate fake data that includes differences between participants, but doesn't model them.
+
+
+To get started, we load the required packages.
+
+```{r}
+#| warning: false 
+#| output: false
+rm(list = ls())
+
+library(here) #To find path of home directory of repo
+library(tidyverse)
+library(brms)
+
+source( here("R","simulate_data.R") )  #Load my needed custom function
+source( here("R","psychometric_function.R") ) #Load my needed custom function
+
+set.seed(999) #ensures reproducibility for testing
+
+break_brms_by_making_num_targets_numeric<- FALSE #Change factor to numeric, right before doing formula fit, so 
+   #I know that it's brms that's the problem rather than the rest of my code
+```
+
+# Create simulated trials
+
+Set up simulated experiment design.
+
+```{r}
+#| echo: true 
+num_targetsConds<- factor( c("two", "three"),
+                         levels=c("two", "three") ) #This defines the factor order
+numSubjects<- 25
+trialsPerCondition<- 8
+laboratories<- factor( c("Roudaia", "Holcombe"),
+                         levels=c("Roudaia", "Holcombe") ) #This defines the factor order
+#Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
+speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
+
+```
+
+Determine what subset of data brms will model, to test what breaks logSigma estimation.
+
+```{r}
+#| echo: true
+example_condition <- data.frame(
+  lab = "Roudaia", #first level
+  age_group = "younger", #first level
+  gender = "M", #first level
+  num_targets = "two", #first level
+  obj_per_ring = 5, #first level? confusing because mixed effect
+  chance_rate = 1/5,
+  subj_standardzd = 0
+)
+```
+
+In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
+
+
+```{r}
+#| echo: false 
+
+trials <- generate_conditions(laboratories,num_targetsConds,numSubjects,trialsPerCondition,speeds)
+
+#Print number of unique values of each column
+#print('Number of values for each factor:')
+numValsPerFactor<- trials |> summarise(across(everything(), ~ n_distinct(.))) |>
+                              pivot_longer(everything())
+print( numValsPerFactor )
+
+```
+Create between-subject variability within each group, to create a potential multilevel modeling advantage. Can do this by passing the participant number to the location-parameter calculating function. Because that function will be called over and over, separately, the location parameter needs to be a deterministic function of the participant number. So it needs to calculate a hash or something to determine the location parameter. E.g. it could calculate the remainder, but then the location parameters wouldn't be centered on the intended value for that condition. To do that, I think I need to know the number of participants in the condition, n, and number them 1..n. Then I can give e.g. participant 1 the extreme value on one side of the condition-determined value and give participant n the extreme value on the other side.
+So I number participants separately even within age*gender to maintain the age and gender penalties, but not within speed, of course. Also not within targetLoad or obj_per_ring.
+
+Because the present purpose of numbering participants is to inject the right amount of between-participant variability, I will number the participants with a range of numbers that has  unit standard deviation. Will call this column "subjStandardized".
+
+```{r}
+#| echo: false
+
+  #Renumber subjWithinCond to be standardized, centered on zero and have unit standard deviation, so that that person's unique params 
+  # can be assigned by multiplying subjWithinCond by the variance, because then the standard
+  # deviation 
+  # adding it to the designated mean val.
+  center_on_zero_and_standardize_std <- function(x,vals) {
+    centered <- (x - mean(vals)) / sd(vals)
+    return(centered)
+  }
+
+  trials<-trials |> 
+    mutate( subj_standardzd = center_on_zero_and_standardize_std(subjWithinGroup,
+                                                          unique(trials$subjWithinGroup))
+          )
+  
+  #In case I need trial number, so far I only have a trialThisCond column
+  #Calculate a trial number numbering the entirety of the trials the subject is given
+  #Assume the within-participant factors are obj_per_ring,targetLoad, and speed
+  trials <- trials |> group_by(lab,num_targets,age_group,gender,subjWithinGroup) |> 
+                      mutate(trial = row_number())
+```
+
+## Choose values for psychometric function for all conditions and groups
+
+```{r}
+#| echo: true 
+lapse <- 0.05
+sigma <- 0.2
+
+location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
+target_penalty<-0.15 #penalty for additional target
+age_penalty <- 0.2#0.4 #Old people have worse limit by this much
+gender_penalty <- 0.09 #Female worse by this much
+Holcombe_lab_penalty <- 0.07#0.2
+#Set parameters for differences between Ss in a group
+eta_between_subject_sd <- 0.2 
+
+#Using above parameters, need function to calculate a participant's location parameter
+#Include optional between_subject_variance
+location_param_calculate<- function(num_targets,age_group,gender,lab,
+                                    subjStandardized,eta_between_subject_sd) {
+  
+  base_location_param <- location_param_base#location_param_young_123targets[targetLoad]
+  #calculate offset for this participant based on desired sigma_between_participant_variance
+  location_param <- base_location_param + 
+                    subjStandardized * eta_between_subject_sd
+  
+  after_penalties <-location_param - 
+                      if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
+                      if_else(age_group=="older",1,0) * age_penalty -
+                      if_else(num_targets=="three",1,0) * target_penalty -
+                      if_else(gender=="F",1,0) * gender_penalty
+  return (after_penalties)
+}
+
+#Need version with fixed eta_between_subject_sd for use in mutate
+location_param_calc_for_mutate<- function(num_targets,age_group,gender,lab,
+                                               subjStandardized) {
+  location_param_calculate(num_targets,age_group,gender,lab,
+                           subjStandardized, eta_between_subject_sd)
+}
+  
+```
+
+
+Using the psychometric function, simulate whether participant is correct on each trial or not, and add that to the simulated data.
+
+```{r}
+#| echo: false
+
+data_simulated<- trials
+
+#Add column for the probability of each trial being correct based on our psychometric function
+#then use that to add column to generate if the subject got the trial correct
+data_simulated <- data_simulated %>%
+  mutate(
+    chance_rate = 1/obj_per_ring,
+    location_param = location_param_calc_for_mutate(num_targets,age_group,gender,
+                                                    lab,subj_standardzd),
+    p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
+    correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
+  )
+
+#Create qualitative target load in case it being numeric is the problem for brms
+#data_simulated<- data_simulated |> mutate( target_load = 
+#                                      if_else(targetLoad==2,"less","more") )
+
+```    
+    
+# Plot data
+
+upper_bound = 1 - L*(1-C)
+
+```{r}
+#| echo: false
+
+#Calculate threshold (eta) for each group*condition
+
+#data_one_subject_group <- data_simulated |> 
+#  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+#data_one_condition <- data_one_subject_group |> filter(targetLoad==2)
+
+gg<- ggplot(data_simulated, #data_one_condition, 
+            aes(x=speed,y=p_correct,linetype=age_group,color=factor(num_targets))) +
+  #stat_summary(fun=mean,geom="point") +
+  stat_summary(fun=mean,geom="line")  +
+  facet_grid(lab~obj_per_ring) +
+  labs(x = "Speed (revolutions per second)",
+        y = "P(Correct)",
+        title = "Simulated data") +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
+
+#Also show between-subject variability
+range <- function(x) {
+  data.frame(
+    y = mean(x), ymin = min(x), ymax = max(x)
+  )
+}
+SDrange <- function(x) {
+  data.frame(
+    y = mean(x),
+    ymin = mean(x) - 0.5*sd(x),
+    ymax = mean(x) + 0.5*sd(x)
+  )
+}
+
+#Can show variability as range or as CI
+gg<-gg+stat_summary( aes(group=interaction(age_group,num_targets)),
+                     fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
+#Add confidence interval ribbon to show variability.
+#gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
+#                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),
+#                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
+#Show floor  and ceiling with lines
+gg<- gg + geom_hline( aes(yintercept = chance_rate),
+                      colour = "purple", alpha=0.2 ) +
+     geom_hline( aes(yintercept = 1-lapse*(1-chance_rate)), 
+                 colour = "yellow3", alpha=0.8 )
+
+#Add threshold (location_parameter) lines by calculating average for each group of subjects,
+#including midpoint (threshold percent correct level)
+calc_midpoint <- function( chance_rate, lapse ) {
+  (chance_rate + 1-lapse*(1-chance_rate)) / 2
+}
+
+#calculate the threshold percent correct level, which differs by num_objects as well as lapse
+loc_param_each_group <- data_simulated |>
+        group_by(age_group, lab, num_targets) %>%
+        summarise(location_param = mean(location_param, na.rm = TRUE),
+                  #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
+                  midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
+                  .groups = "drop")
+
+gg<-  gg+ geom_segment(data = loc_param_each_group,
+                   aes(x = location_param, xend = location_param,
+                       y = 0, yend = midpoint,
+                       color=factor(num_targets)),
+                       linetype = "dashed",alpha=.4)#, color = "grey3")
+#This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
+gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
+show(gg)
+
+
+#geom_hline(aes(yintercept = 1-lapse*(1-chance_rate), colour = "Upper Bound"), linetype = "dashed") +
+    # geom_hline(aes(yintercept = 0.25 , colour = "Lower Bound"), linetype = "dashed") +
+    # geom_vline(aes(xintercept = 0.9, colour = "eta")) +
+    # geom_line(aes(x = speed, y = probability_correct,
+    #               colour = "Probability Correct")) +
+    # theme_light() +
+    # lims(x = c(0,2.5), y = c(0,1)) +
+    # scale_colour_manual(values = c("Upper Bound" = "blue", "Lower Bound" = "red", "eta" = "yellow", "Probability Correct" = "black")) +
+
+```  
+
+# Setting up our Model in brms
+
+Setting a model formula in brms allows the use of multilevel models, where there is a hierarchical structure in the data. But at this point we haven't made the model multi-level as we have been concentrating on the basics of brms.
+
+The bf() function of brms allows the specification of a formula. The parameter can be defined by population effects, where the parameter's effect is fixed, or group level effects where the parameter varies with a variable such as age. The "family" argument is a description of the response distribution and link function that the model uses. For more detailed information on setting up a formula and the different arguments in BRMS see<https://paulbuerkner.com/brms/reference/brmsformula.html>
+
+The model we used is based off our psychometric function used to generate the data mentioned previously. The only explicitly-coded difference in our simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allowed $\eta$ and $\log(\sigma)$ to vary by age group in the model. Because the psychometric function doesn't map onto a canonical link function, we use the non-linear estimation capability of brms rather than linear regression with a link function.
+
+*Alex's note: Using the nonlinear option is also what allowed us to set a prior on the thresholds  $\eta$, because we could then parametrize the function in terms of the x-intercept, whereas with the link-function approach, we are stuck with the conventional parameterization of a line, which [has a term for the y-intercept but not the x-intercept](https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z) *
+
+
+## This example
+
+**For this minimal example, don't model any factors and only use the data of conditions specified by example_condition**
+
+```{r}
+#| echo: false 
+#Reduce data_simulated to example_condition
+data_simulated <- data_simulated %>%
+  semi_join(example_condition, by = names(example_condition))
+```
+
+
+```{r}
+#Minimal example for eta, so don't model sigma, supply it in the data
+data_simulated$logSigma<- log(sigma)
+
+my_formula <- brms::bf( 
+   correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
+  ) 
+my_formula <- my_formula$formula
+  
+my_brms_formula <- brms::bf(
+  correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
+  eta ~ 1, #lab + age_group + num_targets + gender,
+  lapseRate ~ 1, #~1 estimates intercept only
+  #logSigma ~ 1,#age_group,
+  family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
+  nl = TRUE #non-linear model
+)
+```
+
+
+# Set priors
+
+See [visualize_and_select_priors.html](visualize_and_select_priors.html) for motivation.
+
+```{r}
+#| echo: false 
+lapse_param1<- 2
+lapse_param2<- 33.33
+
+eta_param1<- 0
+eta_param2<- 2.5
+
+logsigma_param1<- -3
+logsigma_param2<- 1.6
+
+#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
+lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
+eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
+
+# my_priors <- c(
+#   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+#   brms::set_prior(eta_prior_distribution, class = "b", nlpar = "eta", lb = 0, ub = 2.5),
+#   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+# )
+
+# define my priors
+my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
+                            class = "b", lb=0,ub=1),
+                brms::prior_string(eta_prior_distribution, nlpar="eta", 
+                            class = "b", lb=0,ub=2.5))
+               # brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
+              #              class="b",lb=-2,ub=1.6)  )
+
+```
+
+Visualize priors, by plotting them all together (with arbitrary height).
+
+```{r}
+#| echo: false
+
+# Create tibbles for each prior with a parameter label
+prior_lapse <- tibble(
+  x = seq(0, 1, length.out = 500),
+  y = dbeta(x, lapse_param1, lapse_param2),
+  parameter = "lapse"
+) |>
+  mutate(y = y / max(y)) #Normalize so has peak of 1
+
+prior_location <- tibble(
+  x = seq(-1, 10, length.out = 500),
+  y = dunif(x, eta_param1, eta_param2),
+  parameter = "location"
+) |>
+  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
+
+prior_scale <- tibble(
+  x = seq(-5, 5, length.out = 500),
+  y = dunif(x, logsigma_param1, logsigma_param2),
+  parameter = "log(sigma)"
+) |>
+  mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
+
+# Combine all priors
+priors_all <- bind_rows(prior_lapse, prior_location)#, prior_scale)
+
+# Plot
+ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "Parameter value",
+    y = "Density",
+    color = "Parameter"
+  ) + 
+  coord_cartesian( xlim=c(-4,4) ) +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
+```
+
+
+# Fitting Model to Simulated Data
+
+Fitting the model gives an estimation of the average parameter value of the participants. The brm() function is used to fit the model based on the given formula, data and priors. Other arguments of brm can adjust the model fitting in various ways, for more information on each of the arguments see <https://paulbuerkner.com/brms/reference/brm.html>
+
+```{r}
+#| echo: true 
+
+if (break_brms_by_making_num_targets_numeric) {
+  #Make numeric version of num_targets
+  data_simulated <- data_simulated |>
+    mutate(targets = case_when(
+      num_targets == "two" ~ 2,
+      num_targets == "three" ~ 3,
+      TRUE ~ 0
+    ))
+  #Delete old column
+  data_simulated$num_targets <- NULL #delete column
+  data_simulated <- data_simulated %>%
+    rename(num_targets = targets)
+}
+```
+
+```{r}
+#| echo: false 
+
+#brms set number of cores
+cores_available <- parallel::detectCores()
+#set mc.cores option which is used by brms by default 
+options(mc.cores = cores_available)
+
+time <- try( system.time({ 
+  fit <-
+    brm(
+      my_brms_formula,
+      data = data_simulated,
+      prior = my_priors,
+      silent = 0, #prints more detailed messages (helps debug)
+      init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
+      chains = 3, #4 is the default to check consistent convergence
+      iter = 1000 #2000 is default number of iterations 
+    ) 
+  }), #end of system.time
+ silent=FALSE) #End of try
+
+cat('Time taken (min) =', round( time["elapsed"] / 60. ,1) )
+
+if (inherits(time, "try-error")) {
+  message("An error occurred!")
+} else {
+  print('No errors when fitting.')
+}
+
+summary(fit)
+```
+
+
+The logSigma estimate tends to have wide confidence intervals, and be biased high?
+
+
+
+Check how close the fit estimates are to the true parameters.
+
+First report on logSigma.
+
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+estimates<- as.data.frame( fixef(fit) )
+
+#brms' estimate for the reference group
+eta_logSigma<- estimates["logSigma_Intercept","Estimate"]
+
+true_logSigma<- log(sigma)
+
+discrepancy<- eta_logSigma - true_logSigma 
+if (abs(discrepancy)<0.1) {
+  print("Success. Looks like I/brms calculated/estimated the reference group logSigma correctly.")
+} else {
+  cat("Discrepancy of",round(discrepancy,2),
+      "between true logSigma,",round(true_logSigma,2),
+        "and what brms estimated,",round(eta_logSigma,2))
+}
+  
+```
+
+Now report on eta_Intercept.
+
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+estimates<- as.data.frame( fixef(fit) )
+
+#brms' estimate for the reference group
+eta_Intercept<- estimates["eta_Intercept","Estimate"]
+
+#Get the true eta used to generate the data
+data_eta<- data_simulated$location_param
+if ( length(unique(data_eta))  > 1 ) {
+  print('Expecting the same eta for all participants, you must have mixed conditions together.')
+}
+true_eta_Intercept<- data_eta[1]
+
+discrepancy<- eta_Intercept - true_eta_Intercept 
+if (abs(discrepancy)<0.1) {
+  print("Success. Looks like I/brms calculated/estimated the eta_Intercept correctly.")
+} else {
+  cat("Discrepancy of",round(discrepancy,2),
+      "between true eta,",round(true_eta_Intercept,2),
+        "and what brms estimated,",round(eta_Intercept,2))
+}
+
+library(broom.mixed) #tidying methods for mixed models 
+broom.mixed::tidy(fit) #similar to just printing estimates
+```
+
+
+First try to calculate the reference group location parameter.
+
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+estimates<- as.data.frame( fixef(fit) )
+
+#Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
+#brms returns estimates relative to baseline eta_Intercept, 
+#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
+# lab == "Holcombe" (if "Holcombe" is first alphabetically)
+#age_group == "younger" ( "older" is first alphabetically), gender == "F"
+#targetLoad == 2 (if 2 is first)
+#Calculate that reference value
+
+#brms expresses estimates relative to a reference condition
+reference_group <- data.frame(
+  lab = "Holcombe",
+  age_group = "older",
+  gender = "F",
+  num_targets = "two"
+)
+
+#brms' estimate for the reference group
+eta_Intercept<- estimates["eta_Intercept","Estimate"]
+
+eta_reference_group <- data_simulated |>  #filter by values in reference condition
+          semi_join(reference_group, by = names(reference_group))
+#Calculate the average ground truth location_param for the reference condition
+true_eta_reference<- eta_reference_group |> 
+                  summarise(eta_avg = mean(location_param), .groups="drop")
+true_eta_reference<- mean(true_eta_reference$eta_avg)
+
+discrepancy<- eta_Intercept - true_eta_reference 
+if (abs(discrepancy)<0.1) {
+  print("Success. Looks like I/brms calculated/estimated the reference group location parameter correctly.")
+} else {
+  cat("Discrepancy between my calculation of eta_reference,",round(true_eta_reference,2),
+        "and what brms calculated,",round(eta_Intercept,2),"of",round(discrepancy,2))
+}
+
+```
+
+Check brms' estimate of sigma.
+
+
+```{r}
+#| echo: false 
+
+#Create corresponding true values dataframe, to compare
+
+trueValsNamesInBrmParlance<-
+  c("eta_labRoudaia","eta_age_groupyounger","eta_num_targetstwo","eta_genderM", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_age_groupyounger")
+trueVal<-c( 
+     Holcombe_lab_penalty,age_penalty,target_penalty,gender_penalty, 
+     lapse, log(sigma))#, 0)
+trueVal<- data.frame(trueVal)
+rownames(trueVal) <- trueValsNamesInBrmParlance
+
+estimates <- merge(estimates, trueVal, by = "row.names", sort=FALSE)
+#Move trueVals column to second column so next to Estimate
+estimates <- estimates %>% select(1, trueVal, everything())
+
+#Assess size of discrepancies. Create new columns for that.
+estimates <- estimates %>%
+  mutate(discrepancy = trueVal - Estimate, .after = Estimate)
+estimates <- estimates %>%
+  mutate( outside_CI = 
+    case_when(
+      trueVal < Q2.5 ~ Q2.5 - trueVal,
+      trueVal > Q97.5 ~ trueVal - Q97.5,
+      TRUE ~ 0 #0 means it's not outside the CI
+    )
+  )
+
+#For some reason sigma is estimated inaccurately, so leave it out.
+est_no_sigma <- estimates %>% filter(!grepl("Sigma", Row.names))
+
+#round for pretty printing
+rounded<- est_no_sigma %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 2)))
+print(rounded)
+
+if (all(est_no_sigma$outside_CI==0)) {
+  print('Other than overall and logSigma, all estimates are within confidence interval of true value!')
+} else {
+  outside_CI_rows <- est_no_sigma %>% filter(outside_CI > 0)
+  cat('Estimates falling outside CI:')
+  outside_CI_rows_rounded <- outside_CI_rows %>% dplyr::mutate(across(where(is.numeric), ~ round(.x, 3)))
+  print( outside_CI_rows ) 
+}
+
+```
+
+
+The fitted model's estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!
+
+Example using predict to show brms' estimate of effect of additional target
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+brms_estimates<- as.data.frame( fixef(fit) )
+
+estimates_num_targets<- brms_estimates["eta_num_targets", ]
+
+print("See below brms' estimate for the effect of num_targets.")
+
+if (break_brms_by_making_num_targets_numeric) {
+  print("It seems broken as the estimate is approximately zero with confidence interval of nearly zero width! Whereas when coded as a factor, it yields the correct estimate.")
+}
+print( round(estimates_num_targets,3) )
+
+
+# Compare num_targets = 2 vs num_targets = 3 for a specific group:
+example_condition <- data.frame(
+  lab = "Holcombe",
+  age_group = "older",
+  gender = "F",
+  num_targets = num_targetsConds,
+  speed = 1.5, # 
+  obj_per_ring = 8, 
+  subj_standardzd = 0,
+  chance_rate = 1/8
+)
+
+if (break_brms_by_making_num_targets_numeric) {
+  print("Similarly, predicting probability with 2 targets versus 3 yields a miniscule difference, as you'll see below.")
+
+}
+cat('Fitted values:')
+# Get fitted values (posterior mean of the linear predictor)
+fitted_values <- fitted(fit, newdata = example_condition, summary = TRUE)
+print(fitted_values)
+
+# Or get predicted probabilities (with uncertainty)
+predicted <- predict(fit, newdata = example_condition, summary = TRUE)
+
+
+# Or get predicted probabilities (with uncertainty)
+# Create a condition to plug into brms for it to predict the y value
+# Have to specify exact condition, so add columns to reference group.
+reference_condition<- reference_group |> mutate(
+                          speed = 1.5, subj_standardzd = 0,
+                          chance_rate = 1/8 )
+predicted <- predict(fit, newdata = reference_condition, summary = TRUE)
+
+
+```
+
+Plot the predictions of the brms fit, only for 3 targets because that's the reference condition.
+
+```{r}
+#| echo: false 
+
+# First set up all conditions
+prediction_grid <- expand.grid(
+  lab = unique(data_simulated$lab),
+  age_group = unique(data_simulated$age_group),
+  gender = unique(data_simulated$gender),
+  num_targets = unique(data_simulated$num_targets),
+  speed = seq(min(data_simulated$speed), max(data_simulated$speed), length.out = 40),
+  obj_per_ring = unique(data_simulated$obj_per_ring),
+  subj_standardzd = 0         # Use mean subject
+)
+prediction_conditions<- prediction_grid |> mutate( chance_rate =
+                                                    1 / obj_per_ring )
+
+# Filter prediction grid for 2 targets, Roudaia lab, subj_standardzd = 0
+prediction_subset <- prediction_conditions %>%
+  filter(num_targets=="two", lab == "Roudaia", gender=="F",obj_per_ring==5)
+
+# Get fitted values (posterior mean and CI) for each condition
+fitted_preds <- fitted(fit, newdata = prediction_subset, summary = TRUE)
+prediction_subset$p_correct <- fitted_preds[, "Estimate"]
+prediction_subset$p_lower <- fitted_preds[, "Q2.5"]
+prediction_subset$p_upper <- fitted_preds[, "Q97.5"]
+
+# Filter data for same condition
+data_subset <- data_simulated %>%
+  filter(num_targets=="two", lab == "Roudaia", gender=="F",obj_per_ring==5, subj_standardzd == 0)
+
+# Plot
+ggplot(prediction_subset, aes(x = speed, y = p_correct, color = age_group)) +
+  geom_line() +
+  #geom_ribbon(aes(ymin = p_lower, ymax = p_upper), fill = "blue", alpha = 0.2, color = NA) +
+  geom_point(data = data_subset, 
+             aes(x = speed, y = p_correct), alpha = 0.7) +
+  labs(
+    x = "Speed (revolutions per second)",
+    y = "P(Correct)",
+    linetype = "Age",
+    title = "curve is Prediction, dots are generative model",
+    subtitle = "Roudaia, 3 targets, female, 5 obj, subj_standardzd=0)"
+  ) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  
+```
+
+Plot the predictions of the brms fit.
+
+```{r}
+#| echo: false 
+
+prediction_conditions<- prediction_conditions |> filter(gender=="F") #otherwise graph is too confusing
+
+# Get fitted values (posterior mean and CI) for each condition
+fitted_preds <- fitted(fit, newdata = prediction_conditions, summary = TRUE)
+prediction_conditions$p_correct <- fitted_preds[, "Estimate"]
+prediction_conditions$p_lower <- fitted_preds[, "Q2.5"]
+prediction_conditions$p_upper <- fitted_preds[, "Q97.5"]
+
+# Plot predictions for all conditions
+hh<- ggplot(prediction_conditions, 
+       aes(x = speed, y = p_correct, color = factor(num_targets), linetype = age_group)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = p_lower, ymax = p_upper, fill = factor(num_targets)), alpha = 0.4, color = NA) +
+  facet_grid(lab ~ obj_per_ring) +
+  labs(
+    x = "Speed (revolutions per second)",
+    y = "Predicted P(Correct)",
+    color = "targets",
+    fill = "targets",
+    linetype = "age",
+    title = "brms Model Predictions"
+  ) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+show(hh)
+
+
+```
