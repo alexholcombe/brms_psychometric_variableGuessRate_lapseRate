@@ -48,12 +48,12 @@ Determine what subset of data brms will model, to test what breaks logSigma esti
 ```{r}
 #| echo: true
 example_condition <- data.frame(
-  lab = "Holcombe",
-  age_group = "older",
-  gender = "F",
-  num_targets = "two",
-  obj_per_ring = 4, 
-  chance_rate = 1/4,
+  lab = "Roudaia", #first level
+  age_group = "younger", #first level
+  gender = "M", #first level
+  num_targets = "two", #first level
+  obj_per_ring = 5, #first level? confusing because mixed effect
+  chance_rate = 1/5,
   subj_standardzd = 0
 )
 ```
@@ -65,7 +65,6 @@ In order to build and test our model in brms, we must first create a simulated d
 #| echo: false 
 
 trials <- generate_conditions(laboratories,num_targetsConds,numSubjects,trialsPerCondition,speeds)
-
 
 #Print number of unique values of each column
 #print('Number of values for each factor:')
@@ -267,10 +266,13 @@ The model we used is based off our psychometric function used to generate the da
 *Alex's note: Using the nonlinear option is also what allowed us to set a prior on the thresholds  $\eta$, because we could then parametrize the function in terms of the x-intercept, whereas with the link-function approach, we are stuck with the conventional parameterization of a line, which [has a term for the y-intercept but not the x-intercept](https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z) *
 
 
-For this minimal example, don't model any factors and only use the data of conditions specified by example_condition
+## This example
+
+**For this minimal example, don't model any factors and only use the data of conditions specified by example_condition**
 
 ```{r}
 #| echo: false 
+#CReduce data_simulated to example_condition
 data_simulated <- data_simulated %>%
   semi_join(example_condition, by = names(example_condition))
 ```
@@ -471,6 +473,7 @@ estimates<- as.data.frame( fixef(fit) )
 #brms' estimate for the reference group
 eta_Intercept<- estimates["eta_Intercept","Estimate"]
 
+#Get the true eta used to generate the data
 data_eta<- data_simulated$location_param
 if ( length(unique(data_eta))  > 1 ) {
   print('Expecting the same eta for all participants, you must have mixed conditions together.')
@@ -485,7 +488,9 @@ if (abs(discrepancy)<0.1) {
       "between true eta,",round(true_eta_Intercept,2),
         "and what brms estimated,",round(eta_Intercept,2))
 }
-  
+
+library(broom.mixed) #tidying methods for mixed models 
+broom.mixed::tidy(fit) #similar to just printing estimates
 ```
 
 
