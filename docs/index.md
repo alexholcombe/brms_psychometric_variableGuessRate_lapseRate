@@ -13,6 +13,13 @@ Check out [visualize_and_select_priors.html](visualize_and_select_priors.html)
 
 [do_all_model_recovery.html](../do_all_model_recovery.html)
 
+## Why is estimate of eta smaller by 0.16 than actual value?
+
+It's not the numTargets difference
+
+[eta_wrong.qmd](eta_wrong_minimal_example/eta_wrong.html)
+
+
 ## Why is estimate of logSigma so much larger (shallower) than actual value?
 
 Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
