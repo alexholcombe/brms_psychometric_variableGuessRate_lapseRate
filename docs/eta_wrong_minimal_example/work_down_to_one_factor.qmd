@@ -3,8 +3,9 @@ title: "Psychophysical model recovery using Bayesian brms"
 format: html
 ---
 
-Will generate fake data that includes differences between participants, but doesn't model them.
+Based on not_multilevel_model_recovery.qmd
 
+Will generate fake data that includes differences between participants, but doesn't model them.
 
 To get started, we load the required packages.
 
@@ -192,7 +193,7 @@ SDrange <- function(x) {
 
 #Can show variability as range or as CI
 gg<-gg+stat_summary( aes(group=interaction(age_group,numTargets)),
-                     fun.data=SDrange, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
+                     fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
 #gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
 #                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),

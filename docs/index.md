@@ -9,6 +9,8 @@ title: "Guide to this brms model recovery site"
 
 [advanced_model_recovery.html](advanced_model_recovery.html)
 
+[not_multilevel_model_recovery](not_multilevel_model_recovery.html)
+
 
 [do_all_model_recovery.html](../do_all_model_recovery.html)
 
@@ -37,12 +39,13 @@ Can't figure out why it always just splits the difference and gives zero for eff
 
 Splitting the difference and assigning close to zero effect of age
 
+Trying to work back down from not_multilevel_model_recovery but it also now isn't working for gender and age? It really seems like sometimes brms won't recover the effect of these factors.
 
 ## Why is estimate of logSigma so much larger (shallower) than actual value?
 
 Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 
-[logSigma_wrong.qmd](logSigma_wrong_minimal_example/logSigma_wrong.html)
+[logSigma_wrong](logSigma_wrong_minimal_example/logSigma_wrong.html)
 
 ## Why do CIs for parameters whose true value is exactly zero never range below zero?
 
