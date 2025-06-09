@@ -110,7 +110,7 @@ lapse <- 0.05
 sigma <- 0.2
 
 location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
-target_penalty<-0.15 #penalty for additional target
+target_penalty<-0.9 #penalty for additional target
 age_penalty <- 0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0.09 #Female worse by this much
 Holcombe_lab_penalty <- 0.07#0.2
@@ -441,31 +441,9 @@ The logSigma estimate tends to have wide confidence intervals, and be biased hig
 
 Check how close the fit estimates are to the true parameters.
 
-First report on logSigma.
 
-```{r}
-#| echo: false 
 
-#Grab the estimates column of the parameter estimates
-estimates<- as.data.frame( fixef(fit) )
-
-#brms' estimate for the reference group
-eta_logSigma<- estimates["logSigma_Intercept","Estimate"]
-
-true_logSigma<- log(sigma)
-
-discrepancy<- eta_logSigma - true_logSigma 
-if (abs(discrepancy)<0.1) {
-  print("Success. Looks like I/brms calculated/estimated the reference group logSigma correctly.")
-} else {
-  cat("Discrepancy of",round(discrepancy,2),
-      "between true logSigma,",round(true_logSigma,2),
-        "and what brms estimated,",round(eta_logSigma,2))
-}
-  
-```
-
-Now report on eta_Intercept.
+Report on eta_Intercept.
 
 ```{r}
 #| echo: false 
@@ -491,6 +469,10 @@ if (abs(discrepancy)<0.1) {
       "between true eta,",round(true_eta_Intercept,2),
         "and what brms estimated,",round(eta_Intercept,2))
 }
+```
+
+```{r}
+#| echo: false
 
 library(broom.mixed) #tidying methods for mixed models 
 broom.mixed::tidy(fit) #similar to just printing estimates
