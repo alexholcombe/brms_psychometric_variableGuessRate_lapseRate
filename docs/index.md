@@ -14,14 +14,19 @@ title: "Guide to this brms model recovery site"
 
 ## Why is estimate of eta smaller by 0.16 than actual value?
 
-Remember I'm trying to get back to eta being so wrong when both lapse and logSigma estimated.
+I'm trying to get back to eta being so wrong when both lapse and logSigma estimated.
 
-At first I thought .apse biased high, but maybe that byproduct of high eta?
+[eta_wrong](eta_wrong_minimal_example/eta_wrong.html)
+
+
+
+At first I thought lapse biased high, but maybe that byproduct of high eta?
 
 I upped the trials and even with lapse estimation on it seems ok.
 With eta =1.1, 1.6 and 1.7 as well it does fine!
+
+[eta_lapse_estimation_no_apparent_bias](eta_wrong_minimal_example/eta_lapse_estimation_no_apparent_bias.html)
  
-[eta_wrong.qmd](eta_wrong_minimal_example/eta_wrong.html)
 
 
 ## Why is estimate of logSigma so much larger (shallower) than actual value?

@@ -109,7 +109,7 @@ Because the present purpose of numbering participants is to inject the right amo
 lapse <- 0.05
 sigma <- 0.2
 
-location_param_base<-1.1 #location_param_young_123targets <- c(1.7,1.0,0.8)
+location_param_base<-1.5 #location_param_young_123targets <- c(1.7,1.0,0.8)
 target_penalty<-0#0.9 #penalty for additional target
 age_penalty <- 0#0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.09 #Female worse by this much
@@ -501,6 +501,12 @@ prediction_conditions<- prediction_grid |> mutate( chance_rate =
 # Filter prediction grid for data subset beign modeled (example_condition)
 prediction_subset <- prediction_conditions %>%
   semi_join(example_condition, by = names(example_condition))
+
+
+#Not modeling lapse, so need to add it to prediction so prediction can be made
+prediction_subset$lapseRate <- lapse
+
+#Not modeling sigma, so need to add it to prediction so prediction can be made
 prediction_subset$logSigma <- log(sigma)
 
 # Get fitted values (posterior mean and CI) for each condition
@@ -514,21 +520,73 @@ data_subset <- data_simulated %>%
               semi_join(example_condition, by=names(example_condition))
 
 # Plot
-ggplot(prediction_subset, aes(x = speed, y = p_correct, color = age_group)) +
-  geom_line() +
+
+# Add a curve_type column to each data frame, for the legend
+prediction_subset$curve_type <- "brms fit"
+data_subset$curve_type <- "generating model"
+# Combine for plotting
+plot_data <- bind_rows(
+  prediction_subset %>% select(speed, p_correct, curve_type),
+  data_subset %>% select(speed, p_correct, curve_type)
+)
+
+hh<- ggplot(plot_data, aes(x = speed, y = p_correct, color = curve_type)) +
+  geom_line() + #fit
   #geom_ribbon(aes(ymin = p_lower, ymax = p_upper), fill = "blue", alpha = 0.2, color = NA) +
-  geom_point(data = data_subset, 
-             aes(x = speed, y = p_correct), alpha = 0.7) +
-  labs(
-    x = "Speed (revolutions per second)",
-    y = "P(Correct)",
-    linetype = "Age",
-    title = "curve is Prediction, dots are generative model",
-    subtitle = "Roudaia, 3 targets, female, 5 obj, subj_standardzd=0)"
+  geom_line(data = data_subset, #actual data generating model
+            linetype="dotted") + geom_point(data=data_subset) +
+  # labs(
+  #   x = "Speed (revolutions per second)",
+  #   y = "P(Correct)",
+  #   title = "curve is Prediction, dots are generative model",
+  #   linetype= "Curve",
+  #   subtitle = ""
+  # ) +
+  scale_color_manual(
+    name = "",
+    values = c("brms fit" = "red", "generating model" = "black")
   ) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-  
+
+
+#Add threshold (location_parameter) lines by calculating average for each group of subjects,
+#including midpoint (threshold percent correct level)
+calc_midpoint <- function( chance_rate, lapse ) {
+  (chance_rate + 1-lapse*(1-chance_rate)) / 2
+}
+
+#calculate the *true* threshold percent correct level, which differs by num_objects as well as lapse
+loc_param_each_group <- data_simulated |>
+        group_by(age_group, lab, num_targets) %>%
+        summarise(location_param = mean(location_param, na.rm = TRUE),
+                  #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
+                  midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
+                  .groups = "drop")
+loc_param_each_group$curve_type <- "generating model"
+
+#Draw eta line
+hh<- hh + geom_segment(data = loc_param_each_group,
+                   aes(x = location_param, xend = location_param,
+                       y = 0, yend = midpoint), linetype="dotted"
+                       ,alpha=.8)#, color = "grey3")
+
+#Now add a line for the estimated location parameter
+eta_Intercept <- fixef(fit)["eta_Intercept", "Estimate"]
+
+# Calculate the midpoint for the current condition
+midpoint_val <- mean(calc_midpoint(data_subset$chance_rate, lapse))
+
+# Add the vertical segment at eta_Intercept to hh
+hh <- hh + 
+  geom_segment(
+    aes(x = eta_Intercept, xend = eta_Intercept, y = 0, yend = midpoint_val),
+    color="red")
+
+#This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
+hh<-hh + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
+show(hh)
+
 ```
 
 
