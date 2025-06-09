@@ -9,14 +9,18 @@ title: "Guide to this brms model recovery site"
 
 [advanced_model_recovery.html](advanced_model_recovery.html)
 
-Check out [visualize_and_select_priors.html](visualize_and_select_priors.html)
 
 [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 ## Why is estimate of eta smaller by 0.16 than actual value?
 
-It's not the numTargets difference
+Remember I'm trying to get back to eta being so wrong when both lapse and logSigma estimated.
 
+At first I thought .apse biased high, but maybe that byproduct of high eta?
+
+I upped the trials and even with lapse estimation on it seems ok.
+With eta =1.1, 1.6 and 1.7 as well it does fine!
+ 
 [eta_wrong.qmd](eta_wrong_minimal_example/eta_wrong.html)
 
 
@@ -36,3 +40,7 @@ Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 [FAIL version](break_brms_with_numeric_regressor/numTargets_recovery_FAIL_because_numeric.html)
 
 [Success version, not numeric](break_brms_with_numeric_regressor/numTargets_recovery_SUCCEED_because_not_numeric.html)
+
+## Priors
+
+Check out [visualize_and_select_priors.html](visualize_and_select_priors.html)

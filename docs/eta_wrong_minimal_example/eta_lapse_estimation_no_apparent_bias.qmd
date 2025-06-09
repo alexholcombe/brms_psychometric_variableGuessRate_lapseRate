@@ -1,10 +1,9 @@
 ---
-title: "Psychophysical model recovery using Bayesian brms"
+title: "No consistent bias?"
 format: html
 ---
 
-Will generate fake data that includes differences between participants, but doesn't model them.
-
+Generate fake data that includes differences between participants, but doesn't model them.
 
 To get started, we load the required packages.
 
@@ -109,7 +108,8 @@ Because the present purpose of numbering participants is to inject the right amo
 lapse <- 0.05
 sigma <- 0.2
 
-location_param_base<-1.1 #location_param_young_123targets <- c(1.7,1.0,0.8)
+location_param_base<-1.7 #1.1 #location_param_young_123targets <- c(1.7,1.0,0.8)
+
 target_penalty<-0#0.9 #penalty for additional target
 age_penalty <- 0#0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.09 #Female worse by this much
@@ -281,8 +281,6 @@ data_simulated <- data_simulated %>%
 ```{r}
 #Minimal example for eta, so don't model sigma, supply it in the data
 data_simulated$logSigma<- log(sigma)
-#and don't model lapse, supply it in the data
-data_simulated$lapseRate <- lapse
 
 my_formula <- brms::bf( 
    correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
@@ -292,7 +290,7 @@ my_formula <- my_formula$formula
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
   eta ~ 1, #lab + age_group + num_targets + gender,
-  #lapseRate ~ 1, #~1 estimates intercept only
+  lapseRate ~ 1, #~1 estimates intercept only
   #logSigma ~ 1,#age_group,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
   nl = TRUE #non-linear model
@@ -327,8 +325,8 @@ logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsig
 # )
 
 # define my priors
-my_priors <- c( #brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
-                #            class = "b", lb=0,ub=1),
+my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
+                            class = "b", lb=0,ub=1),
                 brms::prior_string(eta_prior_distribution, nlpar="eta", 
                             class = "b", lb=0,ub=2.5))
                # brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
@@ -364,7 +362,7 @@ prior_scale <- tibble(
   mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
 
 # Combine all priors
-priors_all <- bind_rows(prior_location) #,prior_lapse)#, prior_scale)
+priors_all <- bind_rows(prior_lapse, prior_location)#, prior_scale)
 
 # Plot
 ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
@@ -523,8 +521,8 @@ ggplot(prediction_subset, aes(x = speed, y = p_correct, color = age_group)) +
     x = "Speed (revolutions per second)",
     y = "P(Correct)",
     linetype = "Age",
-    title = "curve is Prediction, dots are generative model",
-    subtitle = "Roudaia, 3 targets, female, 5 obj, subj_standardzd=0)"
+    title = "curve is Prediction, dots are model used to generate data",
+    subtitle = "Just one condition"
   ) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
