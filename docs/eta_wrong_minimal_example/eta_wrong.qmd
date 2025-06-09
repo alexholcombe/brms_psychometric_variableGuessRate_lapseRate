@@ -109,7 +109,7 @@ Because the present purpose of numbering participants is to inject the right amo
 lapse <- 0.05
 sigma <- 0.2
 
-location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
+location_param_base<-1.1 #location_param_young_123targets <- c(1.7,1.0,0.8)
 target_penalty<-0#0.9 #penalty for additional target
 age_penalty <- 0#0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0#0.09 #Female worse by this much
@@ -477,52 +477,6 @@ if (abs(discrepancy)<0.1) {
 library(broom.mixed) #tidying methods for mixed models 
 broom.mixed::tidy(fit) #similar to just printing estimates
 ```
-
-
-First try to calculate the reference group location parameter.
-
-```{r}
-#| echo: false 
-
-#Grab the estimates column of the parameter estimates
-estimates<- as.data.frame( fixef(fit) )
-
-#Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
-#brms returns estimates relative to baseline eta_Intercept, 
-#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
-# lab == "Holcombe" (if "Holcombe" is first alphabetically)
-#age_group == "younger" ( "older" is first alphabetically), gender == "F"
-#targetLoad == 2 (if 2 is first)
-#Calculate that reference value
-
-#brms expresses estimates relative to a reference condition
-reference_group <- data.frame(
-  lab = "Holcombe",
-  age_group = "older",
-  gender = "F",
-  num_targets = "two"
-)
-
-#brms' estimate for the reference group
-eta_Intercept<- estimates["eta_Intercept","Estimate"]
-
-eta_reference_group <- data_simulated |>  #filter by values in reference condition
-          semi_join(reference_group, by = names(reference_group))
-#Calculate the average ground truth location_param for the reference condition
-true_eta_reference<- eta_reference_group |> 
-                  summarise(eta_avg = mean(location_param), .groups="drop")
-true_eta_reference<- mean(true_eta_reference$eta_avg)
-
-discrepancy<- eta_Intercept - true_eta_reference 
-if (abs(discrepancy)<0.1) {
-  print("Success. Looks like I/brms calculated/estimated the reference group location parameter correctly.")
-} else {
-  cat("Discrepancy between my calculation of eta_reference,",round(true_eta_reference,2),
-        "and what brms calculated,",round(eta_Intercept,2),"of",round(discrepancy,2))
-}
-
-```
-
 
 Plot the predictions of the brms fit
 
