@@ -20,7 +20,7 @@ library(brms)
 source( here("R","simulate_data.R") )  #Load my needed custom function
 source( here("R","psychometric_function.R") ) #Load my needed custom function
 
-set.seed(998) #ensures reproducibility for testing
+set.seed(997) #ensures reproducibility for testing
 
 break_brms_by_making_num_targets_numeric<- FALSE #Change factor to numeric, right before doing formula fit, so 
    #I know that it's brms that's the problem rather than the rest of my code

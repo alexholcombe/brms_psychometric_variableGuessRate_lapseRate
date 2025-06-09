@@ -12,7 +12,9 @@ title: "Guide to this brms model recovery site"
 
 [do_all_model_recovery.html](../do_all_model_recovery.html)
 
-## Why is estimate of eta smaller by 0.16 than actual value?
+## Eta estimation by itself or in conjunction with lapse only (and no factors) seems ok
+
+Although it's often off by maybe 0.16
 
 I'm trying to get back to eta being so wrong when both lapse and logSigma estimated.
 
@@ -27,6 +29,13 @@ With eta =1.1, 1.6 and 1.7 as well it does fine!
 
 [eta_lapse_estimation_no_apparent_bias](eta_wrong_minimal_example/eta_lapse_estimation_no_apparent_bias.html)
  
+## When add one factor, age, fails
+
+Can't figure out why it always just splits the difference and gives zero for effect of age.
+
+[eta_with_one_factor](eta_wrong_minimal_example/eta_with_one_factor.html)
+
+Splitting the difference and assigning close to zero effect of age
 
 
 ## Why is estimate of logSigma so much larger (shallower) than actual value?
