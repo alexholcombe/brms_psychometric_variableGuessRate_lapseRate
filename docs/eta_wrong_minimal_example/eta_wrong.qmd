@@ -578,10 +578,13 @@ eta_Intercept <- fixef(fit)["eta_Intercept", "Estimate"]
 midpoint_val <- mean(calc_midpoint(data_subset$chance_rate, lapse))
 
 # Add the vertical segment at eta_Intercept to hh
-hh <- hh + 
-  geom_segment(
-    aes(x = eta_Intercept, xend = eta_Intercept, y = 0, yend = midpoint_val),
-    color="red")
+hh <- hh +
+  annotate( # useful to add segment with fixed values, not mapped from a data frame
+    "segment",
+    x = eta_Intercept, xend = eta_Intercept,
+    y = 0, yend = midpoint_val,
+    color = "red"
+  )
 
 #This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
 hh<-hh + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
