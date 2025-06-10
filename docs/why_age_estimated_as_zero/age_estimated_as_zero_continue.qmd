@@ -259,31 +259,28 @@ The model we used is based off our psychometric function used to generate the da
 my_formula <- brms::bf( 
    correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
   ) 
+my_formula <- brms::bf( 
+   correct ~ chance_rate + (1-chance_rate - .04*(1-chance_rate)) * Phi(-(speed-eta)/exp(log(0.2)))
+  ) 
 my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
   eta ~ ageGroup, #+ lab + numTargets,# + gender,
-  lapseRate ~ 1, #~1 estimates intercept only
-  logSigma ~ 1,#ageGroup,
+  #lapseRate ~ 1, #~1 estimates intercept only
+  #logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
   nl = TRUE #non-linear model
 )
-```
 
-# Set priors
-
-See [visualize_and_select_priors.html](visualize_and_select_priors.html) for some motivation and visualisation.
-
-```{r}
-#| echo: true 
-
-my_priors <- c(
-  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-  brms::set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logSigma", lb = -2, ub = 1.6) 
+my_brms_formula <- brms::bf(
+  correct ~ chance_rate + (1-chance_rate - .04 * (1-chance_rate))*Phi(-(speed-eta)/exp(log(0.2))), 
+  eta ~ ageGroup, #+ lab + numTargets,# + gender,
+  #lapseRate ~ 1, #~1 estimates intercept only
+  #logSigma ~ 1,#ageGroup,
+  family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
+  nl = TRUE #non-linear model
 )
-
 ```
 
 # Set priors
@@ -306,19 +303,14 @@ lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
-# my_priors <- c(
-#   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-#   brms::set_prior(eta_prior_distribution, class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-#   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
-# )
-
 # define my priors
-my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
-                            class = "b", lb=0,ub=1),
+my_priors <- c( #brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
+                 #           class = "b", lb=0,ub=1),
                 brms::prior_string(eta_prior_distribution, nlpar="eta", 
-                            class = "b", lb=0,ub=2.5),
-                brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
-                            class="b",lb=-2,ub=1.6)  )
+                            class = "b", lb=0,ub=2.5)#,
+                #brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
+                           # class="b",lb=-2,ub=1.6)  
+)
 
 ```
 
@@ -350,7 +342,8 @@ prior_scale <- tibble(
   mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
 
 # Combine all priors
-priors_all <- bind_rows(prior_lapse, prior_location, prior_scale)
+priors_all <- bind_rows(#prior_lapse, prior_location, 
+                        prior_scale)
 
 # Plot
 ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
@@ -391,20 +384,20 @@ if (break_brms_by_making_numTargets_numeric) {
 
 ```{r}
 #| echo: false 
-# 
-#print('Show stan code . But I dont know how to interrogate it to see the factors.')
 
-# stan_code <- make_stancode(
-#       formula = my_brms_formula,
-#       data = data_simulated,
-#       prior = my_priors,
-#       silent = 0, #prints more detailed messages (helps debug)
-#       init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
-#       chains = 2,#3, #4 is the default to check consistent convergence
-#       iter = 300 #2000 is default number of iterations 
-# )
-# 
-# cat(stan_code)
+print('Show stan code . But I dont know how to interrogate it to see the factors.')
+
+stan_code <- make_stancode(
+       formula = my_brms_formula,
+       data = data_simulated,
+       prior = my_priors,
+       silent = 0, #prints more detailed messages (helps debug)
+       init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
+       chains = 2,#3, #4 is the default to check consistent convergence
+       iter = 300 #2000 is default number of iterations 
+ )
+ 
+cat(stan_code)
 ```
 
 ```{r}
