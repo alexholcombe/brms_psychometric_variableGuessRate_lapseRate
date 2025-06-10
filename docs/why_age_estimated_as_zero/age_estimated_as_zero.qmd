@@ -591,7 +591,7 @@ chainchainchain |>
   facet_grid(paramGroup ~ ., scales="free") +
   geom_line()+
   ggtitle("")+
-  theme_bw()
+  theme_bw()+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
 
 ```
 Plot possibly- problematic ones (gender and age) specifically.
@@ -607,7 +607,7 @@ chainchainchain |>
   geom_hline(yintercept=age_penalty, alpha=.5,linetype="dotted")+
   geom_hline(yintercept=gender_penalty, alpha=.5,linetype="dotted")+
   ggtitle("")+
-  theme_bw()
+  theme_bw()+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
 
 ```
 
@@ -620,6 +620,33 @@ chainchainchain |>
   ggplot(aes(x = value, color=Parameter, linetype = factor(Chain))) +
   facet_grid(Parameter~., scales="free") +
   geom_density(alpha = 0.5) +
-  labs(title = "Posterior Density")
+  labs(title = "Posterior Density") + 
+  theme_bw() + theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
+
 ```
 
+Look at warm-up iterations specifically.
+
+```{r}
+#| echo: false 
+
+# Extract all samples, including warm-up
+chainchainchain_all <- ggs(fit, burnin = FALSE)
+
+#guess warmup as half of total iterations if not available
+warmup_iters <- 100# fit$fit@sim$warmup
+
+# Plot all parameters, only for warm-up iterations
+chainchainchain_all |>
+  filter(Iteration <= warmup_iters) |>
+  filter( str_detect(Parameter, "age|lab") ) |>
+  ggplot(aes(x = Iteration, y = value, linetype = factor(Chain), color = Parameter)) +
+  facet_grid(Parameter~.) + 
+  geom_line() +
+  labs(
+    title = "Warm-up Traceplots",
+    x = "Iteration (Warm-up)",
+    y = "Parameter Value"
+  ) +
+  theme_bw() + theme(panel.grid.minor = element_blank()) #remove gridlines
+```

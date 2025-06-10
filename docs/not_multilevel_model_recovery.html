@@ -147,7 +147,7 @@ window.Quarto = {
 <p>Set up simulated experiment design.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>numTargetsConds<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"two"</span>,<span class="st">"three"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>numSubjects<span class="ot">&lt;-</span> <span class="dv">25</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>numSubjects<span class="ot">&lt;-</span> <span class="dv">20</span><span class="co">#25</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>trialsPerCondition<span class="ot">&lt;-</span> <span class="dv">20</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>laboratories<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Holcombe"</span>,<span class="st">"Roudaia"</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)</span></span>
@@ -162,7 +162,7 @@ window.Quarto = {
 1 lab                 2
 2 gender              2
 3 ageGroup            2
-4 subjWithinGroup    25
+4 subjWithinGroup    20
 5 numTargets          2
 6 obj_per_ring        4
 7 speed              12
@@ -179,8 +179,8 @@ window.Quarto = {
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>location_param_base<span class="ot">&lt;-</span><span class="fl">1.6</span> <span class="co">#location_param_young_123targets &lt;- c(1.7,1.0,0.8)</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>target_penalty<span class="ot">&lt;-</span><span class="fl">0.15</span> <span class="co">#penalty for additional target</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>age_penalty <span class="ot">&lt;-</span> <span class="fl">0.2</span><span class="co">#0.4 #Old people have worse limit by this much</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>gender_penalty <span class="ot">&lt;-</span> <span class="fl">0.09</span> <span class="co">#Female worse by this much</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>Holcombe_lab_penalty <span class="ot">&lt;-</span> <span class="fl">0.07</span><span class="co">#0.2</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>gender_penalty <span class="ot">&lt;-</span> <span class="fl">0.12</span> <span class="co">#Female worse by this much</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>Holcombe_lab_penalty <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Set parameters for differences between Ss in a group</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>eta_between_subject_sd <span class="ot">&lt;-</span> <span class="fl">0.2</span> </span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -238,7 +238,7 @@ window.Quarto = {
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>my_brms_formula <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">bf</span>(</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  correct <span class="sc">~</span> chance_rate <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate <span class="sc">-</span> lapseRate <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate))<span class="sc">*</span><span class="fu">Phi</span>(<span class="sc">-</span>(speed<span class="sc">-</span>eta)<span class="sc">/</span><span class="fu">exp</span>(logSigma)), </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  eta <span class="sc">~</span> lab <span class="sc">+</span> ageGroup <span class="sc">+</span> numTargets <span class="sc">+</span> gender,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  eta <span class="sc">~</span> lab <span class="sc">+</span> ageGroup, <span class="co">#+ numTargets,# + gender,</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  lapseRate <span class="sc">~</span> <span class="dv">1</span>, <span class="co">#~1 estimates intercept only</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  logSigma <span class="sc">~</span> <span class="dv">1</span>,<span class="co">#ageGroup,</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">bernoulli</span>(<span class="at">link=</span><span class="st">"identity"</span>), <span class="co">#Otherwise the default link 'logit' would be applied</span></span>
@@ -314,76 +314,60 @@ make: *** [foo.o] Error 1</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>Start sampling</code></pre>
 </div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess</code></pre>
+</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Time taken (min) = 18anon_model' NOW (CHAIN 3).
+<pre><code>Time taken (min) = 13.1on_model' NOW (CHAIN 2).
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
 Chain 2: 
-Chain 2: Gradient evaluation took 0.049968 seconds
-Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 499.68 seconds.
+Chain 2: Gradient evaluation took 0.040546 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 405.46 seconds.
 Chain 2: Adjust your expectations accordingly!
 Chain 2: 
 Chain 2: 
-Chain 3: 
-Chain 3: Gradient evaluation took 0.049177 seconds
-Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 491.77 seconds.
-Chain 3: Adjust your expectations accordingly!
-Chain 3: 
-Chain 3: 
 Chain 1: 
-Chain 1: Gradient evaluation took 0.057485 seconds
-Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 574.85 seconds.
+Chain 1: Gradient evaluation took 0.041512 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 415.12 seconds.
 Chain 1: Adjust your expectations accordingly!
 Chain 1: 
 Chain 1: 
-Chain 3: Iteration:   1 / 1000 [  0%]  (Warmup)
-Chain 1: Iteration:   1 / 1000 [  0%]  (Warmup)
-Chain 2: Iteration:   1 / 1000 [  0%]  (Warmup)
-Chain 1: Iteration: 100 / 1000 [ 10%]  (Warmup)
-Chain 3: Iteration: 100 / 1000 [ 10%]  (Warmup)
-Chain 1: Iteration: 200 / 1000 [ 20%]  (Warmup)
-Chain 3: Iteration: 200 / 1000 [ 20%]  (Warmup)
-Chain 1: Iteration: 300 / 1000 [ 30%]  (Warmup)
-Chain 1: Iteration: 400 / 1000 [ 40%]  (Warmup)
-Chain 3: Iteration: 300 / 1000 [ 30%]  (Warmup)
-Chain 1: Iteration: 500 / 1000 [ 50%]  (Warmup)
-Chain 1: Iteration: 501 / 1000 [ 50%]  (Sampling)
-Chain 3: Iteration: 400 / 1000 [ 40%]  (Warmup)
-Chain 1: Iteration: 600 / 1000 [ 60%]  (Sampling)
-Chain 3: Iteration: 500 / 1000 [ 50%]  (Warmup)
-Chain 3: Iteration: 501 / 1000 [ 50%]  (Sampling)
-Chain 1: Iteration: 700 / 1000 [ 70%]  (Sampling)
-Chain 3: Iteration: 600 / 1000 [ 60%]  (Sampling)
-Chain 1: Iteration: 800 / 1000 [ 80%]  (Sampling)
-Chain 3: Iteration: 700 / 1000 [ 70%]  (Sampling)
-Chain 1: Iteration: 900 / 1000 [ 90%]  (Sampling)
-Chain 3: Iteration: 800 / 1000 [ 80%]  (Sampling)
-Chain 1: Iteration: 1000 / 1000 [100%]  (Sampling)
+Chain 1: Iteration:   1 / 400 [  0%]  (Warmup)
+Chain 2: Iteration:   1 / 400 [  0%]  (Warmup)
+Chain 1: Iteration:  40 / 400 [ 10%]  (Warmup)
+Chain 1: Iteration:  80 / 400 [ 20%]  (Warmup)
+Chain 2: Iteration:  40 / 400 [ 10%]  (Warmup)
+Chain 1: Iteration: 120 / 400 [ 30%]  (Warmup)
+Chain 1: Iteration: 160 / 400 [ 40%]  (Warmup)
+Chain 1: Iteration: 200 / 400 [ 50%]  (Warmup)
+Chain 1: Iteration: 201 / 400 [ 50%]  (Sampling)
+Chain 1: Iteration: 240 / 400 [ 60%]  (Sampling)
+Chain 1: Iteration: 280 / 400 [ 70%]  (Sampling)
+Chain 1: Iteration: 320 / 400 [ 80%]  (Sampling)
+Chain 2: Iteration:  80 / 400 [ 20%]  (Warmup)
+Chain 1: Iteration: 360 / 400 [ 90%]  (Sampling)
+Chain 1: Iteration: 400 / 400 [100%]  (Sampling)
 Chain 1: 
-Chain 1:  Elapsed Time: 434.123 seconds (Warm-up)
-Chain 1:                230.277 seconds (Sampling)
-Chain 1:                664.4 seconds (Total)
+Chain 1:  Elapsed Time: 182.891 seconds (Warm-up)
+Chain 1:                79.291 seconds (Sampling)
+Chain 1:                262.182 seconds (Total)
 Chain 1: 
-Chain 2: Iteration: 100 / 1000 [ 10%]  (Warmup)
-Chain 3: Iteration: 900 / 1000 [ 90%]  (Sampling)
-Chain 3: Iteration: 1000 / 1000 [100%]  (Sampling)
-Chain 3: 
-Chain 3:  Elapsed Time: 491.598 seconds (Warm-up)
-Chain 3:                217.499 seconds (Sampling)
-Chain 3:                709.097 seconds (Total)
-Chain 3: 
-Chain 2: Iteration: 200 / 1000 [ 20%]  (Warmup)
-Chain 2: Iteration: 300 / 1000 [ 30%]  (Warmup)
-Chain 2: Iteration: 400 / 1000 [ 40%]  (Warmup)
-Chain 2: Iteration: 500 / 1000 [ 50%]  (Warmup)
-Chain 2: Iteration: 501 / 1000 [ 50%]  (Sampling)
-Chain 2: Iteration: 600 / 1000 [ 60%]  (Sampling)
-Chain 2: Iteration: 700 / 1000 [ 70%]  (Sampling)
-Chain 2: Iteration: 800 / 1000 [ 80%]  (Sampling)
-Chain 2: Iteration: 900 / 1000 [ 90%]  (Sampling)
-Chain 2: Iteration: 1000 / 1000 [100%]  (Sampling)
+Chain 2: Iteration: 120 / 400 [ 30%]  (Warmup)
+Chain 2: Iteration: 160 / 400 [ 40%]  (Warmup)
+Chain 2: Iteration: 200 / 400 [ 50%]  (Warmup)
+Chain 2: Iteration: 201 / 400 [ 50%]  (Sampling)
+Chain 2: Iteration: 240 / 400 [ 60%]  (Sampling)
+Chain 2: Iteration: 280 / 400 [ 70%]  (Sampling)
+Chain 2: Iteration: 320 / 400 [ 80%]  (Sampling)
+Chain 2: Iteration: 360 / 400 [ 90%]  (Sampling)
+Chain 2: Iteration: 400 / 400 [100%]  (Sampling)
 Chain 2: 
-Chain 2:  Elapsed Time: 863.047 seconds (Warm-up)
-Chain 2:                188.707 seconds (Sampling)
-Chain 2:                1051.75 seconds (Total)
+Chain 2:  Elapsed Time: 687.555 seconds (Warm-up)
+Chain 2:                71.67 seconds (Sampling)
+Chain 2:                759.225 seconds (Total)
 Chain 2: </code></pre>
 </div>
 </div>
@@ -403,45 +387,35 @@ Chain 2: </code></pre>
 <p>Check brms’ estimate of sigma.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>Discrepancy of 0.43 between true logSigma, -1.61 and what brms estimated, -1.18</code></pre>
+<pre><code>Discrepancy of 0.46 between true logSigma, -1.61 and what brms estimated, -1.15</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>            Row.names trueVal Estimate discrepancy Est.Error Q2.5 Q97.5
-1      eta_labRoudaia    0.07     0.07           0         0 0.06  0.08
-2   eta_numTargetstwo    0.15     0.15           0         0 0.14  0.16
-3 lapseRate_Intercept    0.05     0.05           0         0 0.05  0.05
+1      eta_labRoudaia    0.20     0.20         0.0         0 0.19  0.21
+2   eta_ageGroupolder    0.20     0.00         0.2         0 0.00  0.00
+3 lapseRate_Intercept    0.05     0.05         0.0         0 0.05  0.05
   outside_CI
-1          0
-2          0
-3          0</code></pre>
+1        0.0
+2        0.2
+3        0.0</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Other than overall and logSigma, all estimates are within confidence interval of true value!"</code></pre>
+<pre><code>Estimates falling outside CI:          Row.names trueVal     Estimate discrepancy    Est.Error         Q2.5
+1 eta_ageGroupolder     0.2 9.037908e-05   0.1999096 8.156578e-05 4.771587e-06
+         Q97.5 outside_CI
+1 0.0003025123  0.1996975</code></pre>
 </div>
 </div>
-<p>The fitted model’s estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!</p>
-<p>Example using predict to show brms’ estimate of effect of additional target</p>
+<p>why are gender and ageGroup estimates zero</p>
+<p>Look at <a href="https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548">what is happening during the chain</a></p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "See below brms' estimate for the effect of numTargets."</code></pre>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 method overwritten by 'GGally':
+  method from   
+  +.gg   ggplot2</code></pre>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                  Estimate Est.Error  Q2.5 Q97.5
-eta_numTargetstwo     0.15     0.004 0.143 0.158</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Fitted values:</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>      Estimate   Est.Error      Q2.5     Q97.5
-[1,] 0.4196446 0.003519647 0.4128993 0.4268166
-[2,] 0.2861167 0.002902864 0.2805225 0.2918090</code></pre>
-</div>
-</div>
-<p>Plot the predictions of the brms fit, only for 3 targets because that’s the reference condition.</p>
-<div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -450,12 +424,21 @@ eta_numTargetstwo     0.15     0.004 0.143 0.158</code></pre>
 </div>
 </div>
 </div>
-<p>Plot the predictions of the brms fit.</p>
+<p>Plot possibly- problematic ones (gender and age) specifically.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="not_multilevel_model_recovery_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="not_multilevel_model_recovery_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

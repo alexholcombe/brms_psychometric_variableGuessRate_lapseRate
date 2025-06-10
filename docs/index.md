@@ -23,12 +23,12 @@ also looking at [what is happening during a chain](https://discourse.mc-stan.org
 , goes straight to zero almost. And posterior density is ridiculously peaked at zero.
 
 
-Save warm-ups and then do diagnostics, as follows:
+Save warm-ups and then do diagnostics too.
 
-fit <- brm(..., save_warmup = TRUE)
-as_draws_df(fit, inc_warmup = TRUE)
+* Turning off init=0, back to default. Did not help
 
-* Turning off init=0, back to default
+fit$fit@sim$samples[[1]] includes stepsize and
+attr(,"sampler_params")$divergent
 
 ## Eta estimation by itself or in conjunction with lapse only (and no factors) seems ok
 
