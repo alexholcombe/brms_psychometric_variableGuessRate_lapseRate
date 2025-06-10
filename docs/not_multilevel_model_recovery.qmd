@@ -416,9 +416,10 @@ time <- try( system.time({
       data = data_simulated,
       prior = my_priors,
       silent = 0, #prints more detailed messages (helps debug)
-      init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
+      #init = 0, #
       chains = 2,#3, #4 is the default to check consistent convergence
-      iter = 400 #2000 is default number of iterations 
+      iter = 400, #2000 is default number of iterations 
+      save_warmup = TRUE
     ) 
   }), #end of system.time
  silent=FALSE) #End of try
@@ -614,10 +615,12 @@ chainchainchain |>
 #| echo: false 
 
 chainchainchain |>
-  filter(str_detect(Parameter, "age") |>
-  ggplot(aes(x = value, fill = factor(Chain))) +
+  filter( str_detect(Parameter, "age|lab") ) |>
+  #filter(value < .4) |>
+  ggplot(aes(x = value, color=Parameter, linetype = factor(Chain))) +
+  facet_grid(Parameter~., scales="free") +
   geom_density(alpha = 0.5) +
-  labs(title = "Posterior Density for gender")
+  labs(title = "Posterior Density")
 ```
 
 Example using predict to show brms' estimate of effect of additional target
