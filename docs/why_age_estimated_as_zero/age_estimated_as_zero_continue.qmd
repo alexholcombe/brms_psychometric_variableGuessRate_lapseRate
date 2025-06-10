@@ -471,9 +471,9 @@ estimates<- as.data.frame( fixef(fit) )
 
 #brms expresses estimates relative to a reference condition
 reference_group <- data.frame(
-  lab = "Holcombe",
+  lab = "Roudaia",
   ageGroup = "older",
-  gender = "F",
+  gender = "M",
   numTargets = "two"
 )
 
@@ -569,7 +569,7 @@ if (all(est_no_sigma$outside_CI==0)) {
 ```
 
 
-why are gender and ageGroup estimates zero
+why is ageGroup estimates zero
 
 Look at [what is happening during the chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548)
 
@@ -636,13 +636,13 @@ Look at warm-up iterations specifically.
 #| echo: false 
 
 # Extract all samples, including warm-up
-chainchainchain_all <- ggs(fit, burnin = FALSE)
+chain_of_fools <- ggs(fit, burnin = FALSE)
 
 #guess warmup as half of total iterations if not available
 warmup_iters <- 100# fit$fit@sim$warmup
 
 # Plot all parameters, only for warm-up iterations
-chainchainchain_all |>
+chain_of_fools |>
   filter(Iteration <= warmup_iters) |>
   filter( str_detect(Parameter, "age|lab") ) |>
   ggplot(aes(x = Iteration, y = value, linetype = factor(Chain), color = Parameter)) +

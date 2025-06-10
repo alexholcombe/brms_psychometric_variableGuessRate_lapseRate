@@ -22,6 +22,7 @@ also looking at [what is happening during a chain](https://discourse.mc-stan.org
 
 , [goes straight to zero](why_age_estimated_as_zero/age_estimated_as_zero.html) almost. And posterior density is ridiculously peaked at zero.
 
+More minimal yet [still](why_age_estimated_as_zero/age_estimated_as_zero_continue.html)
 
 Save warm-ups and then do diagnostics too.
 
