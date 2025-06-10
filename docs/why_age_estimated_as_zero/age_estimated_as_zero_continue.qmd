@@ -1,5 +1,5 @@
 ---
-title: "Psychophysical model recovery using Bayesian brms"
+title: "What will it take to get age estimated correctly?"
 format: html
 ---
 
@@ -32,10 +32,15 @@ Set up simulated experiment design.
 
 ```{r}
 #| echo: true 
-numTargetsConds<- c("two","three")
+
+laboratories<- factor( c("Roudaia") ) #, "Holcombe"),
+                      # levels=c("Roudaia", "Holcombe") ) #defines the factor order
+numTargetsConds<- factor( c("two", "three"),
+                         levels=c("two", "three") ) #defines the factor order
+
+
 numSubjects<- 20#25
 trialsPerCondition<- 20
-laboratories<- c("Holcombe","Roudaia")
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
 speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
 
@@ -258,7 +263,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ lab + ageGroup, #+ numTargets,# + gender,
+  eta ~ ageGroup, #+ lab + numTargets,# + gender,
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied

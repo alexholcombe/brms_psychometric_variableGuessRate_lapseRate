@@ -20,7 +20,7 @@ why are gender and ageGroup estimates zero
 
 also looking at [what is happening during a chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548):
 
-, goes straight to zero almost. And posterior density is ridiculously peaked at zero.
+, [goes straight to zero](why_age_estimated_as_zero/age_estimated_as_zero.html) almost. And posterior density is ridiculously peaked at zero.
 
 
 Save warm-ups and then do diagnostics too.
