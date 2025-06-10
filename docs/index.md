@@ -24,6 +24,11 @@ also looking at [what is happening during a chain](https://discourse.mc-stan.org
 
 Can consider init
 
+Save warm-ups and then do diagnostics, as follows:
+
+fit <- brm(..., save_warmup = TRUE)
+as_draws_df(fit, inc_warmup = TRUE)
+
 
 ## Eta estimation by itself or in conjunction with lapse only (and no factors) seems ok
 

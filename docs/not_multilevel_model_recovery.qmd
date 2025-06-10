@@ -33,7 +33,7 @@ Set up simulated experiment design.
 ```{r}
 #| echo: true 
 numTargetsConds<- c("two","three")
-numSubjects<- 25
+numSubjects<- 20#25
 trialsPerCondition<- 20
 laboratories<- c("Holcombe","Roudaia")
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
@@ -258,7 +258,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ lab + ageGroup + numTargets + gender,
+  eta ~ lab + ageGroup + numTargets,# + gender,
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -384,21 +384,22 @@ if (break_brms_by_making_numTargets_numeric) {
 }
 ```
 
-Show stan code . But I don't know how to interrogate it to see the factors.
 ```{r}
 #| echo: false 
+# 
+#print('Show stan code . But I dont know how to interrogate it to see the factors.')
 
-stan_code <- make_stancode(
-      formula = my_brms_formula,
-      data = data_simulated,
-      prior = my_priors,
-      silent = 0, #prints more detailed messages (helps debug)
-      init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
-      chains = 2,#3, #4 is the default to check consistent convergence
-      iter = 300 #2000 is default number of iterations 
-)
-
-cat(stan_code)
+# stan_code <- make_stancode(
+#       formula = my_brms_formula,
+#       data = data_simulated,
+#       prior = my_priors,
+#       silent = 0, #prints more detailed messages (helps debug)
+#       init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
+#       chains = 2,#3, #4 is the default to check consistent convergence
+#       iter = 300 #2000 is default number of iterations 
+# )
+# 
+# cat(stan_code)
 ```
 
 ```{r}
@@ -417,7 +418,7 @@ time <- try( system.time({
       silent = 0, #prints more detailed messages (helps debug)
       init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
       chains = 2,#3, #4 is the default to check consistent convergence
-      iter = 200 #2000 is default number of iterations 
+      iter = 400 #2000 is default number of iterations 
     ) 
   }), #end of system.time
  silent=FALSE) #End of try
