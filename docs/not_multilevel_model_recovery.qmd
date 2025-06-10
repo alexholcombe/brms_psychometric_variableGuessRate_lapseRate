@@ -399,7 +399,7 @@ time <- try( system.time({
       prior = my_priors,
       silent = 0, #prints more detailed messages (helps debug)
       init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
-      chains = 3, #4 is the default to check consistent convergence
+      chains = 1,#3, #4 is the default to check consistent convergence
       iter = 1000 #2000 is default number of iterations 
     ) 
   }), #end of system.time
@@ -413,7 +413,7 @@ if (inherits(time, "try-error")) {
   print('No errors when fitting.')
 }
 
-summary(fit)
+print( summary(fit) )
 ```
 eta_intercept is the eta for the older group
 

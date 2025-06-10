@@ -3,16 +3,35 @@ layout: default
 title: "Guide to this brms model recovery site"
 ---
 
+Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
+
+
 [basic_model_recovery.html](docs/basic_model_recovery.html)
 
 [all_factors_but_not_multilevel](all_factors_but_not_multilevel.html)
 
 [advanced_model_recovery.html](advanced_model_recovery.html)
 
-[not_multilevel_model_recovery](not_multilevel_model_recovery.html) - why did this stop working for estimating effects of age and gender?
+## Why did this stop working, estimating age and gender as having zero effect while others work?
+
+[not_multilevel_model_recovery](not_multilevel_model_recovery.html) - why did this stop working for estimating effects of age and gender? Try make_stancode()
+
+And can also look at [what is happening during a chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548):
+
+ggs(fit1, burnin = TRUE) %>%
+  filter(Parameter == "b_top_Intercept") %>% 
+  mutate(chain = factor(Chain),
+         intercept = value) %>% 
+  
+  ggplot(aes(x = Iteration, y = intercept, color = chain)) +
+  geom_line()+
+  ggtitle("default settings")+
+  theme_bw()
 
 
-[do_all_model_recovery.html](../do_all_model_recovery.html)
+Should probably also reduce to one chain
+
+
 
 ## Eta estimation by itself or in conjunction with lapse only (and no factors) seems ok
 

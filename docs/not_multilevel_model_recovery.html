@@ -132,14 +132,15 @@ window.Quarto = {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../R/simulate_data.R"</span>) <span class="co">#Load my needed custom function</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../R/psychometric_function.R"</span>) <span class="co">#Load my needed custom function</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">999</span>) <span class="co">#ensures reproducibility for testing</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>break_brms_by_making_numTargets_numeric<span class="ot">&lt;-</span> <span class="cn">FALSE</span> <span class="co">#Change factor to numeric, right before doing formula fit, so </span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>   <span class="co">#I know that it's brms that's the problem rather than the rest of my code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here) <span class="co">#For finding root directory</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>( <span class="fu">here</span>(<span class="st">"R"</span>,<span class="st">"simulate_data_no_underscores.R"</span>) )  <span class="co">#Load my needed custom function</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>( <span class="fu">here</span>(<span class="st">"R"</span>,<span class="st">"psychometric_function.R"</span>) ) <span class="co">#Load my needed custom function</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">999</span>) <span class="co">#ensures reproducibility for testing</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>break_brms_by_making_numTargets_numeric<span class="ot">&lt;-</span> <span class="cn">FALSE</span> <span class="co">#Change factor to numeric, right before doing formula fit, so </span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>   <span class="co">#I know that it's brms that's the problem rather than the rest of my code</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="create-simulated-trials" class="level1">
 <h1>Create simulated trials</h1>
@@ -147,7 +148,7 @@ window.Quarto = {
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>numTargetsConds<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"two"</span>,<span class="st">"three"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>numSubjects<span class="ot">&lt;-</span> <span class="dv">25</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>trialsPerCondition<span class="ot">&lt;-</span> <span class="dv">8</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>trialsPerCondition<span class="ot">&lt;-</span> <span class="dv">20</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>laboratories<span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Holcombe"</span>,<span class="st">"Roudaia"</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>speeds<span class="ot">&lt;-</span><span class="fu">seq</span>(.<span class="dv">02</span>,<span class="fl">1.8</span>, <span class="at">length.out =</span> <span class="dv">12</span>) <span class="co"># trials at 12 different speeds between .02 and 1.8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -158,14 +159,14 @@ window.Quarto = {
 <pre><code># A tibble: 8 × 2
   name            value
   &lt;chr&gt;           &lt;int&gt;
-1 numTargets          2
+1 lab                 2
 2 gender              2
-3 age_group           2
+3 ageGroup            2
 4 subjWithinGroup    25
-5 obj_per_ring        4
-6 trialThisCond       8
+5 numTargets          2
+6 obj_per_ring        4
 7 speed              12
-8 lab                 2</code></pre>
+8 trialThisCond      20</code></pre>
 </div>
 </div>
 <p>Create between-subject variability within each group, to create a potential multilevel modeling advantage. Can do this by passing the participant number to the location-parameter calculating function. Because that function will be called over and over, separately, the location parameter needs to be a deterministic function of the participant number. So it needs to calculate a hash or something to determine the location parameter. E.g. it could calculate the remainder, but then the location parameters wouldn’t be centered on the intended value for that condition. To do that, I think I need to know the number of participants in the condition, n, and number them 1..n. Then I can give e.g.&nbsp;participant 1 the extreme value on one side of the condition-determined value and give participant n the extreme value on the other side. So I number participants separately even within age*gender to maintain the age and gender penalties, but not within speed, of course. Also not within targetLoad or obj_per_ring.</p>
@@ -185,7 +186,7 @@ window.Quarto = {
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Using above parameters, need function to calculate a participant's location parameter</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#Include optional between_subject_variance</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>location_param_calculate<span class="ot">&lt;-</span> <span class="cf">function</span>(numTargets,age_group,gender,lab,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>location_param_calculate<span class="ot">&lt;-</span> <span class="cf">function</span>(numTargets,ageGroup,gender,lab,</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                                    subjStandardized,eta_between_subject_sd) {</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  base_location_param <span class="ot">&lt;-</span> location_param_base<span class="co">#location_param_young_123targets[targetLoad]</span></span>
@@ -195,16 +196,16 @@ window.Quarto = {
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  after_penalties <span class="ot">&lt;-</span>location_param <span class="sc">-</span> </span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">if_else</span>(lab<span class="sc">==</span><span class="st">"Holcombe"</span>,<span class="dv">1</span>,<span class="dv">0</span>) <span class="sc">*</span> Holcombe_lab_penalty <span class="sc">-</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">if_else</span>(age_group<span class="sc">==</span><span class="st">"older"</span>,<span class="dv">1</span>,<span class="dv">0</span>) <span class="sc">*</span> age_penalty <span class="sc">-</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">if_else</span>(ageGroup<span class="sc">==</span><span class="st">"older"</span>,<span class="dv">1</span>,<span class="dv">0</span>) <span class="sc">*</span> age_penalty <span class="sc">-</span></span>
 <span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">if_else</span>(numTargets<span class="sc">==</span><span class="st">"three"</span>,<span class="dv">1</span>,<span class="dv">0</span>) <span class="sc">*</span> target_penalty <span class="sc">-</span></span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">if_else</span>(gender<span class="sc">==</span><span class="st">"F"</span>,<span class="dv">1</span>,<span class="dv">0</span>) <span class="sc">*</span> gender_penalty</span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> (after_penalties)</span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="co">#Need version with fixed eta_between_subject_sd for use in mutate</span></span>
-<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>location_param_calc_for_mutate<span class="ot">&lt;-</span> <span class="cf">function</span>(numTargets,age_group,gender,lab,</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>location_param_calc_for_mutate<span class="ot">&lt;-</span> <span class="cf">function</span>(numTargets,ageGroup,gender,lab,</span>
 <span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>                                               subjStandardized) {</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">location_param_calculate</span>(numTargets,age_group,gender,lab,</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">location_param_calculate</span>(numTargets,ageGroup,gender,lab,</span>
 <span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>                           subjStandardized, eta_between_subject_sd)</span>
 <span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -237,9 +238,9 @@ window.Quarto = {
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>my_brms_formula <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">bf</span>(</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  correct <span class="sc">~</span> chance_rate <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate <span class="sc">-</span> lapseRate <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>chance_rate))<span class="sc">*</span><span class="fu">Phi</span>(<span class="sc">-</span>(speed<span class="sc">-</span>eta)<span class="sc">/</span><span class="fu">exp</span>(logSigma)), </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  eta <span class="sc">~</span> lab <span class="sc">+</span> age_group <span class="sc">+</span> numTargets <span class="sc">+</span> gender,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  eta <span class="sc">~</span> lab <span class="sc">+</span> ageGroup <span class="sc">+</span> numTargets <span class="sc">+</span> gender,</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  lapseRate <span class="sc">~</span> <span class="dv">1</span>, <span class="co">#~1 estimates intercept only</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  logSigma <span class="sc">~</span> <span class="dv">1</span>,<span class="co">#age_group,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  logSigma <span class="sc">~</span> <span class="dv">1</span>,<span class="co">#ageGroup,</span></span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">bernoulli</span>(<span class="at">link=</span><span class="st">"identity"</span>), <span class="co">#Otherwise the default link 'logit' would be applied</span></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">nl =</span> <span class="cn">TRUE</span> <span class="co">#non-linear model</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -314,22 +315,22 @@ make: *** [foo.o] Error 1</code></pre>
 <pre><code>Start sampling</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Time taken (min) = 4.2non_model' NOW (CHAIN 3).
-Chain 3: 
-Chain 3: Gradient evaluation took 0.019881 seconds
-Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 198.81 seconds.
-Chain 3: Adjust your expectations accordingly!
-Chain 3: 
-Chain 3: 
+<pre><code>Time taken (min) = 18anon_model' NOW (CHAIN 3).
 Chain 2: 
-Chain 1: 
-Chain 2: Gradient evaluation took 0.02098 seconds
-Chain 1: Chain Gradient evaluation took 0.022054 seconds
-2: Chain 1000 transitions using 10 leapfrog steps per transition would take 209.8 seconds.
+Chain 2: Gradient evaluation took 0.049968 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 499.68 seconds.
 Chain 2: Adjust your expectations accordingly!
 Chain 2: 
 Chain 2: 
-1: 1000 transitions using 10 leapfrog steps per transition would take 220.54 seconds.
+Chain 3: 
+Chain 3: Gradient evaluation took 0.049177 seconds
+Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 491.77 seconds.
+Chain 3: Adjust your expectations accordingly!
+Chain 3: 
+Chain 3: 
+Chain 1: 
+Chain 1: Gradient evaluation took 0.057485 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 574.85 seconds.
 Chain 1: Adjust your expectations accordingly!
 Chain 1: 
 Chain 1: 
@@ -337,88 +338,84 @@ Chain 3: Iteration:   1 / 1000 [  0%]  (Warmup)
 Chain 1: Iteration:   1 / 1000 [  0%]  (Warmup)
 Chain 2: Iteration:   1 / 1000 [  0%]  (Warmup)
 Chain 1: Iteration: 100 / 1000 [ 10%]  (Warmup)
-Chain 2: Iteration: 100 / 1000 [ 10%]  (Warmup)
 Chain 3: Iteration: 100 / 1000 [ 10%]  (Warmup)
 Chain 1: Iteration: 200 / 1000 [ 20%]  (Warmup)
-Chain 2: Iteration: 200 / 1000 [ 20%]  (Warmup)
 Chain 3: Iteration: 200 / 1000 [ 20%]  (Warmup)
 Chain 1: Iteration: 300 / 1000 [ 30%]  (Warmup)
-Chain 2: Iteration: 300 / 1000 [ 30%]  (Warmup)
 Chain 1: Iteration: 400 / 1000 [ 40%]  (Warmup)
 Chain 3: Iteration: 300 / 1000 [ 30%]  (Warmup)
-Chain 2: Iteration: 400 / 1000 [ 40%]  (Warmup)
 Chain 1: Iteration: 500 / 1000 [ 50%]  (Warmup)
 Chain 1: Iteration: 501 / 1000 [ 50%]  (Sampling)
-Chain 2: Iteration: 500 / 1000 [ 50%]  (Warmup)
-Chain 2: Iteration: 501 / 1000 [ 50%]  (Sampling)
 Chain 3: Iteration: 400 / 1000 [ 40%]  (Warmup)
 Chain 1: Iteration: 600 / 1000 [ 60%]  (Sampling)
-Chain 2: Iteration: 600 / 1000 [ 60%]  (Sampling)
 Chain 3: Iteration: 500 / 1000 [ 50%]  (Warmup)
 Chain 3: Iteration: 501 / 1000 [ 50%]  (Sampling)
 Chain 1: Iteration: 700 / 1000 [ 70%]  (Sampling)
-Chain 2: Iteration: 700 / 1000 [ 70%]  (Sampling)
 Chain 3: Iteration: 600 / 1000 [ 60%]  (Sampling)
 Chain 1: Iteration: 800 / 1000 [ 80%]  (Sampling)
-Chain 2: Iteration: 800 / 1000 [ 80%]  (Sampling)
 Chain 3: Iteration: 700 / 1000 [ 70%]  (Sampling)
 Chain 1: Iteration: 900 / 1000 [ 90%]  (Sampling)
-Chain 2: Iteration: 900 / 1000 [ 90%]  (Sampling)
 Chain 3: Iteration: 800 / 1000 [ 80%]  (Sampling)
 Chain 1: Iteration: 1000 / 1000 [100%]  (Sampling)
 Chain 1: 
-Chain 1:  Elapsed Time: 100.864 seconds (Warm-up)
-Chain 1:                89.892 seconds (Sampling)
-Chain 1:                190.756 seconds (Total)
+Chain 1:  Elapsed Time: 434.123 seconds (Warm-up)
+Chain 1:                230.277 seconds (Sampling)
+Chain 1:                664.4 seconds (Total)
 Chain 1: 
-Chain 2: Iteration: 1000 / 1000 [100%]  (Sampling)
-Chain 2: 
-Chain 2:  Elapsed Time: 108.878 seconds (Warm-up)
-Chain 2:                91.908 seconds (Sampling)
-Chain 2:                200.786 seconds (Total)
-Chain 2: 
+Chain 2: Iteration: 100 / 1000 [ 10%]  (Warmup)
 Chain 3: Iteration: 900 / 1000 [ 90%]  (Sampling)
 Chain 3: Iteration: 1000 / 1000 [100%]  (Sampling)
 Chain 3: 
-Chain 3:  Elapsed Time: 128.057 seconds (Warm-up)
-Chain 3:                96.755 seconds (Sampling)
-Chain 3:                224.812 seconds (Total)
-Chain 3: </code></pre>
+Chain 3:  Elapsed Time: 491.598 seconds (Warm-up)
+Chain 3:                217.499 seconds (Sampling)
+Chain 3:                709.097 seconds (Total)
+Chain 3: 
+Chain 2: Iteration: 200 / 1000 [ 20%]  (Warmup)
+Chain 2: Iteration: 300 / 1000 [ 30%]  (Warmup)
+Chain 2: Iteration: 400 / 1000 [ 40%]  (Warmup)
+Chain 2: Iteration: 500 / 1000 [ 50%]  (Warmup)
+Chain 2: Iteration: 501 / 1000 [ 50%]  (Sampling)
+Chain 2: Iteration: 600 / 1000 [ 60%]  (Sampling)
+Chain 2: Iteration: 700 / 1000 [ 70%]  (Sampling)
+Chain 2: Iteration: 800 / 1000 [ 80%]  (Sampling)
+Chain 2: Iteration: 900 / 1000 [ 90%]  (Sampling)
+Chain 2: Iteration: 1000 / 1000 [100%]  (Sampling)
+Chain 2: 
+Chain 2:  Elapsed Time: 863.047 seconds (Warm-up)
+Chain 2:                188.707 seconds (Sampling)
+Chain 2:                1051.75 seconds (Total)
+Chain 2: </code></pre>
 </div>
 </div>
 <p>eta_intercept is the eta for the older group</p>
-<p>eta_age_groupyounger represents the eta advantage for the younger age group.</p>
+<p>eta_ageGroupyounger represents the eta advantage for the younger age group.</p>
 <p>The logSigma estimate tends to have wide confidence intervals.</p>
 <p>eta_intercept is the eta for the older group</p>
-<p>eta_age_groupyounger represents the eta advantage for the younger age group.</p>
+<p>eta_ageGroupyounger represents the eta advantage for the younger age group.</p>
 <p>The logSigma estimate tends to have wide confidence intervals.</p>
 <p>Check how close the fit estimates are to the true parameters.</p>
 <p>First try to calculate the reference group location parameter.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>Discrepancy between my calculation of eta_reference, 1.24 and what brms calculated, 1.08 of -0.16</code></pre>
+<pre><code>[1] "Success. Looks like I/brms calculated/estimated the reference group location parameter correctly."</code></pre>
 </div>
 </div>
 <p>Check brms’ estimate of sigma.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>Discrepancy of 0.37 between my calculation of logSigma, -1.61 and what brms calculated, -1.24</code></pre>
+<pre><code>Discrepancy of 0.43 between true logSigma, -1.61 and what brms estimated, -1.18</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>             Row.names trueVal Estimate discrepancy Est.Error Q2.5 Q97.5
-1       eta_labRoudaia    0.07     0.08       -0.01      0.01 0.07  0.09
-2 eta_age_groupyounger    0.20     0.20        0.00      0.01 0.19  0.21
-3    eta_numTargetstwo    0.15     0.15        0.00      0.01 0.14  0.16
-4          eta_genderM    0.09     0.09        0.00      0.01 0.08  0.10
-5  lapseRate_Intercept    0.05     0.05        0.00      0.00 0.05  0.05
+<pre><code>            Row.names trueVal Estimate discrepancy Est.Error Q2.5 Q97.5
+1      eta_labRoudaia    0.07     0.07           0         0 0.06  0.08
+2   eta_numTargetstwo    0.15     0.15           0         0 0.14  0.16
+3 lapseRate_Intercept    0.05     0.05           0         0 0.05  0.05
   outside_CI
 1          0
 2          0
-3          0
-4          0
-5          0</code></pre>
+3          0</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Other than overall and logSigma, all estimates are within confidence interval of true value!"</code></pre>
@@ -432,15 +429,35 @@ Chain 3: </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                  Estimate Est.Error  Q2.5 Q97.5
-eta_numTargetstwo    0.149     0.006 0.138  0.16</code></pre>
+eta_numTargetstwo     0.15     0.004 0.143 0.158</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Fitted values:</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      Estimate   Est.Error      Q2.5     Q97.5
-[1,] 0.2729210 0.005552471 0.2618553 0.2841228
-[2,] 0.1872671 0.003478202 0.1806513 0.1943170</code></pre>
+[1,] 0.4196446 0.003519647 0.4128993 0.4268166
+[2,] 0.2861167 0.002902864 0.2805225 0.2918090</code></pre>
+</div>
+</div>
+<p>Plot the predictions of the brms fit, only for 3 targets because that’s the reference condition.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="not_multilevel_model_recovery_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Plot the predictions of the brms fit.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="not_multilevel_model_recovery_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>

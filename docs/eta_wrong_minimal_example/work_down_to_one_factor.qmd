@@ -82,7 +82,7 @@ Because the present purpose of numbering participants is to inject the right amo
   #In case I need trial number, so far I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
   #Assume the within-participant factors are obj_per_ring,targetLoad, and speed
-  trials <- trials |> group_by(lab,numTargets,age_group,gender,subjWithinGroup) |> 
+  trials <- trials |> group_by(lab,numTargets,ageGroup,gender,subjWithinGroup) |> 
                       mutate(trial = row_number())
 ```
 
@@ -103,7 +103,7 @@ eta_between_subject_sd <- 0.2
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
-location_param_calculate<- function(numTargets,age_group,gender,lab,
+location_param_calculate<- function(numTargets,ageGroup,gender,lab,
                                     subjStandardized,eta_between_subject_sd) {
   
   base_location_param <- location_param_base#location_param_young_123targets[targetLoad]
@@ -113,16 +113,16 @@ location_param_calculate<- function(numTargets,age_group,gender,lab,
   
   after_penalties <-location_param - 
                       if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
-                      if_else(age_group=="older",1,0) * age_penalty -
+                      if_else(ageGroup=="older",1,0) * age_penalty -
                       if_else(numTargets=="three",1,0) * target_penalty -
                       if_else(gender=="F",1,0) * gender_penalty
   return (after_penalties)
 }
 
 #Need version with fixed eta_between_subject_sd for use in mutate
-location_param_calc_for_mutate<- function(numTargets,age_group,gender,lab,
+location_param_calc_for_mutate<- function(numTargets,ageGroup,gender,lab,
                                                subjStandardized) {
-  location_param_calculate(numTargets,age_group,gender,lab,
+  location_param_calculate(numTargets,ageGroup,gender,lab,
                            subjStandardized, eta_between_subject_sd)
 }
   
@@ -141,7 +141,7 @@ data_simulated<- trials
 data_simulated <- data_simulated %>%
   mutate(
     chance_rate = 1/obj_per_ring,
-    location_param = location_param_calc_for_mutate(numTargets,age_group,gender,
+    location_param = location_param_calc_for_mutate(numTargets,ageGroup,gender,
                                                     lab,subj_standardzd),
     p_correct = psychometric_function(1/obj_per_ring,lapse,speed,location_param,sigma),
     correct = rbinom(n=length(p_correct), size=1, prob=p_correct)
@@ -163,11 +163,11 @@ upper_bound = 1 - L*(1-C)
 #Calculate threshold (eta) for each group*condition
 
 #data_one_subject_group <- data_simulated |> 
-#  filter(age_group=="younger",gender=="M",lab=="Holcombe")
+#  filter(ageGroup=="younger",gender=="M",lab=="Holcombe")
 #data_one_condition <- data_one_subject_group |> filter(targetLoad==2)
 
 gg<- ggplot(data_simulated, #data_one_condition, 
-            aes(x=speed,y=p_correct,linetype=age_group,color=factor(numTargets))) +
+            aes(x=speed,y=p_correct,linetype=ageGroup,color=factor(numTargets))) +
   #stat_summary(fun=mean,geom="point") +
   stat_summary(fun=mean,geom="line")  +
   facet_grid(lab~obj_per_ring) +
@@ -192,10 +192,10 @@ SDrange <- function(x) {
 }
 
 #Can show variability as range or as CI
-gg<-gg+stat_summary( aes(group=interaction(age_group,numTargets)),
-                     fun.data=range, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
+gg<-gg+stat_summary( aes(group=interaction(ageGroup,numTargets)),
+                     fun.data=SDrange, geom="ribbon", color=NA, fill="grey80", alpha=0.2 )
 #Add confidence interval ribbon to show variability.
-#gg<-gg+stat_summary( aes(group=interaction(age_group,targetLoad)),
+#gg<-gg+stat_summary( aes(group=interaction(ageGroup,targetLoad)),
 #                    fun.data = mean_cl_normal, fun.args = list(conf.int = 0.95),
 #                    geom="ribbon", fill="grey80", color=NA, alpha = 0.5)
 #Show floor  and ceiling with lines
@@ -212,7 +212,7 @@ calc_midpoint <- function( chance_rate, lapse ) {
 
 #calculate the threshold percent correct level, which differs by num_objects as well as lapse
 loc_param_each_group <- data_simulated |>
-        group_by(age_group, lab, numTargets) %>%
+        group_by(ageGroup, lab, numTargets) %>%
         summarise(location_param = mean(location_param, na.rm = TRUE),
                   #Calculate midpoint, but I'm actually not sure if f(location_param) = midpoint
                   midpoint =  mean( calc_midpoint(chance_rate,lapse) ), 
@@ -258,9 +258,9 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ lab + age_group + numTargets + gender,
+  eta ~ lab + ageGroup + numTargets + gender,
   lapseRate ~ 1, #~1 estimates intercept only
-  logSigma ~ 1,#age_group,
+  logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
   nl = TRUE #non-linear model
 )
@@ -417,14 +417,14 @@ summary(fit)
 ```
 eta_intercept is the eta for the older group
 
-eta_age_groupyounger represents the eta advantage for the younger age group. 
+eta_ageGroupyounger represents the eta advantage for the younger age group. 
  
 The logSigma estimate tends to have wide confidence intervals.
 
 
 eta_intercept is the eta for the older group
 
-eta_age_groupyounger represents the eta advantage for the younger age group. 
+eta_ageGroupyounger represents the eta advantage for the younger age group. 
  
 The logSigma estimate tends to have wide confidence intervals.
 
@@ -439,16 +439,16 @@ estimates<- as.data.frame( fixef(fit) )
 
 #Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
 #brms returns estimates relative to baseline eta_Intercept, 
-#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
+#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, ageGroup, gender, and targetLoad, the reference group might be:
 # lab == "Holcombe" (if "Holcombe" is first alphabetically)
-#age_group == "younger" ( "older" is first alphabetically), gender == "F"
+#ageGroup == "younger" ( "older" is first alphabetically), gender == "F"
 #targetLoad == 2 (if 2 is first)
 #Calculate that reference value
 
 #brms expresses estimates relative to a reference condition
 reference_group <- data.frame(
   lab = "Holcombe",
-  age_group = "older",
+  ageGroup = "older",
   gender = "F",
   numTargets = "two"
 )
@@ -503,7 +503,7 @@ if (abs(discrepancy)<0.1) {
 #Create corresponding true values dataframe, to compare
 
 trueValsNamesInBrmParlance<-
-  c("eta_labRoudaia","eta_age_groupyounger","eta_numTargetstwo","eta_genderM", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_age_groupyounger")
+  c("eta_labRoudaia","eta_ageGroupyounger","eta_numTargetstwo","eta_genderM", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
 trueVal<-c( 
      Holcombe_lab_penalty,age_penalty,target_penalty,gender_penalty, 
      lapse, log(sigma))#, 0)
@@ -567,7 +567,7 @@ print( round(estimates_numTargets,3) )
 # Compare numTargets = 2 vs numTargets = 3 for a specific group:
 example_condition <- data.frame(
   lab = "Holcombe",
-  age_group = "older",
+  ageGroup = "older",
   gender = "F",
   numTargets = numTargetsConds,
   speed = 1.5, # 
@@ -608,7 +608,7 @@ Plot the predictions of the brms fit, only for 3 targets because that's the refe
 # First set up all conditions
 prediction_grid <- expand.grid(
   lab = unique(data_simulated$lab),
-  age_group = unique(data_simulated$age_group),
+  ageGroup = unique(data_simulated$ageGroup),
   gender = unique(data_simulated$gender),
   numTargets = unique(data_simulated$numTargets),
   speed = seq(min(data_simulated$speed), max(data_simulated$speed), length.out = 40),
@@ -633,7 +633,7 @@ data_subset <- data_simulated %>%
   filter(numTargets=="two", lab == "Roudaia", gender=="F",obj_per_ring==5, subj_standardzd == 0)
 
 # Plot
-ggplot(prediction_subset, aes(x = speed, y = p_correct, color = age_group)) +
+ggplot(prediction_subset, aes(x = speed, y = p_correct, color = ageGroup)) +
   geom_line() +
   #geom_ribbon(aes(ymin = p_lower, ymax = p_upper), fill = "blue", alpha = 0.2, color = NA) +
   geom_point(data = data_subset, 
@@ -665,7 +665,7 @@ prediction_conditions$p_upper <- fitted_preds[, "Q97.5"]
 
 # Plot predictions for all conditions
 hh<- ggplot(prediction_conditions, 
-       aes(x = speed, y = p_correct, color = factor(numTargets), linetype = age_group)) +
+       aes(x = speed, y = p_correct, color = factor(numTargets), linetype = ageGroup)) +
   geom_line() +
   geom_ribbon(aes(ymin = p_lower, ymax = p_upper, fill = factor(numTargets)), alpha = 0.4, color = NA) +
   facet_grid(lab ~ obj_per_ring) +
