@@ -584,7 +584,7 @@ chainchainchain <- chainchainchain |>  filter(Parameter != "lprior") |>
 
 chainchainchain |>
   filter(Iteration < 100) |> #Because nothing happens after first couple hundred
-  ggplot(aes(x = Iteration, y = intercept, linetype = factor(chain),
+  ggplot(aes(x = Iteration, y = value, linetype = factor(Chain),
              color = Parameter)) +
   facet_grid(paramGroup ~ ., scales="free") +
   geom_line()+
@@ -602,18 +602,22 @@ chainchainchain |>
              color = Parameter)) +
   facet_grid(paramGroup ~ ., scales="free") +
   geom_line() +
+  geom_hline(yintercept=age_penalty, alpha=.5,linetype="dotted")+
+  geom_hline(yintercept=gender_penalty, alpha=.5,linetype="dotted")+
   ggtitle("")+
   theme_bw()
 
 ```
 
+```{r}
+#| echo: false 
 
-chainchainchain %>%
-  filter(Parameter == "b_eta_numTargets") %>%
+chainchainchain |>
+  filter(str_detect(Parameter, "age") |>
   ggplot(aes(x = value, fill = factor(Chain))) +
   geom_density(alpha = 0.5) +
-  labs(title = "Posterior Density for b_eta_numTargets")
-  
+  labs(title = "Posterior Density for gender")
+```
 
 Example using predict to show brms' estimate of effect of additional target
 ```{r}
