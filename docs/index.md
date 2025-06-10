@@ -16,6 +16,8 @@ Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 [not_multilevel_model_recovery](not_multilevel_model_recovery.html) - why did this stop working for estimating effects of age and gender? Try make_stancode()
 
+why are gender and ageGroup estimates zero
+
 And can also look at [what is happening during a chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548):
 
 ggs(fit1, burnin = TRUE) %>%

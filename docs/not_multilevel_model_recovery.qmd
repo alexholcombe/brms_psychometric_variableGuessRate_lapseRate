@@ -96,8 +96,8 @@ sigma <- 0.2
 location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
 target_penalty<-0.15 #penalty for additional target
 age_penalty <- 0.2#0.4 #Old people have worse limit by this much
-gender_penalty <- 0.09 #Female worse by this much
-Holcombe_lab_penalty <- 0.07#0.2
+gender_penalty <- 0.12 #Female worse by this much
+Holcombe_lab_penalty <- 0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- 0.2 
 
@@ -384,6 +384,23 @@ if (break_brms_by_making_numTargets_numeric) {
 }
 ```
 
+Show stan code . But I don't know how to interrogate it to see the factors.
+```{r}
+#| echo: false 
+
+stan_code <- make_stancode(
+      formula = my_brms_formula,
+      data = data_simulated,
+      prior = my_priors,
+      silent = 0, #prints more detailed messages (helps debug)
+      init = 0, #starting at 0 recommended "if chains do not initialize or behave well"
+      chains = 2,#3, #4 is the default to check consistent convergence
+      iter = 300 #2000 is default number of iterations 
+)
+
+cat(stan_code)
+```
+
 ```{r}
 #| echo: false 
 
@@ -394,7 +411,7 @@ options(mc.cores = cores_available)
 time <- try( system.time({ 
   fit <-
     brm(
-      my_brms_formula,
+      formula = my_brms_formula,
       data = data_simulated,
       prior = my_priors,
       silent = 0, #prints more detailed messages (helps debug)
@@ -503,7 +520,7 @@ if (abs(discrepancy)<0.1) {
 #Create corresponding true values dataframe, to compare
 
 trueValsNamesInBrmParlance<-
-  c("eta_labRoudaia","eta_ageGroupyounger","eta_numTargetstwo","eta_genderM", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
+  c("eta_labRoudaia","eta_ageGroupolder","eta_numTargetstwo","eta_genderF", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
 trueVal<-c( 
      Holcombe_lab_penalty,age_penalty,target_penalty,gender_penalty, 
      lapse, log(sigma))#, 0)
@@ -545,7 +562,38 @@ if (all(est_no_sigma$outside_CI==0)) {
 ```
 
 
-The fitted model's estimated of the parameters are close to those used to generate the simulated data, meaning the model recovery was a success!!
+why are gender and ageGroup estimates zero
+
+Look at [what is happening during the chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548)
+
+```{r}
+#| echo: false 
+library(ggmcmc)
+
+chainchainchain<- ggmcmc::ggs(fit, burnin = TRUE)
+
+#Label the different kinds of parameters differently so can use 
+#facet_grid to put them on separate panels
+chainchainchain <- chainchainchain |>  filter(Parameter != "lprior") |>
+  mutate(
+    paramGroup = case_when(
+      Parameter %in% c("b_logSigma_Intercept", "b_eta_Intercept") ~ 1,
+      TRUE ~ 2
+    )
+  )
+
+chainchainchain |>
+  filter(Iteration < 100) |> #Because nothing happens after first couple hundred
+  mutate(chain = factor(Chain),
+         intercept = value) |>
+  ggplot(aes(x = Iteration, y = intercept, linetype = chain,
+             color = Parameter)) +
+  facet_grid(paramGroup ~ ., scales="free") +
+  geom_line()+
+  ggtitle("chain")+
+  theme_bw()
+
+```
 
 Example using predict to show brms' estimate of effect of additional target
 ```{r}
