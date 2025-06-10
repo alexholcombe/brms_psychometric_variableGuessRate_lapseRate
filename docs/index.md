@@ -18,21 +18,11 @@ Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 why are gender and ageGroup estimates zero
 
-And can also look at [what is happening during a chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548):
+also looking at [what is happening during a chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548):
 
-ggs(fit1, burnin = TRUE) %>%
-  filter(Parameter == "b_top_Intercept") %>% 
-  mutate(chain = factor(Chain),
-         intercept = value) %>% 
-  
-  ggplot(aes(x = Iteration, y = intercept, color = chain)) +
-  geom_line()+
-  ggtitle("default settings")+
-  theme_bw()
+, goes straight to zero?
 
-
-Should probably also reduce to one chain
-
+Can consider init
 
 
 ## Eta estimation by itself or in conjunction with lapse only (and no factors) seems ok
