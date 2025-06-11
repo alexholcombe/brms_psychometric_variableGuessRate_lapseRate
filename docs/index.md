@@ -46,7 +46,7 @@ If this is really what you want, please specify argument 'lb' of 'set_prior' app
 Warning occurred for prior 
 b_eta_Intercept ~ uniform(0, 2.5) `
 
-
+Age_group estimate went crazy in not_multilevel_model_recovery.qmd, maybe by confining the prior to the intercept I no longer have a prior on the coefficient. 
 
 # All the problems below were I think because prior bounded at zero also applied to coefficients
 

@@ -20,7 +20,7 @@ library(here) #For finding root directory
 source( here("R","simulate_data_no_underscores.R") )  #Load my needed custom function
 source( here("R","psychometric_function.R") ) #Load my needed custom function
 
-set.seed(999) #ensures reproducibility for testing
+set.seed(989) #ensures reproducibility for testing
 
 break_brms_by_making_numTargets_numeric<- FALSE #Change factor to numeric, right before doing formula fit, so 
    #I know that it's brms that's the problem rather than the rest of my code
@@ -50,7 +50,7 @@ speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .0
 
 In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
-
+Values per factor
 ```{r}
 #| echo: false 
 
@@ -105,7 +105,7 @@ age_penalty <- 0.2#0.4 #Old people have worse limit by this much
 gender_penalty <- 0.12 #Female worse by this much
 Holcombe_lab_penalty <- 0.2
 #Set parameters for differences between Ss in a group
-eta_between_subject_sd <- 0.2 
+eta_between_subject_sd <- 0.1 
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
@@ -274,21 +274,6 @@ my_brms_formula <- brms::bf(
 
 # Set priors
 
-See [visualize_and_select_priors.html](visualize_and_select_priors.html) for some motivation and visualisation.
-
-```{r}
-#| echo: true 
-
-my_priors <- c(
-  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-  brms::set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logSigma", lb = -2, ub = 1.6) 
-)
-
-```
-
-# Set priors
-
 See [visualize_and_select_priors.html](visualize_and_select_priors.html) for motivation.
 
 ```{r}
@@ -308,12 +293,22 @@ lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
+eta_param1younger<- -2
+eta_param2younger<- 2
+eta_prior_distribution<-  sprintf("uniform(%s, %s)", 
+                             eta_param1younger, eta_param2younger)
+
+ageGroupyounger_prior<- brms::set_prior(eta_prior_distribution, 
+                          coef="ageGroupyounger",
+                          nlpar = "eta")
+
 my_priors <- c(
    brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
    brms::set_prior(eta_prior_distribution,
                    coef="Intercept", #This means the prior will only apply to eta_Intercept
                    nlpar = "eta"),#, lb = 0, ub = 2.5),
-   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6),
+   ageGroupyounger_prior
  )
 
 ```
@@ -419,7 +414,7 @@ time <- try( system.time({
       silent = 0, #prints more detailed messages (helps debug)
       #init = 0, #
       chains = 2,#3, #4 is the default to check consistent convergence
-      iter = 400, #2000 is default number of iterations 
+      iter = 500, #2000 is default number of iterations 
       save_warmup = TRUE
     ) 
   }), #end of system.time
@@ -525,7 +520,7 @@ if (abs(discrepancy)<0.1) {
 #Create corresponding true values dataframe, to compare
 
 trueValsNamesInBrmParlance<-
-  c("eta_labRoudaia","eta_ageGroupolder","eta_numTargetstwo","eta_genderF", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
+  c("eta_labRoudaia","eta_ageGroupyounger","eta_numTargetstwo","eta_genderF", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
 trueVal<-c( 
      Holcombe_lab_penalty,age_penalty,target_penalty,gender_penalty, 
      lapse, log(sigma))#, 0)
@@ -624,5 +619,16 @@ chainchainchain |>
   facet_grid(Parameter~., scales="free") +
   geom_density(alpha = 0.5) +
   labs(title = "Posterior Density")
+```
+Use brms' built-in plot to show posterior and chains.
+```{r}
+#| echo: false 
+plot(fit)
+```
+
+Brms'  conditional_effects method visualizes the model-implied regression curve:
+```{r}
+#| echo: false 
+plot(conditional_effects(fit1), points = TRUE)
 ```
 
