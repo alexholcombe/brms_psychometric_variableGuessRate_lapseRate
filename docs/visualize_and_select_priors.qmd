@@ -16,6 +16,51 @@ library(brms)
 
 A prior distribution in Bayesian analysis will assign a probability to each possible value of a parameter. By specifying priors, brms takes into account not only the inputted data but also what is already known about the likelihood of certain parameter values to produce a more accurate estimation.
 
+## Confusion of whether prior applies only to intercept or also to between-group coefficients
+
+### Trying to make prior on eta be specific to the Intercept, eta_Intercept
+
+From brms documentation: In case of the default intercept parameterization (discussed in the 'Details' section of brmsformula), general priors on class "b" will not affect the intercept. Instead, the intercept has its own parameter class named "Intercept" and priors can thus be specified via set_prior("<prior>", class = "Intercept")
+
+
+In an attempt to get eta_Intercept instead of Intercept_eta, that my changing class from "b" to "Intercept" did, try also specifying coef.
+
+Wow, specifying both class as "b" and coef as "Intercept" resulted in "Intercept_eta_Intercept" inside brms!
+
+` Error : The following priors do not correspond to any model parameter: 
+<lower=0,upper=2.5> Intercept_eta_Intercept ~ uniform(0, 2.5) `
+
+So try leaving class blank while keeping coef="Intercept", as that seems to be what puts "Intercept" before "eta".
+
+That results in this error: 
+` Error : Prior argument 'coef' may not be specified when using boundaries. `
+
+So I dropped lb and ub.
+
+That yields a warning because the uniform prior I set does have bounds, and brms doesn't like that discrepancy.
+
+` Warning :It appears as if you have specified a lower bounded prior on a parameter that has no natural lower bound.
+If this is really what you want, please specify argument 'lb' of 'set_prior' appropriately.
+Warning occurred for prior 
+b_eta_Intercept ~ uniform(0, 2.5) `
+
+Final solution for an eta uniform prior only on the Intercept:
+
+```{r}
+#| echo: true
+#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string, if you want to set parameters dynamically
+eta_param1<- 0
+eta_param2<- 2.5
+eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+
+brms::set_prior(eta_prior_distribution, 
+                   coef="Intercept",
+                   nlpar = "eta")
+```
+
+
+
+
 ## Prior on Lapse $(L)$
 
 Since lapse is a rate, it is bounded between 0 and 1. We know from previous literature that a reasonable value of lapse is between 0.03 and 0.04.
@@ -157,7 +202,6 @@ prior_lapse <- tibble(
 ) |>
   mutate(y = y / max(y)) #Normalize so has peak of 1
 
-
 prior_location <- tibble(
   x = seq(-1, 10, length.out = 500),
   y = dunif(x, eta_param1, eta_param2),
@@ -173,10 +217,10 @@ prior_scale <- tibble(
   mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
 
 # Combine all priors
-priors_all <- bind_rows(prior_lapse, prior_location, prior_scale)
+priors_to_plot <- bind_rows(prior_lapse, prior_location, prior_scale)
 
 # Plot
-ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
+ggplot(priors_to_plot, aes(x = x, y = y, color = parameter)) +
   geom_line() +
   theme_light() +
   labs(
@@ -188,11 +232,20 @@ ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
 ```
 
-Here is the code you can use when calling brms:
+Here is code you can use when calling brms:
 ```{r}
+#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
+# if you want to set the parameters dynamically
+lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
+eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
+
 my_priors <- c(
-  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-  brms::set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logSigma", lb = -2, ub = 1.6) 
-)
+   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+   brms::set_prior(eta_prior_distribution, # class = "Intercept",
+                   coef="Intercept",
+                   nlpar = "eta"),#, lb = 0, ub = 2.5),
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ )
+
 ```

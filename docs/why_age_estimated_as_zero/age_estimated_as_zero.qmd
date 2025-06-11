@@ -269,8 +269,41 @@ my_brms_formula <- brms::bf(
 
 See [visualize_and_select_priors.html](visualize_and_select_priors.html) for motivation.
 
+## Trying to make prior on eta be specific to the Intercept, eta_Intercept
+
+In an attempt to get eta_Intercept instead of Intercept_eta, that my changing class from "b" to "Intercept" did, try also specifying coef.
+
+Wow, specifying both class as "b" and coef as "Intercept" resulted in "Intercept_eta_Intercept" inside brms!
+
+` Error : The following priors do not correspond to any model parameter: 
+<lower=0,upper=2.5> Intercept_eta_Intercept ~ uniform(0, 2.5) `
+
+So try leaving class blank while keeping coef="Intercept", as that seems to be what puts "Intercept" before "eta".
+
+That results in this error: 
+` Error : Prior argument 'coef' may not be specified when using boundaries. `
+
+So try dropping lb and ub.
+
+That yields a warning because the uniform prior I set does have bounds, and brms doesn't like that discrepancy.
+
+` Warning :It appears as if you have specified a lower bounded prior on a parameter that has no natural lower bound.
+If this is really what you want, please specify argument 'lb' of 'set_prior' appropriately.
+Warning occurred for prior 
+b_eta_Intercept ~ uniform(0, 2.5) `
+
+
+From brms documentation: In case of the default intercept parameterization (discussed in the 'Details' section of brmsformula), general priors on class "b" will not affect the intercept. Instead, the intercept has its own parameter class named "Intercept" and priors can thus be specified via set_prior("<prior>", class = "Intercept")
+
 ```{r}
 #| echo: false 
+
+#Ask brms for syntax for priors for my model
+default_priors<-    brms::default_prior(my_brms_formula,
+                          data = data_simulated   )
+#Looking at default_priors, it seems maybe I should specify coef="Intercept" for eta
+# when I want the class to be Intercept.. 
+
 lapse_param1<- 2
 lapse_param2<- 33.33
 
@@ -285,20 +318,45 @@ lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
-# my_priors <- c(
-#   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-#   brms::set_prior(eta_prior_distribution, class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-#   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
-# )
+my_priors <- c(
+   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+   brms::set_prior(eta_prior_distribution, class = "Intercept", nlpar = "eta", lb = 0, ub = 2.5),
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ )
 
-# define my priors
-my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
-                            class = "b", lb=0,ub=1),
-                brms::prior_string(eta_prior_distribution, nlpar="eta", 
-                            class = "Intercept", #"b"
-                            lb=0,ub=2.5),
-                brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
-                            class="b",lb=-2,ub=1.6)  )
+#in an attempt to get eta_Intercept instead of Intercept_eta, try
+my_priors <- c(
+   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+   brms::set_prior(eta_prior_distribution, class = "Intercept",
+                   coef="Intercept",
+                   nlpar = "eta", lb = 0, ub = 2.5),
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ )
+
+my_priors <- c(
+   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+   brms::set_prior(eta_prior_distribution, # class = "Intercept",
+                   coef="Intercept",
+                   nlpar = "eta", lb = 0, ub = 2.5),
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ )
+
+my_priors <- c(
+   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+   brms::set_prior(eta_prior_distribution, # class = "Intercept",
+                   coef="Intercept",
+                   nlpar = "eta"),#, lb = 0, ub = 2.5),
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ )
+
+# define my priors, using alternative of prior_string, don't know how it's different.
+# my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
+#                             class = "b", lb=0,ub=1),
+#                 brms::prior_string(eta_prior_distribution, nlpar="eta", 
+#                             class = "Intercept", #"b"
+#                             lb=0,ub=2.5),
+#                 brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
+#                             class="b",lb=-2,ub=1.6)  )
 
 #Error : The following priors do not correspond to any model parameter: 
 #<lower=0,upper=2.5> Intercept_eta ~ uniform(0, 2.5)

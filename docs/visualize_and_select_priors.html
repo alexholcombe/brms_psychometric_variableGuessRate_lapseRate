@@ -133,32 +133,61 @@ window.Quarto = {
 <section id="selecting-priors" class="level1">
 <h1>Selecting Priors</h1>
 <p>A prior distribution in Bayesian analysis will assign a probability to each possible value of a parameter. By specifying priors, brms takes into account not only the inputted data but also what is already known about the likelihood of certain parameter values to produce a more accurate estimation.</p>
+<section id="confusion-of-whether-prior-applies-only-to-intercept-or-also-to-between-group-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="confusion-of-whether-prior-applies-only-to-intercept-or-also-to-between-group-coefficients">Confusion of whether prior applies only to intercept or also to between-group coefficients</h2>
+<section id="trying-to-make-prior-on-eta-be-specific-to-the-intercept-eta_intercept" class="level3">
+<h3 class="anchored" data-anchor-id="trying-to-make-prior-on-eta-be-specific-to-the-intercept-eta_intercept">Trying to make prior on eta be specific to the Intercept, eta_Intercept</h3>
+<p>From brms documentation: In case of the default intercept parameterization (discussed in the ‘Details’ section of brmsformula), general priors on class “b” will not affect the intercept. Instead, the intercept has its own parameter class named “Intercept” and priors can thus be specified via set_prior(“<prior>”, class = “Intercept”)</prior></p>
+<p>In an attempt to get eta_Intercept instead of Intercept_eta, that my changing class from “b” to “Intercept” did, try also specifying coef.</p>
+<p>Wow, specifying both class as “b” and coef as “Intercept” resulted in “Intercept_eta_Intercept” inside brms!</p>
+<p><code>Error : The following priors do not correspond to any model parameter:  &lt;lower=0,upper=2.5&gt; Intercept_eta_Intercept ~ uniform(0, 2.5)</code></p>
+<p>So try leaving class blank while keeping coef=“Intercept”, as that seems to be what puts “Intercept” before “eta”.</p>
+<p>That results in this error: <code>Error : Prior argument 'coef' may not be specified when using boundaries.</code></p>
+<p>So I dropped lb and ub.</p>
+<p>That yields a warning because the uniform prior I set does have bounds, and brms doesn’t like that discrepancy.</p>
+<p><code>Warning :It appears as if you have specified a lower bounded prior on a parameter that has no natural lower bound. If this is really what you want, please specify argument 'lb' of 'set_prior' appropriately. Warning occurred for prior  b_eta_Intercept ~ uniform(0, 2.5)</code></p>
+<p>Final solution for an eta uniform prior only on the Intercept:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string, if you want to set parameters dynamically</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>eta_param1<span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>eta_param2<span class="ot">&lt;-</span> <span class="fl">2.5</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>eta_prior_distribution<span class="ot">&lt;-</span>  <span class="fu">sprintf</span>(<span class="st">"uniform(%s, %s)"</span>, eta_param1, eta_param2)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>brms<span class="sc">::</span><span class="fu">set_prior</span>(eta_prior_distribution, </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                   <span class="at">coef=</span><span class="st">"Intercept"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                   <span class="at">nlpar =</span> <span class="st">"eta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>b_eta_Intercept ~ uniform(0, 2.5)</code></pre>
+</div>
+</div>
+</section>
+</section>
 <section id="prior-on-lapse-l" class="level2">
 <h2 class="anchored" data-anchor-id="prior-on-lapse-l">Prior on Lapse <span class="math inline">\((L)\)</span></h2>
 <p>Since lapse is a rate, it is bounded between 0 and 1. We know from previous literature that a reasonable value of lapse is between 0.03 and 0.04.</p>
 <p>As the tested population was reasonably well-motivated, high lapse valuables were unlikely, although not impossible. Therefore, we set a prior on lapse using a beta distribution that was bounded between 0 and 1 and a mode of 0.03.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>lapse_param1<span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>lapse_param2<span class="ot">&lt;-</span> <span class="fl">33.33</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lapse_param1<span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>lapse_param2<span class="ot">&lt;-</span> <span class="fl">33.33</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>prior_lapse <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tibble</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">500</span>),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">dbeta</span>(x, lapse_param1, lapse_param2)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(prior_lapse) <span class="sc">+</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y) <span class="sc">+</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_area</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">""</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">""</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>prior_lapse <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">500</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">dbeta</span>(x, lapse_param1, lapse_param2)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(prior_lapse) <span class="sc">+</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y) <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_area</span>(<span class="at">fill =</span> <span class="st">"red"</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">""</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">""</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -168,14 +197,14 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="prior-on-location-eta">Prior on Location <span class="math inline">\((\eta)\)</span></h2>
 <p>We set a uniform prior for location with a lower bound of 0 and an upper bound of 2.5. The lower bound was set at 0 as you cannot have negative speed&nbsp;. Holcombe and Chen (2013) found that even the best participant would have a speed threshold of less than 2.5 revolutions per second, even with only 2 distractors present in their array. Holcombe and Chen (2020) found that tracking of a single object on a mechanical display which is not confounded by a display’s refresh rate still had a speed limit of 2.3 revolutions per second. Therefore, from previous research, an upper bound on speed threshold at 2.5 revolutions per second would be adequate to cover all participants.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>eta_param1<span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>eta_param2<span class="ot">&lt;-</span> <span class="fl">2.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>eta_param1<span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>eta_param2<span class="ot">&lt;-</span> <span class="fl">2.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -185,21 +214,21 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="prior-on-sigmascale-sigma">Prior on Sigma/Scale <span class="math inline">\((\sigma)\)</span></h2>
 <p>Values of sigma can get extremely small and therefore tiny changes in the value of sigma can have significant effects, makeing it hard for brms to accurately estimate sigma. Therefore, our brms model is cast in terms of logsigma. We concluded that a sigma approximately between 0.05 and 5 would be a sufficient range to accommodate all participants based on looking at psychometric data from previous papers. Converting this with the log transform, we set a uniform prior on logsigma with a conservative lower and upper bound of -3 and 1.6 respectively.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>logsigma_param1<span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">3</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>logsigma_param2<span class="ot">&lt;-</span> <span class="fl">1.6</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>logsigma_param1<span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">3</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>logsigma_param2<span class="ot">&lt;-</span> <span class="fl">1.6</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -209,7 +238,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -223,18 +252,26 @@ window.Quarto = {
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="visualize_and_select_priors_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Here is the code you can use when calling brms:</p>
+<p>Here is code you can use when calling brms:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>my_priors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  brms<span class="sc">::</span><span class="fu">set_prior</span>(<span class="st">"beta(2,33.33)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"lapseRate"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="dv">1</span>),</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  brms<span class="sc">::</span><span class="fu">set_prior</span>(<span class="st">"uniform(0, 2.5)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"eta"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="fl">2.5</span>),</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  brms<span class="sc">::</span><span class="fu">set_prior</span>(<span class="st">"uniform(-3, 1.6)"</span>, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"logSigma"</span>, <span class="at">lb =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">ub =</span> <span class="fl">1.6</span>) </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># if you want to set the parameters dynamically</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>lapseRate_prior_distribution<span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"beta(%s, %s)"</span>, lapse_param1, lapse_param2)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>eta_prior_distribution<span class="ot">&lt;-</span>  <span class="fu">sprintf</span>(<span class="st">"uniform(%s, %s)"</span>, eta_param1, eta_param2)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>logsigma_prior_distribution<span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"uniform(%s, %s)"</span>, logsigma_param1, logsigma_param2)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>my_priors <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>   brms<span class="sc">::</span><span class="fu">set_prior</span>(lapseRate_prior_distribution, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"lapseRate"</span>, <span class="at">lb =</span> <span class="dv">0</span>, <span class="at">ub =</span> <span class="dv">1</span>),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>   brms<span class="sc">::</span><span class="fu">set_prior</span>(eta_prior_distribution, <span class="co"># class = "Intercept",</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                   <span class="at">coef=</span><span class="st">"Intercept"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                   <span class="at">nlpar =</span> <span class="st">"eta"</span>),<span class="co">#, lb = 0, ub = 2.5),</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>   brms<span class="sc">::</span><span class="fu">set_prior</span>(logsigma_prior_distribution, <span class="at">class =</span> <span class="st">"b"</span>, <span class="at">nlpar =</span> <span class="st">"logSigma"</span>, <span class="at">lb =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">ub =</span> <span class="fl">1.6</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a> )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
