@@ -13,10 +13,10 @@ generate_conditions<- function(labs,numTargetsConds,subjPerGroup,trialsPerCondit
 
   #For brms, to interpret coefficients, you need to know your factors' order.
   #The first level of your factor is the reference in the model summary. Otherwise will use alphabetized
-  genders<- factor( c("M", "F"), 
-                    levels = c("M", "F") ) #This defines the factor order
-  ageGroups<- factor( c("younger","older"),
-                       levels=c("younger","older") ) #This defines the factor order
+  genders<- factor( c("F", "M"), 
+                    levels = c("F", "M") ) #This defines the factor order
+  ageGroups<- factor( c("older","younger"),
+                       levels=c("older","younger") ) #This defines the factor order
   obj_per_rings<- factor( c("fewer","more"),
                           levels=c("fewer","more") ) #This defines the factor order
   

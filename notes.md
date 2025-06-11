@@ -58,3 +58,9 @@ Error : The following priors do not correspond to any model parameter:
 <lower=0,upper=2.5> Intercept_eta ~ uniform(0, 2.5)
 
 yeah because it's supposed to be eta_Intercept?
+
+## To-do
+
+Check if logSigma still wrong.
+
+Try to work out reference group again.

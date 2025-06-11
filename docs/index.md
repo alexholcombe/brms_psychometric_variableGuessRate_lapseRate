@@ -33,6 +33,21 @@ Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 
 Check out [visualize_and_select_priors.html](visualize_and_select_priors.html)
 
+One remaining question is why lb and ub are not accepted for prior that applies only to eta_Intercept. If one sets lb and ub, one gets this error:
+
+` Error : Prior argument 'coef' may not be specified when using boundaries. `
+
+So I dropped lb and ub.
+
+That yields a warning because the uniform prior I set does have bounds, and brms doesn't like that discrepancy.
+
+` Warning :It appears as if you have specified a lower bounded prior on a parameter that has no natural lower bound.
+If this is really what you want, please specify argument 'lb' of 'set_prior' appropriately.
+Warning occurred for prior 
+b_eta_Intercept ~ uniform(0, 2.5) `
+
+
+
 # All the problems below were I think because prior bounded at zero also applied to coefficients
 
 

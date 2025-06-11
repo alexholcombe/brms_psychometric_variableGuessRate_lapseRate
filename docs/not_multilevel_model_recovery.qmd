@@ -30,15 +30,22 @@ break_brms_by_making_numTargets_numeric<- FALSE #Change factor to numeric, right
 
 Set up simulated experiment design.
 
+Maybe make sure the reference group (that the Intercept estimate pertains to) is the expected-worse group. This is in case I later set priors on the coefficients, so that I can set the priors to all be positive to be less confusing.
+
+Supposedly the levels order determines what brms sets the reference group to.
+
 ```{r}
 #| echo: true 
-numTargetsConds<- c("two","three")
-numSubjects<- 20#25
-trialsPerCondition<- 20
-laboratories<- c("Holcombe","Roudaia")
+
+numTargetsConds<- factor( c("three", "two"),
+                         levels=c("three", "two") ) #This defines factor order. Worst is first.
+numSubjects<- 25
+trialsPerCondition<- 30#20
+laboratories<- factor( c("Holcombe", "Roudaia"),
+                         levels=c("Holcombe", "Roudaia") ) #This defines the factor order
+
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
 speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
-
 ```
 
 In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
@@ -48,7 +55,6 @@ In order to build and test our model in brms, we must first create a simulated d
 #| echo: false 
 
 trials <- generate_conditions(laboratories,numTargetsConds,numSubjects,trialsPerCondition,speeds)
-
 
 #Print number of unique values of each column
 #print('Number of values for each factor:')
@@ -297,23 +303,18 @@ logsigma_param1<- -3
 logsigma_param2<- 1.6
 
 #brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
+# if you want to set the parameters dynamically
 lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
-# my_priors <- c(
-#   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-#   brms::set_prior(eta_prior_distribution, class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-#   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
-# )
-
-# define my priors
-my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
-                            class = "b", lb=0,ub=1),
-                brms::prior_string(eta_prior_distribution, nlpar="eta", 
-                            class = "b", lb=0,ub=2.5),
-                brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
-                            class="b",lb=-2,ub=1.6)  )
+my_priors <- c(
+   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
+   brms::set_prior(eta_prior_distribution,
+                   coef="Intercept", #This means the prior will only apply to eta_Intercept
+                   nlpar = "eta"),#, lb = 0, ub = 2.5),
+   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ )
 
 ```
 
@@ -434,6 +435,8 @@ if (inherits(time, "try-error")) {
 
 print( summary(fit) )
 ```
+## Interpreting the intercepts and coefficients estimated by brms
+
 eta_intercept is the eta for the older group
 
 eta_ageGroupyounger represents the eta advantage for the younger age group. 
@@ -469,7 +472,7 @@ reference_group <- data.frame(
   lab = "Holcombe",
   ageGroup = "older",
   gender = "F",
-  numTargets = "two"
+  numTargets = "three"
 )
 
 #brms' estimate for the reference group
