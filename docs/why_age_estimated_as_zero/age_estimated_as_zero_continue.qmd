@@ -5,7 +5,6 @@ format: html
 
 Will generate fake data that includes differences between participants, but doesn't model them.
 
-
 To get started, we load the required packages.
 
 ```{r}
@@ -99,7 +98,7 @@ lapse <- 0.05
 sigma <- 0.2
 
 location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
-target_penalty<-0.15 #penalty for additional target
+target_penalty<-0.4 #penalty for additional target
 age_penalty <- 0.4#0.4 #Old people have worse limit by this much
 gender_penalty <- 0.12 #Female worse by this much
 Holcombe_lab_penalty <- 0.4
@@ -256,26 +255,15 @@ The model we used is based off our psychometric function used to generate the da
 
 
 ```{r}
-my_formula <- brms::bf( 
-   correct ~ chance_rate + (1-chance_rate - lapseRate*(1-chance_rate)) * Phi(-(speed-eta)/exp(logSigma))
-  ) 
+
 my_formula <- brms::bf( 
    correct ~ chance_rate + (1-chance_rate - .04*(1-chance_rate)) * Phi(-(speed-eta)/exp(log(0.2)))
   ) 
 my_formula <- my_formula$formula
-  
-my_brms_formula <- brms::bf(
-  correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ ageGroup, #+ lab + numTargets,# + gender,
-  #lapseRate ~ 1, #~1 estimates intercept only
-  #logSigma ~ 1,#ageGroup,
-  family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
-  nl = TRUE #non-linear model
-)
 
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - .04 * (1-chance_rate))*Phi(-(speed-eta)/exp(log(0.2))), 
-  eta ~ ageGroup, #+ lab + numTargets,# + gender,
+  eta ~ ageGroup + numTargets, #+ lab + numTargets,# + gender,
   #lapseRate ~ 1, #~1 estimates intercept only
   #logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -304,10 +292,12 @@ eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
 # define my priors
+#"Intercept" means only applies to the intercept, so that coefficients can go negative if need to. But maybe I should make sure my reference group is "older" so then I can constrain that to be greater than zero
 my_priors <- c( #brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
                  #           class = "b", lb=0,ub=1),
-                brms::prior_string(eta_prior_distribution, nlpar="eta", 
-                            class = "b", lb=0,ub=2.5)#,
+          brms::prior_string(eta_prior_distribution, nlpar="eta", 
+                            class = "b", #only applies to intercept
+                            lb=0,ub=2.5) #,
                 #brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
                            # class="b",lb=-2,ub=1.6)  
 )

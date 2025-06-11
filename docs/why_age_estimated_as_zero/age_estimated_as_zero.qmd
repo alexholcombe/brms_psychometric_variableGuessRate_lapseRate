@@ -49,7 +49,6 @@ In order to build and test our model in brms, we must first create a simulated d
 
 trials <- generate_conditions(laboratories,numTargetsConds,numSubjects,trialsPerCondition,speeds)
 
-
 #Print number of unique values of each column
 #print('Number of values for each factor:')
 numValsPerFactor<- trials |> summarise(across(everything(), ~ n_distinct(.))) |>
@@ -247,7 +246,7 @@ The bf() function of brms allows the specification of a formula. The parameter c
 
 The model we used is based off our psychometric function used to generate the data mentioned previously. The only explicitly-coded difference in our simulated data is in the location parameter of older vs younger. Thus, in addition to the psychometric function, we allowed $\eta$ and $\log(\sigma)$ to vary by age group in the model. Because the psychometric function doesn't map onto a canonical link function, we use the non-linear estimation capability of brms rather than linear regression with a link function.
 
-*Alex's note: Using the nonlinear option is also what allowed us to set a prior on the thresholds  $\eta$, because we could then parametrize the function in terms of the x-intercept, whereas with the link-function approach, we are stuck with the conventional parameterization of a line, which [has a term for the y-intercept but not the x-intercept](https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z) *
+Using the nonlinear option is also what allowed us to set a prior on the thresholds  $\eta$, because we could then parametrize the function in terms of the x-intercept, whereas with the link-function approach, we are stuck with the conventional parameterization of a line, which [has a term for the y-intercept but not the x-intercept](https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z)
 
 
 ```{r}
@@ -264,21 +263,6 @@ my_brms_formula <- brms::bf(
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
   nl = TRUE #non-linear model
 )
-```
-
-# Set priors
-
-See [visualize_and_select_priors.html](visualize_and_select_priors.html) for some motivation and visualisation.
-
-```{r}
-#| echo: true 
-
-my_priors <- c(
-  brms::set_prior("beta(2,33.33)", class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-  brms::set_prior("uniform(0, 2.5)", class = "b", nlpar = "eta", lb = 0, ub = 2.5),
-  brms::set_prior("uniform(-3, 1.6)", class = "b", nlpar = "logSigma", lb = -2, ub = 1.6) 
-)
-
 ```
 
 # Set priors
@@ -311,10 +295,14 @@ logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsig
 my_priors <- c( brms::prior_string(lapseRate_prior_distribution, nlpar="lapseRate", 
                             class = "b", lb=0,ub=1),
                 brms::prior_string(eta_prior_distribution, nlpar="eta", 
-                            class = "b", lb=0,ub=2.5),
+                            class = "Intercept", #"b"
+                            lb=0,ub=2.5),
                 brms::prior_string(logsigma_prior_distribution, nlpar="logSigma", 
                             class="b",lb=-2,ub=1.6)  )
 
+#Error : The following priors do not correspond to any model parameter: 
+#<lower=0,upper=2.5> Intercept_eta ~ uniform(0, 2.5)
+#yeah because it's supposed to be eta_Intercept, not Intercept_eta?
 ```
 
 Visualize priors, by plotting them all together (with arbitrary height).
