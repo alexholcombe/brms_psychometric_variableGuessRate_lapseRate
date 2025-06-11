@@ -293,7 +293,6 @@ eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
 eta_differences_prior_distribution<- sprintf("normal(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
-
 eta_param1younger<- -1.5
 eta_param2younger<- 1.5
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", 
@@ -316,7 +315,7 @@ my_priors <- c( lapseRate_prior, eta_prior,
 
 ```
 
-Visualize priors, by plotting them all together (with arbitrary height).
+Visualize priors, by plotting together (with arbitrary height).
 
 ```{r}
 #| echo: false
