@@ -129,9 +129,11 @@ lapse_param2<- 33.33
 ```
 
 ```{r}
-prior_lapse <- dplyr::tibble(
-    x = seq(0, 1, length.out = 500),
-    y = dbeta(x, lapse_param1, lapse_param2)
+
+prior_lapse <- tibble(
+  x = seq(0, 1, length.out = 500),
+  y = dbeta(x, lapse_param1, lapse_param2),
+  parameter = "lapse"
 )
 
 ggplot(prior_lapse) + aes(x = x, y = y) +
@@ -153,22 +155,38 @@ eta_param1<- 0
 eta_param2<- 2.5
 ```
 
+Brms allows setting lower and upper bounds on Intercept but not on coefficients. This means that if need to set a prior on coefficients (perhaps shouldn't need to do that, but I had trouble recently where simple ones blew up), may need to use a non-uniform (because brms may not play well with uniform without bounds specified, not sure), so also consider Gaussian for the difference between groups, between -1.5 and +1.5 difference in rps.
 
 ```{r}
 #| echo: false 
-prior_location <- dplyr::tibble(
-    x = seq(-1, 10, length.out = 500),
-    y = dunif(x, eta_param1, eta_param2)
+
+prior_location <- tibble(
+  x = seq(-1, 5, length.out = 500),
+  y = dunif(x, eta_param1, eta_param2),
+  parameter = "location"
 )
 
-ggplot(prior_location) + aes(x = x, y = y) +
-  geom_area(fill = "red", alpha = 0.2) +
+prior_location_diff<-  dplyr::tibble(
+    x = seq(-4, 5, length.out = 500),
+    y = dnorm(x, eta_param1, eta_param2),
+    parameter = "location diff (coef)"
+)
+
+# Combine all priors
+priors_to_plot <- bind_rows(prior_location,prior_location_diff)
+
+# Plot
+ggplot(priors_to_plot, aes(x = x, y = y, color = parameter)) +
   geom_line() +
   theme_light() +
   labs(
-    x = "",
-    y = ""
-  )
+    x = "Parameter value",
+    y = "Density",
+    color = "Parameter"
+  ) + xlim(-4,4) +
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
+
 ```
 
 ## Prior on Sigma/Scale $(\sigma)$
@@ -230,9 +248,10 @@ Figure 2: Example plots of psychometric function with a logsigma of either -3 or
 
 ```{r}
 #| echo: false 
-prior_scale <- dplyr::tibble(
-    x = seq(-5, 5, length.out = 500),
-    y = dunif(x, -3, 1.6)
+prior_scale <- tibble(
+  x = seq(-5, 5, length.out = 500),
+  y = dunif(x, logsigma_param1, logsigma_param2),
+  parameter = "log(sigma)"
 )
 
 ggplot(prior_scale) + aes(x = x, y = y) +
@@ -251,29 +270,22 @@ Plot them all together
 #| echo: false
 
 # Create tibbles for each prior with a parameter label
-prior_lapse <- tibble(
-  x = seq(0, 1, length.out = 500),
-  y = dbeta(x, lapse_param1, lapse_param2),
-  parameter = "lapse"
-) |>
+prior_lapse<- prior_lapse |>
   mutate(y = y / max(y)) #Normalize so has peak of 1
 
-prior_location <- tibble(
-  x = seq(-1, 10, length.out = 500),
-  y = dunif(x, eta_param1, eta_param2),
-  parameter = "location"
-) |>
+prior_location<- prior_location |>
   mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
 
-prior_scale <- tibble(
-  x = seq(-5, 5, length.out = 500),
-  y = dunif(x, logsigma_param1, logsigma_param2),
-  parameter = "log(sigma)"
-) |>
+prior_location_diff<- prior_location_diff |>
+  mutate(y = y / max(y) * 0.85) #Normalize so has peak of 0.95 (to avoid overlap)
+
+prior_scale<- prior_scale |>
   mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
 
+
 # Combine all priors
-priors_to_plot <- bind_rows(prior_lapse, prior_location, prior_scale)
+priors_to_plot <- bind_rows(prior_lapse, prior_location,
+                            prior_location_diff, prior_scale)
 
 # Plot
 ggplot(priors_to_plot, aes(x = x, y = y, color = parameter)) +
@@ -293,8 +305,12 @@ Here is code you can use when calling brms:
 #brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
 # if you want to set the parameters dynamically
 lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
+
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+eta_differences_prior_distribution<-  sprintf("gaussian(%s, %s)", eta_param1, eta_param2)
+
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
+
 
 my_priors <- c(
    brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),

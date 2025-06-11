@@ -316,6 +316,7 @@ logsigma_param2<- 1.6
 #brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
 lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+eta_differences_prior_distribution<- sprintf("gaussian(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
 my_priors <- c(
@@ -324,22 +325,6 @@ my_priors <- c(
    brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
  )
 
-#in an attempt to get eta_Intercept instead of Intercept_eta, try
-my_priors <- c(
-   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-   brms::set_prior(eta_prior_distribution, class = "Intercept",
-                   coef="Intercept",
-                   nlpar = "eta", lb = 0, ub = 2.5),
-   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
- )
-
-my_priors <- c(
-   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-   brms::set_prior(eta_prior_distribution, # class = "Intercept",
-                   coef="Intercept",
-                   nlpar = "eta", lb = 0, ub = 2.5),
-   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
- )
 
 my_priors <- c(
    brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
@@ -383,6 +368,13 @@ prior_location <- tibble(
 ) |>
   mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
 
+prior_location_diff <- tibble(
+  x = seq(-4, 10, length.out = 500),
+  y = dnorm(x, eta_param1, eta_param2),
+  parameter = "location group difference"
+) |>
+  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
+
 prior_scale <- tibble(
   x = seq(-5, 5, length.out = 500),
   y = dunif(x, logsigma_param1, logsigma_param2),
@@ -391,7 +383,7 @@ prior_scale <- tibble(
   mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
 
 # Combine all priors
-priors_all <- bind_rows(prior_lapse, prior_location, prior_scale)
+priors_all <- bind_rows(prior_lapse, prior_location, prior_location_diff, prior_scale)
 
 # Plot
 ggplot(priors_all, aes(x = x, y = y, color = parameter)) +

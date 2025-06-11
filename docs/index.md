@@ -33,7 +33,7 @@ Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 
 Check out [visualize_and_select_priors.html](visualize_and_select_priors.html)
 
-One remaining question is why lb and ub are not accepted for prior that applies only to eta_Intercept. If one sets lb and ub, one gets this error:
+A remaining question is why lb and ub are not accepted for prior that applies only to eta_Intercept. If one sets lb and ub, one gets this error:
 
 ` Error : Prior argument 'coef' may not be specified when using boundaries. `
 
@@ -45,6 +45,8 @@ That yields a warning because the uniform prior I set does have bounds, and brms
 If this is really what you want, please specify argument 'lb' of 'set_prior' appropriately.
 Warning occurred for prior 
 b_eta_Intercept ~ uniform(0, 2.5) `
+
+ with "Error : Prior argument 'coef' may not be specified when using boundaries." make it difficult to have a uniform prior, should I go for a non-uniform prior even for effects of groups that I'm interested in estimating (as opposed to the Intercept)
 
 Age_group estimate went crazy in not_multilevel_model_recovery.qmd, maybe by confining the prior to the intercept I no longer have a prior on the coefficient. 
 

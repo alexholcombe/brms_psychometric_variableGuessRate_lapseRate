@@ -288,28 +288,31 @@ logsigma_param1<- -3
 logsigma_param2<- 1.6
 
 #brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
-# if you want to set the parameters dynamically
 lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
+eta_differences_prior_distribution<- sprintf("normal(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
-eta_param1younger<- -2
-eta_param2younger<- 2
+
+eta_param1younger<- -1.5
+eta_param2younger<- 1.5
 eta_prior_distribution<-  sprintf("uniform(%s, %s)", 
                              eta_param1younger, eta_param2younger)
 
-ageGroupyounger_prior<- brms::set_prior(eta_prior_distribution, 
+
+lapseRate_prior<- brms::set_prior(lapseRate_prior_distribution,
+                          class = "b", nlpar = "lapseRate", lb = 0, ub = 1)
+eta_prior<- brms::set_prior(eta_prior_distribution,
+              coef="Intercept", #This means the prior will only apply to eta_Intercept
+              nlpar = "eta")#, lb = 0, ub = 2.5),
+logSigma_prior<- brms::set_prior(logsigma_prior_distribution, 
+                    class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ageGroupyounger_prior<- brms::set_prior(eta_differences_prior_distribution, 
                           coef="ageGroupyounger",
                           nlpar = "eta")
 
-my_priors <- c(
-   brms::set_prior(lapseRate_prior_distribution, class = "b", nlpar = "lapseRate", lb = 0, ub = 1),
-   brms::set_prior(eta_prior_distribution,
-                   coef="Intercept", #This means the prior will only apply to eta_Intercept
-                   nlpar = "eta"),#, lb = 0, ub = 2.5),
-   brms::set_prior(logsigma_prior_distribution, class = "b", nlpar = "logSigma", lb = -2, ub = 1.6),
-   ageGroupyounger_prior
- )
+my_priors <- c( lapseRate_prior, eta_prior,
+                logSigma_prior, ageGroupyounger_prior)
 
 ```
 
@@ -333,6 +336,13 @@ prior_location <- tibble(
 ) |>
   mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
 
+prior_location_diff <- tibble(
+  x = seq(-4, 10, length.out = 500),
+  y = dnorm(x, eta_param1, eta_param2),
+  parameter = "location group difference"
+) |>
+  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
+
 prior_scale <- tibble(
   x = seq(-5, 5, length.out = 500),
   y = dunif(x, logsigma_param1, logsigma_param2),
@@ -341,7 +351,7 @@ prior_scale <- tibble(
   mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
 
 # Combine all priors
-priors_all <- bind_rows(prior_lapse, prior_location, prior_scale)
+priors_all <- bind_rows(prior_lapse, prior_location, prior_location_diff, prior_scale)
 
 # Plot
 ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
@@ -414,7 +424,7 @@ time <- try( system.time({
       silent = 0, #prints more detailed messages (helps debug)
       #init = 0, #
       chains = 2,#3, #4 is the default to check consistent convergence
-      iter = 500, #2000 is default number of iterations 
+      iter = 700, #2000 is default number of iterations 
       save_warmup = TRUE
     ) 
   }), #end of system.time
@@ -629,6 +639,6 @@ plot(fit)
 Brms'  conditional_effects method visualizes the model-implied regression curve:
 ```{r}
 #| echo: false 
-plot(conditional_effects(fit1), points = TRUE)
+plot(conditional_effects(fit), points = TRUE)
 ```
 
