@@ -6,6 +6,8 @@ title: "Guide to this brms model recovery site"
 Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 
+[lab_age_model_works](lab_age_model_works/lab_age_model_works_except_logSigma.html)
+
 [basic_model_recovery.html](docs/basic_model_recovery.html)
 
 [all_factors_but_not_multilevel](all_factors_but_not_multilevel.html)
