@@ -279,7 +279,7 @@ See [visualize_and_select_priors.html](visualize_and_select_priors.html) for mot
 ```{r}
 #| echo: false 
 
-# Specify distribution names and parameters separately
+# Specify distribution names and parameters
 lapseRate_prior_dist_name <- "beta"
 lapse_param1 <- 2
 lapse_param2 <- 33.33
