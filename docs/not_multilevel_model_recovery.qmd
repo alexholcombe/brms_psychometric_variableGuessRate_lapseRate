@@ -564,9 +564,10 @@ if (abs(discrepancy)<0.1) {
 #Create corresponding true values dataframe, to compare
 
 trueValsNamesInBrmParlance<-
-  c("eta_labRoudaia","eta_ageGroupyounger","eta_numTargetstwo","eta_genderF", "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
+  c("eta_labRoudaia","eta_ageGroupyounger",#"eta_numTargetstwo","eta_genderF",
+    "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
 trueVal<-c( 
-     Holcombe_lab_penalty,age_penalty,target_penalty,gender_penalty, 
+     Holcombe_lab_penalty,age_penalty,#target_penalty,gender_penalty, 
      lapse, log(sigma))#, 0)
 trueVal<- data.frame(trueVal)
 rownames(trueVal) <- trueValsNamesInBrmParlance
@@ -605,8 +606,6 @@ if (all(est_no_sigma$outside_CI==0)) {
 
 ```
 
-
-why are gender and ageGroup estimates zero
 
 Look at [what is happening during the chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548)
 
