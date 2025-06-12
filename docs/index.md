@@ -29,6 +29,10 @@ Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 
 [Success version, not numeric](break_brms_with_numeric_regressor/numTargets_recovery_SUCCEED_because_not_numeric.html)
 
+## Reference group
+
+[not_multilevel_model_recovery](docs/not_multilevel_model_recovery.html)
+
 ## Priors
 
 Check out [visualize_and_select_priors.html](visualize_and_select_priors.html)
