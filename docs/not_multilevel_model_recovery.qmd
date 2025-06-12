@@ -284,32 +284,55 @@ lapseRate_prior_dist_name <- "beta"
 lapse_param1 <- 2
 lapse_param2 <- 33.33
 
-logsigma_prior_dist_name <- "uniform"
-logsigma_param1 <- -3
-logsigma_param2 <- 1.6
+logsigma_uniform_param1 <- -3
+logsigma_uniform_param2 <- 1.6
 
-eta_prior_dist_name <- "normal"
+logsigma_normal_param1 <- log(.3) #true sigma=.2
+logsigma_normal_param2 <- 1.5
+
+logsigma_prior_dist_name <- "normal"
+
 
 eta_uniform_param1 <- 0
 eta_uniform_param2 <- 2.5
 
-eta_gaussian_param1 <- 1.2
+eta_gaussian_param1 <- 1.0
 eta_gaussian_param2 <- 2
+eta_prior_dist_name <- "normal"
+
 
 eta_differences_prior_dist_name <- "normal"
 eta_diffs_gaussian_param1 <- 0
 eta_diffs_gaussian_param2 <- 2
 
-
 # Build prior distribution strings for brms
 lapseRate_prior_distribution <- sprintf("%s(%s, %s)", lapseRate_prior_dist_name,
                                         lapse_param1, lapse_param2)
 logsigma_prior_distribution <- sprintf("%s(%s, %s)", logsigma_prior_dist_name,
-                                       logsigma_param1, logsigma_param2)
+                                       logsigma_normal_param1, logsigma_normal_param2)
 eta_prior_distribution <- sprintf("%s(%s, %s)", eta_prior_dist_name,
                                   eta_gaussian_param1, eta_gaussian_param2)
 eta_differences_prior_distribution <- sprintf("%s(%s, %s)",
                                       eta_differences_prior_dist_name, eta_diffs_gaussian_param1, eta_diffs_gaussian_param2)
+
+#Set up actual priors for various coefficients and intercepts
+lapseRate_prior<- brms::set_prior(lapseRate_prior_distribution,
+                          class = "b", nlpar = "lapseRate", lb = 0, ub = 1)
+eta_prior<- brms::set_prior(eta_prior_distribution,
+              coef="Intercept", #This means the prior will only apply to eta_Intercept
+              nlpar = "eta")#, lb = 0, ub = 2.5),
+logSigma_prior<- brms::set_prior(logsigma_prior_distribution, 
+                    class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
+ageGroup_prior<- brms::set_prior(eta_differences_prior_distribution, 
+                          coef="ageGroupyounger",
+                          nlpar = "eta")
+lab_prior<- brms::set_prior(eta_differences_prior_distribution, 
+                          coef="labRoudaia",
+                          nlpar = "eta")
+
+my_priors <- c( lapseRate_prior, logSigma_prior, eta_prior, #Intercept priors
+                ageGroup_prior, lab_prior #coefficient priors
+                )
 
 ```
 
@@ -354,6 +377,8 @@ prior_scale <- tibble(
   x = seq(-5, 5, length.out = 500),
   y = if (logsigma_prior_dist_name == "uniform") {
     dunif(x, logsigma_param1, logsigma_param2)
+  } else if (logsigma_prior_dist_name == "normal") {
+    dnorm(x, logsigma_normal_param1, logsigma_normal_param2)
   } else {
     NA_real_
   },
@@ -376,105 +401,6 @@ ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
   theme_bw() +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
-
-```{r}
-#| echo: false 
-lapse_param1<- 2
-lapse_param2<- 33.33
-
-eta_uniform_param1<- 0
-eta_uniform_param2<- 2.5
-
-eta_gaussian_param1<- 1.2
-eta_gaussian_param2<- 2
-
-eta_diffs_gaussian_param1<- 0
-eta_diffs_gaussian_param2<- 2
-
-logsigma_param1<- -3
-logsigma_param2<- 1.6
-
-#brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
-lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
-logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
-
-#eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_uniform_param1, eta_uniform_param2)
-eta_prior_distribution<-  sprintf("normal(%s, %s)", eta_gaussian_param1, eta_gaussian_param2)
-
-eta_differences_prior_distribution<- sprintf("normal(%s, %s)", 
-                                      eta_diffs_gaussian_param1,
-                                      eta_diffs_gaussian_param2)
-
-
-lapseRate_prior<- brms::set_prior(lapseRate_prior_distribution,
-                          class = "b", nlpar = "lapseRate", lb = 0, ub = 1)
-eta_prior<- brms::set_prior(eta_prior_distribution,
-              coef="Intercept", #This means the prior will only apply to eta_Intercept
-              nlpar = "eta")#, lb = 0, ub = 2.5),
-logSigma_prior<- brms::set_prior(logsigma_prior_distribution, 
-                    class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
-ageGroup_prior<- brms::set_prior(eta_differences_prior_distribution, 
-                          coef="ageGroupyounger",
-                          nlpar = "eta")
-lab_prior<- brms::set_prior(eta_differences_prior_distribution, 
-                          coef="labRoudaia",
-                          nlpar = "eta")
-
-my_priors <- c( lapseRate_prior, eta_prior, logSigma_prior,
-                ageGroup_prior, lab_prior)
-```
-
-Visualize priors, by plotting together (with arbitrary height).
-
-```{r}
-#| echo: false
-
-# Create tibbles for each prior with a parameter label
-prior_lapse <- tibble(
-  x = seq(0, 1, length.out = 500),
-  y = dbeta(x, lapse_param1, lapse_param2),
-  parameter = "lapse"
-) |>
-  mutate(y = y / max(y)) #Normalize so has peak of 1
-
-prior_location <- tibble(
-  x = seq(-1, 10, length.out = 500),
-  y = dunif(x, eta_uniform_param1, eta_uniform_param2),
-  parameter = "location"
-) |>
-  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
-
-prior_location_diff <- tibble(
-  x = seq(-4, 10, length.out = 500),
-  y = dnorm(x, eta_diffs_gaussian_param1, eta_diffs_gaussian_param2),
-  parameter = "location group difference"
-) |>
-  mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
-
-prior_scale <- tibble(
-  x = seq(-5, 5, length.out = 500),
-  y = dunif(x, logsigma_param1, logsigma_param2),
-  parameter = "log(sigma)"
-) |>
-  mutate(y = y / max(y) * 0.92) #Normalize so has peak of 0.92 (to avoid overlap)
-
-# Combine all priors
-priors_all <- bind_rows(prior_lapse, prior_location, prior_location_diff, prior_scale)
-
-# Plot
-ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
-  geom_line() +
-  theme_light() +
-  labs(
-    x = "Parameter value",
-    y = "Density",
-    color = "Parameter"
-  ) + 
-  coord_cartesian( xlim=c(-4,4) ) +
-  theme_bw() + 
-  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) #remove gridlines
-```
-
 
 # Fitting Model to Simulated Data
 
@@ -715,7 +641,7 @@ Plot possibly- problematic ones (gender and age) specifically.
 #| echo: false 
 chainchainchain |>
   filter(str_detect(Parameter, "age|gender")) |>
-  filter(Iteration < 200) |> #Because nothing happens after first couple hundred
+  filter(Iteration < 300) |> #Because nothing happens after first couple hundred
   ggplot(aes(x = Iteration, y = value, linetype = factor(Chain),
              color = Parameter)) +
   facet_grid(paramGroup ~ ., scales="free") +
