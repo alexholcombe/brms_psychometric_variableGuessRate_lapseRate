@@ -278,25 +278,132 @@ See [visualize_and_select_priors.html](visualize_and_select_priors.html) for mot
 
 ```{r}
 #| echo: false 
+
+# Specify distribution names and parameters separately
+lapseRate_prior_dist_name <- "beta"
+lapse_param1 <- 2
+lapse_param2 <- 33.33
+
+logsigma_prior_dist_name <- "uniform"
+logsigma_param1 <- -3
+logsigma_param2 <- 1.6
+
+eta_prior_dist_name <- "normal"
+
+eta_uniform_param1 <- 0
+eta_uniform_param2 <- 2.5
+
+eta_gaussian_param1 <- 1.2
+eta_gaussian_param2 <- 2
+
+eta_differences_prior_dist_name <- "normal"
+eta_diffs_gaussian_param1 <- 0
+eta_diffs_gaussian_param2 <- 2
+
+
+# Build prior distribution strings for brms
+lapseRate_prior_distribution <- sprintf("%s(%s, %s)", lapseRate_prior_dist_name,
+                                        lapse_param1, lapse_param2)
+logsigma_prior_distribution <- sprintf("%s(%s, %s)", logsigma_prior_dist_name,
+                                       logsigma_param1, logsigma_param2)
+eta_prior_distribution <- sprintf("%s(%s, %s)", eta_prior_dist_name,
+                                  eta_gaussian_param1, eta_gaussian_param2)
+eta_differences_prior_distribution <- sprintf("%s(%s, %s)",
+                                      eta_differences_prior_dist_name, eta_diffs_gaussian_param1, eta_diffs_gaussian_param2)
+
+```
+
+Plot the priors
+
+```{r}
+#| echo: false 
+
+prior_lapse <- tibble(
+  x = seq(0, 1, length.out = 500),
+  y = if (lapseRate_prior_dist_name == "beta") {
+    dbeta(x, lapse_param1, lapse_param2)
+  } else {
+    NA_real_
+  },
+  parameter = "lapse"
+) |> mutate(y = y / max(y))
+
+prior_location <- tibble(
+  x = seq(-1, 10, length.out = 500),
+  y = if (eta_prior_dist_name == "normal") {
+    dnorm(x, eta_gaussian_param1, eta_gaussian_param2)
+  } else if (eta_prior_dist_name == "uniform") {
+    dunif(x, eta_uniform_param1, eta_uniform_param2)
+  } else {
+    NA_real_
+  },
+  parameter = "location"
+) |> mutate(y = y / max(y) * 0.95)
+
+prior_location_diff <- tibble(
+  x = seq(-4, 10, length.out = 500),
+  y = if (eta_differences_prior_dist_name == "normal") {
+    dnorm(x, eta_diffs_gaussian_param1, eta_diffs_gaussian_param2)
+  } else {
+    NA_real_
+  },
+  parameter = "location group difference"
+) |> mutate(y = y / max(y) * 0.95)
+
+prior_scale <- tibble(
+  x = seq(-5, 5, length.out = 500),
+  y = if (logsigma_prior_dist_name == "uniform") {
+    dunif(x, logsigma_param1, logsigma_param2)
+  } else {
+    NA_real_
+  },
+  parameter = "log(sigma)"
+) |> mutate(y = y / max(y) * 0.92)
+
+# Combine all priors
+priors_all <- bind_rows(prior_lapse, prior_location, prior_location_diff, prior_scale)
+
+# Plot
+ggplot(priors_all, aes(x = x, y = y, color = parameter)) +
+  geom_line() +
+  theme_light() +
+  labs(
+    x = "Parameter value",
+    y = "Density",
+    color = "Parameter"
+  ) + 
+  coord_cartesian(xlim = c(-4, 4)) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
+```{r}
+#| echo: false 
 lapse_param1<- 2
 lapse_param2<- 33.33
 
-eta_param1<- 0
-eta_param2<- 2.5
+eta_uniform_param1<- 0
+eta_uniform_param2<- 2.5
+
+eta_gaussian_param1<- 1.2
+eta_gaussian_param2<- 2
+
+eta_diffs_gaussian_param1<- 0
+eta_diffs_gaussian_param2<- 2
 
 logsigma_param1<- -3
 logsigma_param2<- 1.6
 
 #brms can't evaluate parameters in the prior setting so one has to resort to sprintf-ing a string
 lapseRate_prior_distribution<- sprintf("beta(%s, %s)", lapse_param1, lapse_param2)
-eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_param1, eta_param2)
-eta_differences_prior_distribution<- sprintf("normal(%s, %s)", eta_param1, eta_param2)
 logsigma_prior_distribution<- sprintf("uniform(%s, %s)", logsigma_param1, logsigma_param2)
 
-eta_param1younger<- -1.5
-eta_param2younger<- 1.5
-eta_prior_distribution<-  sprintf("uniform(%s, %s)", 
-                             eta_param1younger, eta_param2younger)
+#eta_prior_distribution<-  sprintf("uniform(%s, %s)", eta_uniform_param1, eta_uniform_param2)
+eta_prior_distribution<-  sprintf("normal(%s, %s)", eta_gaussian_param1, eta_gaussian_param2)
+
+eta_differences_prior_distribution<- sprintf("normal(%s, %s)", 
+                                      eta_diffs_gaussian_param1,
+                                      eta_diffs_gaussian_param2)
 
 
 lapseRate_prior<- brms::set_prior(lapseRate_prior_distribution,
@@ -306,13 +413,15 @@ eta_prior<- brms::set_prior(eta_prior_distribution,
               nlpar = "eta")#, lb = 0, ub = 2.5),
 logSigma_prior<- brms::set_prior(logsigma_prior_distribution, 
                     class = "b", nlpar = "logSigma", lb = -2, ub = 1.6)
-ageGroupyounger_prior<- brms::set_prior(eta_differences_prior_distribution, 
+ageGroup_prior<- brms::set_prior(eta_differences_prior_distribution, 
                           coef="ageGroupyounger",
                           nlpar = "eta")
+lab_prior<- brms::set_prior(eta_differences_prior_distribution, 
+                          coef="labRoudaia",
+                          nlpar = "eta")
 
-my_priors <- c( lapseRate_prior, eta_prior,
-                logSigma_prior, ageGroupyounger_prior)
-
+my_priors <- c( lapseRate_prior, eta_prior, logSigma_prior,
+                ageGroup_prior, lab_prior)
 ```
 
 Visualize priors, by plotting together (with arbitrary height).
@@ -330,14 +439,14 @@ prior_lapse <- tibble(
 
 prior_location <- tibble(
   x = seq(-1, 10, length.out = 500),
-  y = dunif(x, eta_param1, eta_param2),
+  y = dunif(x, eta_uniform_param1, eta_uniform_param2),
   parameter = "location"
 ) |>
   mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
 
 prior_location_diff <- tibble(
   x = seq(-4, 10, length.out = 500),
-  y = dnorm(x, eta_param1, eta_param2),
+  y = dnorm(x, eta_diffs_gaussian_param1, eta_diffs_gaussian_param2),
   parameter = "location group difference"
 ) |>
   mutate(y = y / max(y) * 0.95) #Normalize so has peak of 0.95 (to avoid overlap)
