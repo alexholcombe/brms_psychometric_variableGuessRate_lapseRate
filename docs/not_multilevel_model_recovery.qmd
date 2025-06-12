@@ -99,11 +99,11 @@ Choose values for psychometric function for younger and older
 lapse <- 0.05
 sigma <- 0.2
 
-location_param_base<-1.6 #location_param_young_123targets <- c(1.7,1.0,0.8)
-target_penalty<-0.15 #penalty for additional target
-age_penalty <- 0.2#0.4 #Old people have worse limit by this much
-gender_penalty <- 0.12 #Female worse by this much
-Holcombe_lab_penalty <- 0.2
+location_param_base<-1.2 #location_param_young_123targets <- c(1.7,1.0,0.8)
+one_less_target_benefit<-0 #0.15 #penalty for additional target
+youth_benefit <- 0.2#0.4 #Old people have worse limit by this much
+male_benefit <- 0 #0.12 #Female worse by this much
+Roudaia_lab_benefit <- 0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- 0.1 
 
@@ -112,16 +112,16 @@ eta_between_subject_sd <- 0.1
 location_param_calculate<- function(numTargets,ageGroup,gender,lab,
                                     subjStandardized,eta_between_subject_sd) {
   
-  base_location_param <- location_param_base#location_param_young_123targets[targetLoad]
+  base_location_param <- location_param_base# location_param_young_123targets[targetLoad]
   #calculate offset for this participant based on desired sigma_between_participant_variance
   location_param <- base_location_param + 
                     subjStandardized * eta_between_subject_sd
   
-  after_penalties <-location_param - 
-                      if_else(lab=="Holcombe",1,0) * Holcombe_lab_penalty -
-                      if_else(ageGroup=="older",1,0) * age_penalty -
-                      if_else(numTargets=="three",1,0) * target_penalty -
-                      if_else(gender=="F",1,0) * gender_penalty
+  after_penalties <-location_param + 
+                      if_else(lab=="Roudaia",1,0) * Roudaia_lab_benefit +
+                      if_else(ageGroup=="younger",1,0) * youth_benefit +
+                      if_else(numTargets=="two",1,0) * one_less_target_benefit +
+                      if_else(gender=="F",1,0) * male_benefit
   return (after_penalties)
 }
 
@@ -567,7 +567,7 @@ trueValsNamesInBrmParlance<-
   c("eta_labRoudaia","eta_ageGroupyounger",#"eta_numTargetstwo","eta_genderF",
     "lapseRate_Intercept","logSigma_Intercept") #,"logSigma_ageGroupyounger")
 trueVal<-c( 
-     Holcombe_lab_penalty,age_penalty,#target_penalty,gender_penalty, 
+     Roudaia_lab_benefit,youth_benefit,#target_benefit,male_benefit, 
      lapse, log(sigma))#, 0)
 trueVal<- data.frame(trueVal)
 rownames(trueVal) <- trueValsNamesInBrmParlance
@@ -645,8 +645,8 @@ chainchainchain |>
              color = Parameter)) +
   facet_grid(paramGroup ~ ., scales="free") +
   geom_line() +
-  geom_hline(yintercept=age_penalty, alpha=.5,linetype="dotted")+
-  geom_hline(yintercept=gender_penalty, alpha=.5,linetype="dotted")+
+  geom_hline(yintercept=youth_benefit, alpha=.5,linetype="dotted")+
+  geom_hline(yintercept=male_benefit, alpha=.5,linetype="dotted")+
   ggtitle("")+
   theme_bw()
 
