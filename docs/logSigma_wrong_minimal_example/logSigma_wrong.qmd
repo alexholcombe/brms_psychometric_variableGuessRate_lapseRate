@@ -1,7 +1,9 @@
 ---
-title: "Psychophysical model recovery using Bayesian brms"
+title: "logSigma estimation seems biased high"
 format: html
 ---
+
+Typically brms estimates logSigma as -1.41 instead of true value of -1.67.
 
 Will generate fake data that includes differences between participants, but doesn't model them.
 
@@ -13,16 +15,16 @@ To get started, we load the required packages.
 #| output: false
 rm(list = ls())
 
-library(here) #To find path of home directory of repo
 library(tidyverse)
 library(brms)
+library(here) #For finding root directory
 
-source( here("R","simulate_data.R") )  #Load my needed custom function
+source( here("R","simulate_data_no_underscores.R") )  #Load my needed custom function
 source( here("R","psychometric_function.R") ) #Load my needed custom function
 
-set.seed(999) #ensures reproducibility for testing
+set.seed(989) #ensures reproducibility for testing
 
-break_brms_by_making_num_targets_numeric<- FALSE #Change factor to numeric, right before doing formula fit, so 
+break_brms_by_making_numTargets_numeric<- FALSE #Change factor to numeric, right before doing formula fit, so 
    #I know that it's brms that's the problem rather than the rest of my code
 ```
 
@@ -30,41 +32,31 @@ break_brms_by_making_num_targets_numeric<- FALSE #Change factor to numeric, righ
 
 Set up simulated experiment design.
 
+Maybe make sure the reference group (that the Intercept estimate pertains to) is the expected-worse group. This is in case I later set priors on the coefficients, so that I can set the priors to all be positive to be less confusing.
+
+Supposedly the levels order determines what brms sets the reference group to.
+
 ```{r}
 #| echo: true 
-num_targetsConds<- factor( c("two", "three"),
-                         levels=c("two", "three") ) #This defines the factor order
+
+numTargetsConds<- factor( c("three", "two"),
+                         levels=c("three", "two") ) #This defines factor order. Worst is first.
 numSubjects<- 25
-trialsPerCondition<- 8
-laboratories<- factor( c("Roudaia", "Holcombe"),
-                         levels=c("Roudaia", "Holcombe") ) #This defines the factor order
+trialsPerCondition<- 30#20
+laboratories<- factor( c("Holcombe", "Roudaia"),
+                         levels=c("Holcombe", "Roudaia") ) #This defines the factor order
+
 #Array of speeds (not very realistic because mostly controlled by a staircase in actual experiment)
 speeds<-seq(.02,1.8, length.out = 12) # trials at 12 different speeds between .02 and 1.8
-
-```
-
-Determine what subset of data brms will model, to test what breaks logSigma estimation.
-
-```{r}
-#| echo: true
-example_condition <- data.frame(
-  lab = "Roudaia", #first level
-  age_group = "younger", #first level
-  gender = "M", #first level
-  num_targets = "two", #first level
-  obj_per_ring = 5, #first level? confusing because mixed effect
-  chance_rate = 1/5,
-  subj_standardzd = 0
-)
 ```
 
 In order to build and test our model in brms, we must first create a simulated data set that is similar to our actual experiment data. This allows us to confirm the brms model is working and successfully recovers the parameters we set before applying it to our real experimental data that has unknown parameter values. In the actual data, there will be many group-wise differences in location and scale parameters. The following simulated data only has explicit differences between the $\eta$ (location) of the two age groups (older vs younger).
 
-
+Values per factor
 ```{r}
 #| echo: false 
 
-trials <- generate_conditions(laboratories,num_targetsConds,numSubjects,trialsPerCondition,speeds)
+trials <- generate_conditions(laboratories,numTargetsConds,numSubjects,trialsPerCondition,speeds)
 
 #Print number of unique values of each column
 #print('Number of values for each factor:')
@@ -98,7 +90,7 @@ Because the present purpose of numbering participants is to inject the right amo
   #In case I need trial number, so far I only have a trialThisCond column
   #Calculate a trial number numbering the entirety of the trials the subject is given
   #Assume the within-participant factors are obj_per_ring,targetLoad, and speed
-  trials <- trials |> group_by(lab,num_targets,age_group,gender,subjWithinGroup) |> 
+  trials <- trials |> group_by(lab,numTargets,ageGroup,gender,subjWithinGroup) |> 
                       mutate(trial = row_number())
 ```
 
