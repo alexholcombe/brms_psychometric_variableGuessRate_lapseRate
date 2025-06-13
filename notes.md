@@ -64,3 +64,6 @@ yeah because it's supposed to be eta_Intercept?
 Check if logSigma still wrong.
 
 Try to work out reference group again.
+
+I need to make a plot of the data to show how far off the sigma makes the slope be.
+Maybe it's the over dispersion of the heterogeneity of the groups?

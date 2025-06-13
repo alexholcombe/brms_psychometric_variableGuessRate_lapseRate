@@ -266,10 +266,13 @@ my_formula <- my_formula$formula
 
 #If don't want to fit lapseRate, need to supply it
 data_simulated$lapseRate<- lapse
+#If I don't want to fit eta, need to supply it
+true_eta<- 1.625
+data_simulated$eta<- true_eta
 
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ 1, #lab + ageGroup + numTargets + gender,
+  #eta ~ 1, #lab + ageGroup + numTargets + gender,
   #lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -619,7 +622,104 @@ if (abs(discrepancy)<0.1) {
   
 ```
 
-Look at [what is happening during the chain](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548)
+
+
+## Plot the predictions of the brms fit
+
+For an example condition, model only one factor and only use data relevant to that
+
+```{r}
+#| echo: false 
+#Reduce data_simulated to example_condition
+example_condition<- data.frame( #reference_group 
+  lab="Holcombe",
+  ageGroup="older",
+  gender="F",
+  numTargets="three",
+  obj_per_ring=8,
+  subj_standardzd=0
+)
+
+data_to_model <- data_simulated |>
+  semi_join(example_condition, by = names(example_condition))
+```
+
+Set up all the conditions to calculate the prediction for.
+
+```{r}
+#| echo: false 
+
+# First set up all conditions
+prediction_grid <- expand.grid(
+  lab = unique(data_to_model$lab),
+  ageGroup = unique(data_to_model$ageGroup),
+  gender = unique(data_to_model$gender),
+  numTargets = unique(data_to_model$numTargets),
+  speed = seq(min(data_to_model$speed), max(data_to_model$speed), length.out = 40),
+  obj_per_ring = unique(data_to_model$obj_per_ring),
+  subj_standardzd = 0         # Use mean subject
+)
+prediction_conditions<- prediction_grid |> mutate( chance_rate =
+                                                    1 / obj_per_ring )
+
+# Filter prediction grid for data subset being modeled (example_condition)
+prediction_subset <- prediction_conditions %>%
+  semi_join(example_condition, by = names(example_condition))
+
+#Not modeling lapse, so need to add it to prediction so prediction can be made
+prediction_subset$lapseRate <- lapse
+
+#Not modeling eta, so need to add it to prediction so prediction can be made
+prediction_subset$eta <- true_eta
+
+# Get fitted values (posterior mean and CI) for each condition
+fitted_preds <- fitted(fit, newdata = prediction_subset)#, summary = TRUE)
+#Merge y's with conditions
+prediction_subset$p_correct <- fitted_preds[, "Estimate"]
+prediction_subset$p_lower <- fitted_preds[, "Q2.5"]
+prediction_subset$p_upper <- fitted_preds[, "Q97.5"]
+
+```
+
+Plot
+
+```{r}
+#| echo: false 
+
+# Add a curve_type column to each data frame, for the legend
+prediction_subset$curve_type <- "brms fit"
+data_to_model$curve_type <- "generating model"
+# Combine for plotting
+plot_data <- bind_rows(
+  prediction_subset %>% select(speed, p_correct, curve_type),
+  data_to_model %>% select(speed, p_correct, curve_type)
+)
+
+hh<- ggplot(plot_data, 
+            aes(x= speed, y= p_correct, color=curve_type, shape=ageGroup)) +
+  geom_line() + #fit
+  #geom_ribbon(aes(ymin = p_lower, ymax = p_upper), fill = "blue", alpha = 0.2, color = NA) +
+  geom_line(data = data_to_model, #actual data generating model
+            linetype="dotted") + geom_point(data=data_to_model) +
+  # labs(
+  #   x = "Speed (revolutions per second)",
+  #   y = "P(Correct)",
+  #   title = "curve is Prediction, dots are generative model",
+  #   linetype= "Curve",
+  #   subtitle = ""
+  # ) +
+  scale_color_manual(
+    name = "",
+    values = c("brms fit" = "red", "generating model" = "black")
+  ) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+show(hh)
+```
+
+
+Look at what is happening during the chain, as explained on the [Stan forum](https://discourse.mc-stan.org/t/init-not-using-my-initial-values-and-seems-to-be-defaulting-to-0/39548)
 
 ```{r}
 #| echo: false 
