@@ -5,12 +5,13 @@ title: "Guide to this brms model recovery site"
 
 Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
+[all_factors_but_not_multilevel](all_factors_but_not_multilevel.html) . Works for estimating a few factors but blows up to almost 5 hrs when estimating all factors, and at least with limited runs (700 iterations, 2 chains), lab factor blew up. But reference group might be correct.
 
 [lab_age_model_works](lab_age_model_works/lab_age_model_works_except_logSigma.html)
 
 [basic_model_recovery.html](docs/basic_model_recovery.html)
 
-[all_factors_but_not_multilevel](all_factors_but_not_multilevel.html)
+
 
 [advanced_model_recovery.html](advanced_model_recovery.html)
 

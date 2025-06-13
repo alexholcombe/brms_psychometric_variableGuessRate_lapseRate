@@ -100,9 +100,9 @@ lapse <- 0.05
 sigma <- 0.2
 
 location_param_base<-1.2 #location_param_young_123targets <- c(1.7,1.0,0.8)
-one_less_target_benefit<-0 #0.15 #penalty for additional target
+one_less_target_benefit<-0.3 #0.15 #penalty for additional target
 youth_benefit <- 0.2#0.4 #Old people have worse limit by this much
-male_benefit <- 0 #0.12 #Female worse by this much
+male_benefit <- 0.15 #0.12 #Female worse by this much
 Roudaia_lab_benefit <- 0.2
 #Set parameters for differences between Ss in a group
 eta_between_subject_sd <- 0.1 
@@ -121,7 +121,7 @@ location_param_calculate<- function(numTargets,ageGroup,gender,lab,
                       if_else(lab=="Roudaia",1,0) * Roudaia_lab_benefit +
                       if_else(ageGroup=="younger",1,0) * youth_benefit +
                       if_else(numTargets=="two",1,0) * one_less_target_benefit +
-                      if_else(gender=="F",1,0) * male_benefit
+                      if_else(gender=="M",1,0) * male_benefit
   return (after_penalties)
 }
 
@@ -229,7 +229,7 @@ gg<-  gg+ geom_segment(data = loc_param_each_group,
                        y = 0, yend = midpoint,
                        color=factor(numTargets)),
                        linetype = "dashed",alpha=.4)#, color = "grey3")
-#This removes the default padding/margin below the y-axis, so the plot area starts exactly at y = 0.
+#This removes the padding/margin below the y-axis, so the plot area starts exactly at y = 0.
 gg<- gg + scale_y_continuous(limits=c(0,1),expand = c(0, 0))
 show(gg)
 
@@ -264,7 +264,7 @@ my_formula <- my_formula$formula
   
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ lab + ageGroup, #+ numTargets,# + gender,
+  eta ~ lab + ageGroup + numTargets + gender,
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -305,6 +305,9 @@ eta_differences_prior_dist_name <- "normal"
 eta_diffs_gaussian_param1 <- 0
 eta_diffs_gaussian_param2 <- 2
 
+#default_priors<-    brms::default_prior(my_brms_formula, data = data_simulated   )
+#print( default_priors )
+
 # Build prior distribution strings for brms
 lapseRate_prior_distribution <- sprintf("%s(%s, %s)", lapseRate_prior_dist_name,
                                         lapse_param1, lapse_param2)
@@ -328,6 +331,12 @@ ageGroup_prior<- brms::set_prior(eta_differences_prior_distribution,
                           nlpar = "eta")
 lab_prior<- brms::set_prior(eta_differences_prior_distribution, 
                           coef="labRoudaia",
+                          nlpar = "eta")
+lab_prior<- brms::set_prior(eta_differences_prior_distribution, 
+                          coef="numTargetstwo",
+                          nlpar = "eta")
+lab_prior<- brms::set_prior(eta_differences_prior_distribution, 
+                          coef="genderM",
                           nlpar = "eta")
 
 my_priors <- c( lapseRate_prior, logSigma_prior, eta_prior, #Intercept priors
@@ -535,6 +544,28 @@ if (abs(discrepancy)<0.1) {
 ```
 
 Check brms' estimate of sigma.
+
+```{r}
+#| echo: false 
+
+#Grab the estimates column of the parameter estimates
+estimates<- as.data.frame( fixef(fit) )
+
+#brms' estimate for the reference group
+eta_logSigma<- estimates["logSigma_Intercept","Estimate"]
+
+true_logSigma<- log(sigma)
+
+discrepancy<- eta_logSigma - true_logSigma 
+if (abs(discrepancy)<0.1) {
+  print("Success. Looks like I/brms calculated/estimated the reference group logSigma correctly.")
+} else {
+  cat("Discrepancy of",round(discrepancy,2),
+      "between true logSigma,",round(true_logSigma,2),
+        "and what brms estimated,",round(eta_logSigma,2))
+}
+  
+```
 
 ```{r}
 #| echo: false 
