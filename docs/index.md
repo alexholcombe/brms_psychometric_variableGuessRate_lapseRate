@@ -21,6 +21,10 @@ Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 Works in this seemingly super-simple case:
 [logSigma_wrong](logSigma_wrong_minimal_example/logSigma_wrong.html)
 
+Also works when simultaneously estimating alpha
+
+I'm thinking that creating unmodeled dispersion by adding back in the target penalty will make sigma be estimated too shallow.
+
 ## Why do CIs for parameters whose true value is exactly zero never range below zero?
 
 [CIs of estimates stop short at zero](why_do_CIs_not_range_below_zero/CIs_not_below_zero_advanced_model_recovery.html)
