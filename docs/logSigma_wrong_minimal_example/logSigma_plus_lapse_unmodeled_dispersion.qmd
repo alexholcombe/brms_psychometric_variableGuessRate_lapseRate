@@ -266,13 +266,14 @@ my_formula <- my_formula$formula
 
 #If don't want to fit lapseRate, need to supply it
 #data_simulated$lapseRate<- lapse
+
 #If I don't want to fit eta, need to supply it
-true_eta<- location_param_base
-data_simulated$eta<- true_eta
+#true_eta<- location_param_base
+#data_simulated$eta<- true_eta
 
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  #eta ~ 1, #lab + ageGroup + numTargets + gender,
+  eta ~ 1, #lab + ageGroup + numTargets + gender,
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -347,7 +348,7 @@ lab_prior<- brms::set_prior(eta_differences_prior_distribution,
                           coef="genderM",
                           nlpar = "eta")
 
-my_priors <- c( logSigma_prior, lapseRate_prior #, eta_prior  #Intercept priors
+my_priors <- c( logSigma_prior, lapseRate_prior, eta_prior  #Intercept priors
                 #ageGroup_prior, lab_prior #coefficient priors
                 )
 

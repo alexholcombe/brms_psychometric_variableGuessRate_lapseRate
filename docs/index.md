@@ -26,6 +26,8 @@ Also works when simultaneously estimating alpha
 
 I'm thinking that creating unmodeled dispersion by adding back in the target penalty will make sigma be estimated too shallow. Yes, that was it! [logSigma_plus_lapse_unmodeled_dispersion](logSigma_wrong_minimal_example/logSigma_plus_lapse_unmodeled_dispersion.html)
 
+Hopefully modeling effect of target will restore correct sigma estimation.
+
 ## Why do CIs for parameters whose true value is exactly zero never range below zero?
 
 [CIs of estimates stop short at zero](why_do_CIs_not_range_below_zero/CIs_not_below_zero_advanced_model_recovery.html)
