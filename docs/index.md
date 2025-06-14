@@ -28,7 +28,8 @@ I'm thinking that creating unmodeled dispersion by adding back in the target pen
 actually i had eta fixed rather than modeled so eta was underestimated 
  now having it be estimated , but I added estimation of eta and result the same.
 
-Hopefully modeling effect of target will restore correct sigma estimation.
+Hopefully modeling effect of target will restore correct sigma estimation. It does!
+[logSigma_plus_model_dispersing_factor](logSigma_wrong_minimal_example/logSigma_plus_model_dispersing_factor.html)
 
 ## Why do CIs for parameters whose true value is exactly zero never range below zero?
 
