@@ -22,8 +22,9 @@ Works in this seemingly super-simple case:
 [logSigma_wrong](logSigma_wrong_minimal_example/logSigma_wrong.html)
 
 Also works when simultaneously estimating alpha
+[logSigma_plus_lapse_try](logSigma_wrong_minimal_example/logSigma_plus_lapse_try.html)
 
-I'm thinking that creating unmodeled dispersion by adding back in the target penalty will make sigma be estimated too shallow.
+I'm thinking that creating unmodeled dispersion by adding back in the target penalty will make sigma be estimated too shallow. Yes, that was it! [logSigma_plus_lapse_unmodeled_dispersion](logSigma_wrong_minimal_example/logSigma_plus_lapse_unmodeled_dispersion.html)
 
 ## Why do CIs for parameters whose true value is exactly zero never range below zero?
 
