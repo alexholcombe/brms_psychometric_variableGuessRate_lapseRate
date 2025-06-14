@@ -25,6 +25,8 @@ Also works when simultaneously estimating alpha
 [logSigma_plus_lapse_try](logSigma_wrong_minimal_example/logSigma_plus_lapse_try.html)
 
 I'm thinking that creating unmodeled dispersion by adding back in the target penalty will make sigma be estimated too shallow. Yes, that was it! [logSigma_plus_lapse_unmodeled_dispersion](logSigma_wrong_minimal_example/logSigma_plus_lapse_unmodeled_dispersion.html)
+actually i had eta fixed rather than modeled so eta was underestimated 
+ now having it be estimated , but I added estimation of eta and result the same.
 
 Hopefully modeling effect of target will restore correct sigma estimation.
 
