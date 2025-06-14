@@ -101,12 +101,12 @@ lapse <- 0.05
 sigma <- 0.2
 
 location_param_base<-1.2 #location_param_young_123targets <- c(1.7,1.0,0.8)
-one_less_target_benefit<-0.3 #0.15 #penalty for additional target
-youth_benefit <- 0.2#0.4 #Old people have worse limit by this much
-male_benefit <- 0.15 #0.12 #Female worse by this much
-Roudaia_lab_benefit <- 0.2
+one_less_target_benefit<-0 #0.3 #penalty for additional target
+youth_benefit <- 0 #0.4 #Old people have worse limit by this much
+male_benefit <-0 #0.15 #Female worse by this much
+Roudaia_lab_benefit <- 0 #0.2
 #Set parameters for differences between Ss in a group
-eta_between_subject_sd <- 0.1 
+eta_between_subject_sd <- 0 #0.1 
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance
@@ -347,7 +347,7 @@ lab_prior<- brms::set_prior(eta_differences_prior_distribution,
                           coef="genderM",
                           nlpar = "eta")
 
-my_priors <- c( logSigma_prior, eta_prior #lapseRate_prior,  #Intercept priors
+my_priors <- c( logSigma_prior #, eta_prior #lapseRate_prior,  #Intercept priors
                 #ageGroup_prior, lab_prior #coefficient priors
                 )
 
@@ -521,81 +521,86 @@ if (abs(discrepancy)<0.1) {
   
 ```
 
-Now report on eta_Intercept.
+Now report on eta_Intercept (if estimated).
 
 ```{r}
 #| echo: false 
 
-#Grab the estimates column of the parameter estimates
-estimates<- as.data.frame( fixef(fit) )
-
-#brms' estimate for the reference group
-eta_Intercept<- estimates["eta_Intercept","Estimate"]
-
-#Get the true eta used to generate the data
-data_eta<- data_simulated$location_param
-if ( length(unique(data_eta))  > 1 ) {
-  print('Expecting the same eta for all participants, you must have mixed conditions together.')
-}
-true_eta_Intercept<- data_eta[1]
-
-discrepancy<- eta_Intercept - true_eta_Intercept 
-if (abs(discrepancy)<0.1) {
-  print("Success. Looks like I/brms calculated/estimated the eta_Intercept correctly.")
-} else {
-  cat("Discrepancy of",round(discrepancy,2),
-      "between true eta,",round(true_eta_Intercept,2),
+if (str_detect(row.names(estimates),"eta_Intercept")) {
+  
+  #Grab the estimates column of the parameter estimates
+  estimates<- as.data.frame( fixef(fit) )
+  
+  #brms' estimate for the reference group
+  eta_Intercept<- estimates["eta_Intercept","Estimate"]
+  
+  #Get the true eta used to generate the data
+  data_eta<- data_simulated$location_param
+  if ( length(unique(data_eta))  > 1 ) {
+    print('Expecting the same eta for all participants, you must have mixed conditions together.')
+  }
+  true_eta_Intercept<- data_eta[1]
+  
+  discrepancy<- eta_Intercept - true_eta_Intercept 
+  if (abs(discrepancy)<0.1) {
+    print("Success. Looks like I/brms calculated/estimated the eta_Intercept correctly.")
+  } else {
+    cat("Discrepancy of",round(discrepancy,2),
+        "between true eta,",round(true_eta_Intercept,2),
         "and what brms estimated,",round(eta_Intercept,2))
+  }
+  
+  library(broom.mixed) #tidying methods for mixed models 
+  broom.mixed::tidy(fit) #similar to just printing estimates
+  
 }
-
-library(broom.mixed) #tidying methods for mixed models 
-broom.mixed::tidy(fit) #similar to just printing estimates
 ```
 
 
-First try to calculate the reference group location parameter.
+If estimating intercept, calculate the reference group location parameter.
 
 ```{r}
 #| echo: false 
-
-#Grab the estimates column of the parameter estimates
-estimates<- as.data.frame( fixef(fit) )
-
-#Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
-#brms returns estimates relative to baseline eta_Intercept, 
-#This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
-# lab == "Holcombe" (if "Holcombe" is first alphabetically)
-#age_group == "younger" ( "older" is first alphabetically), gender == "F"
-#targetLoad == 2 (if 2 is first)
-#Calculate that reference value
-
-#brms expresses estimates relative to a reference condition
-#If a factor is not modelled, then essentially it's using the average of all the levels of that condition, I think, so I need to include them all in the reference group, e.g. lab=c("Holcombe","Roudaia")
-reference_group <- data.frame(
-  lab=c("Holcombe","Roudaia"),
-  ageGroup = c("older","younger"),
-  gender = c("F","M"),
-  numTargets = c("two","three")
-)
-
-#brms' estimate for the reference group
-eta_Intercept<- estimates["eta_Intercept","Estimate"]
-
-eta_reference_group <- data_simulated |>  #filter by values in reference condition
-          semi_join(reference_group, by = names(reference_group))
-#Calculate the average ground truth location_param for the reference condition
-true_eta_reference<- eta_reference_group |> 
-                  summarise(eta_avg = mean(location_param), .groups="drop")
-true_eta_reference<- mean(true_eta_reference$eta_avg)
-
-discrepancy<- eta_Intercept - true_eta_reference 
-if (abs(discrepancy)<0.1) {
-  print("Success. Looks like I/brms calculated/estimated the reference group location parameter correctly.")
-} else {
-  cat("Discrepancy between my calculation of eta_reference,",round(true_eta_reference,2),
+if (str_detect(row.names(estimates),"eta_Intercept")) {
+  
+  #Grab the estimates column of the parameter estimates
+  estimates<- as.data.frame( fixef(fit) )
+  
+  #Calculate trueVal of overall average location_parameter, returned as eta_Intercept by brms
+  #brms returns estimates relative to baseline eta_Intercept, 
+  #This is the estimated value of the location parameter (η) for the reference group. The #reference group is defined by the baseline levels of your categorical predictors (typically #the first level alphabetically or the reference level in your factors). For example, if your #factors are lab, age_group, gender, and targetLoad, the reference group might be:
+  # lab == "Holcombe" (if "Holcombe" is first alphabetically)
+  #age_group == "younger" ( "older" is first alphabetically), gender == "F"
+  #targetLoad == 2 (if 2 is first)
+  #Calculate that reference value
+  
+  #brms expresses estimates relative to a reference condition
+  #If a factor is not modelled, then essentially it's using the average of all the levels of that condition, I think, so I need to include them all in the reference group, e.g. lab=c("Holcombe","Roudaia")
+  reference_group <- data.frame(
+    lab=c("Holcombe","Roudaia"),
+    ageGroup = c("older","younger"),
+    gender = c("F","M"),
+    numTargets = c("two","three")
+  )
+  
+  #brms' estimate for the reference group
+  eta_Intercept<- estimates["eta_Intercept","Estimate"]
+  
+  eta_reference_group <- data_simulated |>  #filter by values in reference condition
+    semi_join(reference_group, by = names(reference_group))
+  #Calculate the average ground truth location_param for the reference condition
+  true_eta_reference<- eta_reference_group |> 
+    summarise(eta_avg = mean(location_param), .groups="drop")
+  true_eta_reference<- mean(true_eta_reference$eta_avg)
+  
+  discrepancy<- eta_Intercept - true_eta_reference 
+  if (abs(discrepancy)<0.1) {
+    print("Success. Looks like I/brms calculated/estimated the reference group location parameter correctly.")
+  } else {
+    cat("Discrepancy between my calculation of eta_reference,",round(true_eta_reference,2),
         "and what brms calculated,",round(eta_Intercept,2),"of",round(discrepancy,2))
+  }
 }
-
 ```
 
 Check brms' estimate of sigma.
@@ -621,8 +626,6 @@ if (abs(discrepancy)<0.1) {
 }
   
 ```
-
-
 
 ## Plot the predictions of the brms fit
 
