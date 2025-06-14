@@ -267,7 +267,7 @@ my_formula <- my_formula$formula
 #If don't want to fit lapseRate, need to supply it
 data_simulated$lapseRate<- lapse
 #If I don't want to fit eta, need to supply it
-true_eta<- 1.625
+true_eta<- location_param_base
 data_simulated$eta<- true_eta
 
 my_brms_formula <- brms::bf(

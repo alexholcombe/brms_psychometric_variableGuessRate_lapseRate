@@ -246,7 +246,7 @@ window.Quarto = {
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#If don't want to fit lapseRate, need to supply it</span></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>data_simulated<span class="sc">$</span>lapseRate<span class="ot">&lt;-</span> lapse</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#If I don't want to fit eta, need to supply it</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>true_eta<span class="ot">&lt;-</span> <span class="fl">1.625</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>true_eta<span class="ot">&lt;-</span> location_param_base</span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>data_simulated<span class="sc">$</span>eta<span class="ot">&lt;-</span> true_eta</span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>my_brms_formula <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">bf</span>(</span>
@@ -368,21 +368,23 @@ make: *** [foo.o] Error 1</code></pre>
 <pre><code>Start sampling</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Time taken (min) = 1.6non_model' NOW (CHAIN 2).
-Chain 2: 
-Chain 2: Gradient evaluation took 0.033903 seconds
-Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 339.03 seconds.
-Chain 2: Adjust your expectations accordingly!
-Chain 2: 
-Chain 2: 
+<pre><code>Time taken (min) = 1.8non_model' NOW (CHAIN 1
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+).
 Chain 1: 
-Chain 1: Gradient evaluation took 0.035703 seconds
-Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 357.03 seconds.
+Chain 1: Gradient evaluation took 0.036196 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 361.96 seconds.
 Chain 1: Adjust your expectations accordingly!
 Chain 1: 
 Chain 1: 
-Chain 2: Iteration:   1 / 700 [  0%]  (Warmup)
+Chain 2: 
+Chain 2: Gradient evaluation took 0.037778 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 377.78 seconds.
+Chain 2: Adjust your expectations accordingly!
+Chain 2: 
+Chain 2: 
 Chain 1: Iteration:   1 / 700 [  0%]  (Warmup)
+Chain 2: Iteration:   1 / 700 [  0%]  (Warmup)
 Chain 2: Iteration:  70 / 700 [ 10%]  (Warmup)
 Chain 1: Iteration:  70 / 700 [ 10%]  (Warmup)
 Chain 2: Iteration: 140 / 700 [ 20%]  (Warmup)
@@ -400,20 +402,20 @@ Chain 1: Iteration: 420 / 700 [ 60%]  (Sampling)
 Chain 2: Iteration: 490 / 700 [ 70%]  (Sampling)
 Chain 1: Iteration: 490 / 700 [ 70%]  (Sampling)
 Chain 2: Iteration: 560 / 700 [ 80%]  (Sampling)
-Chain 1: Iteration: 560 / 700 [ 80%]  (Sampling)
 Chain 2: Iteration: 630 / 700 [ 90%]  (Sampling)
-Chain 1: Iteration: 630 / 700 [ 90%]  (Sampling)
+Chain 1: Iteration: 560 / 700 [ 80%]  (Sampling)
 Chain 2: Iteration: 700 / 700 [100%]  (Sampling)
 Chain 2: 
-Chain 2:  Elapsed Time: 34.439 seconds (Warm-up)
-Chain 2:                31.825 seconds (Sampling)
-Chain 2:                66.264 seconds (Total)
+Chain 2:  Elapsed Time: 39.225 seconds (Warm-up)
+Chain 2:                31.78 seconds (Sampling)
+Chain 2:                71.005 seconds (Total)
 Chain 2: 
+Chain 1: Iteration: 630 / 700 [ 90%]  (Sampling)
 Chain 1: Iteration: 700 / 700 [100%]  (Sampling)
 Chain 1: 
-Chain 1:  Elapsed Time: 35.157 seconds (Warm-up)
-Chain 1:                31.87 seconds (Sampling)
-Chain 1:                67.027 seconds (Total)
+Chain 1:  Elapsed Time: 40.96 seconds (Warm-up)
+Chain 1:                40.252 seconds (Sampling)
+Chain 1:                81.212 seconds (Total)
 Chain 1: </code></pre>
 </div>
 </div>
@@ -422,7 +424,7 @@ Chain 1: </code></pre>
 <p>First report on logSigma.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>Discrepancy of 1.2 between true logSigma, -1.61 and what brms estimated, -0.41</code></pre>
+<pre><code>[1] "Success. Looks like I/brms calculated/estimated the reference group logSigma correctly."</code></pre>
 </div>
 </div>
 <p>Now report on eta_Intercept (if estimated).</p>
@@ -430,7 +432,7 @@ Chain 1: </code></pre>
 <p>Check brms’ estimate of sigma.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>Discrepancy of 1.2 between true logSigma, -1.61 and what brms estimated, -0.41</code></pre>
+<pre><code>[1] "Success. Looks like I/brms calculated/estimated the reference group logSigma correctly."</code></pre>
 </div>
 </div>
 <section id="plot-the-predictions-of-the-brms-fit" class="level2">
