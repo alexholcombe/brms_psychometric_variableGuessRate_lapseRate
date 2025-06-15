@@ -105,7 +105,7 @@ youth_benefit <- 0.3 #0.4 #Old people have worse limit by this much
 male_benefit <-0 #0.15 #Female worse by this much
 Roudaia_lab_benefit <- 0.2 #0.2
 #Set parameters for differences between Ss in a group
-eta_between_subject_sd <- 0 #0.1 
+eta_between_subject_sd <- 0.2 #0.1 
 
 #Using above parameters, need function to calculate a participant's location parameter
 #Include optional between_subject_variance

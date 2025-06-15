@@ -17,6 +17,8 @@ Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 ## Why is estimate of logSigma so much larger (shallower) than actual value?
 
+Not modeling a factor, including participant differences, results in a shallower slope.
+
 Discrepancy of 0.37 between my logSigma, -1.61 and what brms estimated, -1.24
 Works in this seemingly super-simple case:
 [logSigma_wrong](logSigma_wrong_minimal_example/logSigma_wrong.html)
