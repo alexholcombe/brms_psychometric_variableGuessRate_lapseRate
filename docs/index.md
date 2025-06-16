@@ -15,7 +15,15 @@ Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 [advanced_model_recovery.html](advanced_model_recovery.html)
 
-## Why is estimate of logSigma so much larger (shallower) than actual value?
+## Adding multilevel subject sigma made brms require at least 8 hours
+
+[build_up_from_logSigma.qmd](build_up_from_logSigma.html)
+
+## Is there a way to fit data without it taking hours and hours?
+
+If I don't add variance term for participants' eta, and probably too for lapse and sigma, my estimates will probably be wrong because of all the dispersion.
+
+## Why is estimate of logSigma so much larger (shallower) than actual value? ANSWERED
 
 Not modeling a factor, including participant differences, results in a shallower slope.
 

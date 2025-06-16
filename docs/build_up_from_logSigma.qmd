@@ -272,7 +272,7 @@ my_formula <- my_formula$formula
 
 my_brms_formula <- brms::bf(
   correct ~ chance_rate + (1-chance_rate - lapseRate * (1-chance_rate))*Phi(-(speed-eta)/exp(logSigma)), 
-  eta ~ numTargets + ageGroup + lab,#  + gender,
+  eta ~ numTargets + ageGroup + lab + (1 | subjWithinGroup),#  + gender,
   lapseRate ~ 1, #~1 estimates intercept only
   logSigma ~ 1,#ageGroup,
   family = bernoulli(link="identity"), #Otherwise the default link 'logit' would be applied
@@ -313,7 +313,7 @@ eta_differences_prior_dist_name <- "normal"
 eta_diffs_gaussian_param1 <- 0
 eta_diffs_gaussian_param2 <- 2
 
-#default_priors<-    brms::default_prior(my_brms_formula, data = data_simulated   )
+default_priors<-    brms::default_prior(my_brms_formula, data = data_simulated   )
 #print( default_priors )
 
 # Build prior distribution strings for brms
@@ -357,6 +357,12 @@ Plot the priors
 
 ```{r}
 #| echo: false 
+
+prior_Ss <- tibble(
+  x = seq(-8, 8, length.out = 500),
+  y = dst(x, df = 3, mu = 0, sigma = 2.5),
+  parameter = "student_t"
+) |> mutate(y = y / max(y))
 
 prior_lapse <- tibble(
   x = seq(0, 1, length.out = 500),
