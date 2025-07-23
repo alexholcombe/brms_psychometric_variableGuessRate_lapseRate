@@ -3,6 +3,15 @@ layout: default
 title: "Guide to this brms model recovery site"
 ---
 
+
+## Adding multilevel subject sigma made brms require at least 8 hours
+
+[build_up_from_logSigma.qmd](build_up_from_logSigma.html)
+
+Next, try running on NCI National Computing Infrastructure
+
+## Overall files guide
+
 Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
 [all_factors_but_not_multilevel](all_factors_but_not_multilevel.html) . Works for estimating a few factors but blows up to almost 5 hrs when estimating all factors, and at least with limited runs (700 iterations, 2 chains), lab factor blew up. But reference group might be correct.
@@ -12,12 +21,8 @@ Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 [basic_model_recovery.html](docs/basic_model_recovery.html)
 
 
-
 [advanced_model_recovery.html](advanced_model_recovery.html)
 
-## Adding multilevel subject sigma made brms require at least 8 hours
-
-[build_up_from_logSigma.qmd](build_up_from_logSigma.html)
 
 ## Is there a way to fit data without it taking hours and hours?
 
