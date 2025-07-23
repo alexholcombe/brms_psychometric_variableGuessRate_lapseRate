@@ -19,5 +19,11 @@ Between-participant factors
 For an alternative to Bayesian, what library should I use?
 
 *	There's the python implementation of psignifit.
-*	Some
+*	lme4
+	*	Widely used for frequentist multilevel models.
+Allows custom link functions via the family argument, but not as flexible as brms for arbitrary nonlinear models.
+*	glmmTMB
+	* Supports a wide range of distributions and custom link functions.
+	* Good for complex random effects structures.
+	* Multilevel?
 
