@@ -1,8 +1,6 @@
 This is for trying brms data analysis of multiple object tracking, for now mainly model recovery, using single- and multi-level Baysian modeling.
 
-The idea is to model:
-
-Non-linear psychometric function in each participant. Sigmoidal but requiring a custom link function because goes from chance_rate to near 1 (affected by lapse rate), with lapse_rate, scale(slope), and location(threshold speed) parameters.
+In each participant, model data with non-linear psychometric function in each participant. Sigmoidal but requiring a custom link function because goes from chance_rate to near 1 (affected by lapse rate), with lapse_rate, scale(slope), and location(threshold speed) parameters.
 
 Within-participant factors:
 
