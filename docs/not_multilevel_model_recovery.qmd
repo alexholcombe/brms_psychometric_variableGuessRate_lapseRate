@@ -451,6 +451,8 @@ if (break_brms_by_making_numTargets_numeric) {
 # cat(stan_code)
 ```
 
+Next, will really call brm to fit the model! Which could take a very long time to execute.
+
 ```{r}
 #| echo: false 
 
@@ -458,7 +460,7 @@ cores_available <- parallel::detectCores()
 #set mc.cores option which is used by brms by default 
 options(mc.cores = cores_available)
 
-time <- try( system.time({ 
+timeToRun <- try( system.time({ 
   fit <-
     brm(
       formula = my_brms_formula,
@@ -473,7 +475,7 @@ time <- try( system.time({
   }), #end of system.time
  silent=FALSE) #End of try
 
-cat('Time taken (min) =', round( time["elapsed"] / 60. ,1) )
+cat('Time taken (min) =', round( timeToRun["elapsed"] / 60. ,1) )
 
 if (inherits(time, "try-error")) {
   message("An error occurred!")

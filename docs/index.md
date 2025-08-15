@@ -4,24 +4,20 @@ title: "Guide to this brms model recovery site"
 ---
 
 
+## Supercomputer notes
+
+ [NCI National Computing Infrastructure](docs/NCI_supercomputer_try/NCI.html)
+
 ## Adding multilevel subject sigma made brms require at least 8 hours
 
 [build_up_from_logSigma.qmd](build_up_from_logSigma.html)
 
-Next, try running on NCI National Computing Infrastructure
 
 ## Overall files guide
 
 Eventually, [do_all_model_recovery.html](../do_all_model_recovery.html)
 
-[all_factors_but_not_multilevel](all_factors_but_not_multilevel.html) . Works for estimating a few factors but blows up to almost 5 hrs when estimating all factors, and at least with limited runs (700 iterations, 2 chains), lab factor blew up. But reference group might be correct.
-
-[lab_age_model_works](lab_age_model_works/lab_age_model_works_except_logSigma.html)
-
-[basic_model_recovery.html](docs/basic_model_recovery.html)
-
-
-[advanced_model_recovery.html](advanced_model_recovery.html)
+[not_multilevel_model_recovery](not_multilevel_model_recovery.html) . Works for estimating a few factors but blows up to almost 5 hrs when estimating all factors, and at least with limited runs (700 iterations, 2 chains), lab factor blew up. But reference group might be correct.
 
 
 ## Is there a way to fit data without it taking hours and hours?

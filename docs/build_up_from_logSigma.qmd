@@ -256,6 +256,34 @@ The model we used is based off our psychometric function used to generate the da
 
 *Alex's note: Using the nonlinear option is also what allowed us to set a prior on the thresholds  $\eta$, because we could then parametrize the function in terms of the x-intercept, whereas with the link-function approach, we are stuck with the conventional parameterization of a line, which [has a term for the y-intercept but not the x-intercept](https://bsky.app/profile/did:plc:kynaetyuzsp46xejc6mzpjle/post/3lg5lpartzs2z) *
 
+## Explanation of the formula telling brms what parameters to estimate
+
+We have three parameters, $\eta$ (speed threshold or location parameter), $\log(\sigma)$ (slope of psychometric function), and lapse_rate.
+
+Ideally we want brms to estimate the effects of numTargets, ageGroup, and gender. Ideally, also the interaction of numTargets and ageGroup because Roudaia claimed numTargets had a bigger effect on the old group, and also that they were equal for numTargets=1.
+
+We also need to add subject to the model, otherwise it will just lump all the subjects within a group together, **right**? 
+
+So, we minmally need to add  "+ (1|subjWithinGroup)" so that each participant gets their own estimate (intercept, meaning offset from the value estimated for each group they are in) for 
+$\eta$, $\log(\sigma)$, and lapseRate
+
+### So far, this isn't multilevel!
+
+But that actually isn't multilevel! According to ChatGPT, (1 | subject) would just treat subject as just another many-level factor, not nested in anything else.
+
+To make it nested within lab for example, syntax is: 
+
+(1 | group) + (1 | group:subject)
+
+which you can write in compressed form as  (1 | group/subject)
+
+To nest within lab and ageGroup, use:
+
+(1 | lab) + (1 | lab:ageGroup) + (1 | lab:ageGroup:subject)
+
+
+separately for each participant.
+Overly-simple would be to 
 
 ```{r}
 my_formula <- brms::bf( 
