@@ -3,6 +3,18 @@ layout: default
 title: "Guide to this brms model recovery site"
 ---
 
+Confirm that tidyverse installed, or at least necessary packages, possibly not dependencies ‘googledrive’, ‘googlesheets4’, ‘httr’, ‘rvest’
+
+Would be good to have a relatively-quick unilevel test for the supercomputer.
+Try not_multilevel_model_recovery.qmd as it at least only takes several hours on laptop.
+
+Practice github clone
+
+Install Quarto so can keep using qmd files?
+
+More recent notes are kept in running chronological fashion at
+
+https://docs.google.com/document/d/1Wog1e4CcYBrW1OuwutBn_uUY_tbyIsn6zITwDl2Fp3A/
 
 ## Log in and load modules
 
@@ -45,8 +57,6 @@ CXX11=g++
 CXX14=g++
 CXX17=g++
 CC=gcc
-
-
 
 
 ## Weekly drop-in sessions: moving from Artemis to NCI Gadi
