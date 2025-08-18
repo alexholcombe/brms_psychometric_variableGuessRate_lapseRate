@@ -6,7 +6,8 @@ title: "Guide to this brms model recovery site"
 
 ## Supercomputer notes
 
- [NCI National Computing Infrastructure](docs/NCI_supercomputer_try/NCI.html)
+ [NCI National Computing Infrastructure](NCI_supercomputer_try/NCI.html)
+  also notes in a [Google Doc](https://docs.google.com/document/d/1Wog1e4CcYBrW1OuwutBn_uUY_tbyIsn6zITwDl2Fp3A/)
 
 ## Adding multilevel subject sigma made brms require at least 8 hours
 
