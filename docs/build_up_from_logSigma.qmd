@@ -12,7 +12,8 @@ To get started, we load the required packages.
 #| output: false
 rm(list = ls())
 
-library(tidyverse)
+#library(tidyverse)
+library(ggplot2); library(dplyr); library(stringr)
 library(brms)
 library(here) #For finding root directory
 library(beepr) #alert sound when done modeling
