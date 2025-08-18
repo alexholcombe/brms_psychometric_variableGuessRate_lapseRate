@@ -1,0 +1,121 @@
+Current directory is /home/562/ha3155
+[1] "Hello, world! From R"
+[1] "Place I will look for installed R packages is:"
+[1] "/scratch/ew49/ha3155/R/Library/"
+[1] "Installed packages are:"
+              BH      Brobdingnag              DBI               DT 
+            "BH"    "Brobdingnag"            "DBI"             "DT" 
+        QuickJSR               R6     RColorBrewer             Rcpp 
+      "QuickJSR"             "R6"   "RColorBrewer"           "Rcpp" 
+       RcppEigen     RcppParallel           Rdpack      StanHeaders 
+     "RcppEigen"   "RcppParallel"         "Rdpack"    "StanHeaders" 
+           abind     arrayhelpers          askpass        backports 
+         "abind"   "arrayhelpers"        "askpass"      "backports" 
+       base64enc        bayesplot              bit            bit64 
+     "base64enc"      "bayesplot"            "bit"          "bit64" 
+            blob   bridgesampling             brms            broom 
+          "blob" "bridgesampling"           "brms"          "broom" 
+           bslib           cachem            callr       cellranger 
+         "bslib"         "cachem"          "callr"     "cellranger" 
+       checkmate              cli            clipr             coda 
+     "checkmate"            "cli"          "clipr"           "coda" 
+    colourpicker       commonmark       conflicted           crayon 
+  "colourpicker"     "commonmark"     "conflicted"         "crayon" 
+       crosstalk       data.table           dbplyr             desc 
+     "crosstalk"     "data.table"         "dbplyr"           "desc" 
+          digest   distributional            dplyr           dtplyr 
+        "digest" "distributional"          "dplyr"         "dtplyr" 
+        dygraphs         evaluate           farver          fastmap 
+      "dygraphs"       "evaluate"         "farver"        "fastmap" 
+     fontawesome          forcats               fs           future 
+   "fontawesome"        "forcats"             "fs"         "future" 
+    future.apply         generics           ggdist          ggplot2 
+  "future.apply"       "generics"         "ggdist"        "ggplot2" 
+        ggridges          globals             glue        gridExtra 
+      "ggridges"        "globals"           "glue"      "gridExtra" 
+          gtable           gtools            haven            highr 
+        "gtable"         "gtools"          "haven"          "highr" 
+             hms        htmltools      htmlwidgets           httpuv 
+           "hms"      "htmltools"    "htmlwidgets"         "httpuv" 
+             ids           igraph           inline          isoband 
+           "ids"         "igraph"         "inline"        "isoband" 
+       jquerylib         jsonlite            knitr         labeling 
+     "jquerylib"       "jsonlite"          "knitr"       "labeling" 
+           later         lazyeval        lifecycle          listenv 
+         "later"       "lazyeval"      "lifecycle"        "listenv" 
+        litedown             lme4              loo        lubridate 
+      "litedown"           "lme4"            "loo"      "lubridate" 
+        magrittr         markdown      matrixStats          memoise 
+      "magrittr"       "markdown"    "matrixStats"        "memoise" 
+            mime           miniUI            minqa           modelr 
+          "mime"         "miniUI"          "minqa"         "modelr" 
+         mvtnorm          nleqslv           nloptr         numDeriv 
+       "mvtnorm"        "nleqslv"         "nloptr"       "numDeriv" 
+         openssl       parallelly           pillar         pkgbuild 
+       "openssl"     "parallelly"         "pillar"       "pkgbuild" 
+       pkgconfig             plyr        posterior      prettyunits 
+     "pkgconfig"           "plyr"      "posterior"    "prettyunits" 
+        processx         progress         promises               ps 
+      "processx"       "progress"       "promises"             "ps" 
+           purrr         quadprog             ragg         rappdirs 
+         "purrr"       "quadprog"           "ragg"       "rappdirs" 
+       rbibutils            readr           readxl       reformulas 
+     "rbibutils"          "readr"         "readxl"     "reformulas" 
+         rematch         rematch2          remotes           reprex 
+       "rematch"       "rematch2"        "remotes"         "reprex" 
+        reshape2            rlang        rmarkdown            rstan 
+      "reshape2"          "rlang"      "rmarkdown"          "rstan" 
+        rstanarm       rstantools       rstudioapi             sass 
+      "rstanarm"     "rstantools"     "rstudioapi"           "sass" 
+          scales          selectr            shiny          shinyjs 
+        "scales"        "selectr"          "shiny"        "shinyjs" 
+       shinystan      shinythemes      sourcetools          stringi 
+     "shinystan"    "shinythemes"    "sourcetools"        "stringi" 
+         stringr           svUnit              sys      systemfonts 
+       "stringr"         "svUnit"            "sys"    "systemfonts" 
+         tensorA      textshaping          threejs           tibble 
+       "tensorA"    "textshaping"        "threejs"         "tibble" 
+       tidybayes            tidyr       tidyselect       timechange 
+     "tidybayes"          "tidyr"     "tidyselect"     "timechange" 
+         tinytex             tzdb             utf8             uuid 
+       "tinytex"           "tzdb"           "utf8"           "uuid" 
+           vctrs      viridisLite            vroom            withr 
+         "vctrs"    "viridisLite"          "vroom"          "withr" 
+            xfun             xml2           xtable              xts 
+          "xfun"           "xml2"         "xtable"            "xts" 
+            yaml              zoo               BH               R6 
+          "yaml"            "zoo"             "BH"             "R6" 
+    RColorBrewer            abind            cpp11         generics 
+  "RColorBrewer"          "abind"          "cpp11"       "generics" 
+          inline         labeling         numDeriv        pkgconfig 
+        "inline"       "labeling"       "numDeriv"      "pkgconfig" 
+              ps      viridisLite            withr       KernSmooth 
+            "ps"    "viridisLite"          "withr"     "KernSmooth" 
+            MASS           Matrix             base             boot 
+          "MASS"         "Matrix"           "base"           "boot" 
+           class          cluster        codetools         compiler 
+         "class"        "cluster"      "codetools"       "compiler" 
+        datasets          foreign        grDevices         graphics 
+      "datasets"        "foreign"      "grDevices"       "graphics" 
+            grid          lattice          methods             mgcv 
+          "grid"        "lattice"        "methods"           "mgcv" 
+            nlme             nnet         parallel            rpart 
+          "nlme"           "nnet"       "parallel"          "rpart" 
+         spatial          splines            stats           stats4 
+       "spatial"        "splines"          "stats"         "stats4" 
+        survival            tcltk            tools            utils 
+      "survival"          "tcltk"          "tools"          "utils" 
+[1] "Tried to load rstan and compile a basic model"
+
+======================================================================================
+                  Resource Usage on 2025-08-18 13:36:35:
+   Job Id:             147285634.gadi-pbs
+   Project:            ew49
+   Exit Status:        0
+   Service Units:      0.38
+   NCPUs Requested:    4                      NCPUs Used: 4               
+                                           CPU Time Used: 00:01:48        
+   Memory Requested:   16.0GB                Memory Used: 1.68GB          
+   Walltime requested: 00:10:00            Walltime Used: 00:02:51        
+   JobFS requested:    100.0MB                JobFS used: 29.71KB         
+======================================================================================
