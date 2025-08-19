@@ -11,6 +11,9 @@ Try not_multilevel_model_recovery.qmd as it at least only takes several hours on
 Practice github clone
 
 Install Quarto so can keep using qmd files?
+	wget https://quarto.org/download/latest/quarto-linux-amd64.deb
+sudo dpkg -i quarto-linux-amd64.deb
+
 
 More recent notes are kept in running chronological fashion at
 
