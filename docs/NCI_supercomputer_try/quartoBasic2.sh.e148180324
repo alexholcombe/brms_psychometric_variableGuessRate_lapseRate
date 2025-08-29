@@ -1,0 +1,12 @@
+[91mERROR: No valid input files passed to render
+
+Stack trace:
+    at Command.actionHandler (file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:92002:15)
+    at eventLoopTick (ext:core/01_core.js:175:7)
+    at async Command.execute (file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:8253:13)
+    at async Command.parseCommand (file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:8143:20)
+    at async quarto (file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:133948:9)
+    at async file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:133978:9
+    at async file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:133830:20
+    at async mainRunner (file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:133832:9)
+    at async file:///home/562/ha3155/opt/quarto-1.7.33/bin/quarto.js:133969:5[39m

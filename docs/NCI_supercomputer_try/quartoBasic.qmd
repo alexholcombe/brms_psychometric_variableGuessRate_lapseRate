@@ -1,0 +1,20 @@
+---
+title: "quartoBasic test of packages etc"
+format: html
+---
+
+
+To get started, we load the required packages.
+
+```{r}
+#| warning: true 
+#| output: true
+rm(list = ls())
+
+library(ggplot2); library(dplyr); library(stringr)
+library(brms)
+library(here) #For finding root directory
+library(beepr) #alert sound when done modeling
+```
+
+OK we loaded the packages
