@@ -17,4 +17,4 @@ my_NCI_scripts_dir=~/brms_model_recovery_MOT/brms_psychometric_variableGuessRate
 
 echo "ls of my_NCI_scripts_dir is $(ls "$my_NCI_scripts_dir")"
 
-~/bin/quarto render quartoBasic.qmd --to html
+~/bin/quarto render brms_model_recovery_MOT/brms_psychometric_variableGuessRate_lapseRate/docs/NCI_supercomputer_try/quartoBasic.qmd --to html
