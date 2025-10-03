@@ -2,8 +2,33 @@
 layout: default
 title: "Guide to this brms model recovery site"
 ---
+Reverse chronological order below
 
-Confirm that tidyverse installed, or at least necessary packages, possibly not dependencies ‘googledrive’, ‘googlesheets4’, ‘httr’, ‘rvest’
+## Run a quarto document
+
+I created a file  quartoBasic.qmd
+
+quartoBasic.sh works except it doesn't find quarto, even though it's available from the interactive shell, e.g. "quarto -v" returns the version number and it's in ~/bin , so I added the path explicitly to the script
+
+qsub jobscripts/quartoBasic.sh
+
+##
+
+To install more of the packages I'm using, I ran this:
+
+pckgs_needed <- c(
+  "brms",
+  "rstanarm",
+  "remotes",
+  "tidybayes",
+  "shinystan", "mgcv","brms","here","beepr")
+pckgs_installed <- installed.packages()[,"Package"]
+pckgs_2_install <- pckgs_needed[!(pckgs_needed %in% pckgs_installed)]
+if(length(pckgs_2_install)) {
+  install.packages(pckgs_2_install, repos="http://cran.ms.unimelb.edu.au/")
+} 
+
+not all tidyverse packages can install, specifically: ‘googledrive’, ‘googlesheets4’, ‘httr’, ‘rvest’
 
 Would be good to have a relatively-quick unilevel test for the supercomputer.
 Try not_multilevel_model_recovery.qmd as it at least only takes several hours on laptop.
@@ -11,11 +36,11 @@ Try not_multilevel_model_recovery.qmd as it at least only takes several hours on
 Practice github clone
 
 Install Quarto so can keep using qmd files?
-	wget https://quarto.org/download/latest/quarto-linux-amd64.deb
+  wget https://quarto.org/download/latest/quarto-linux-amd64.deb
 sudo dpkg -i quarto-linux-amd64.deb
 
 
-More recent notes are kept in running chronological fashion at
+Additional recent notes are kept in running chronological fashion at
 
 https://docs.google.com/document/d/1Wog1e4CcYBrW1OuwutBn_uUY_tbyIsn6zITwDl2Fp3A/
 
