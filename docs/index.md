@@ -129,5 +129,9 @@ Splitting the difference and assigning close to zero effect of age
 
 Trying to work back down from not_multilevel_model_recovery but it also now isn't working for gender and age? It really seems like sometimes brms won't recover the effect of these factors.
 
+## Denison students blog
+
+[original blog](DenisonBlog/DenisonBlogAsPublished.html)
+
 
 
