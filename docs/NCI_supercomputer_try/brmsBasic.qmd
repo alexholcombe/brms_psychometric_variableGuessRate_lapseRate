@@ -18,3 +18,14 @@ library(beepr) #alert sound when done modeling
 ```
 
 OK we loaded the packages
+```{r}
+# Example: Bayesian linear regression
+fit <- brm(
+  formula = mpg ~ wt + cyl,   # model formula
+  data = mtcars,              # dataset
+  family = gaussian(),        # likelihood family
+  chains = 2, iter = 2000     # sampling options
+)
+
+summary(fit)
+```
