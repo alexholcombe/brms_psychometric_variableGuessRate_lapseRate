@@ -387,11 +387,12 @@ Plot the priors
 ```{r}
 #| echo: false 
 
-prior_Ss <- tibble(
-  x = seq(-8, 8, length.out = 500),
-  y = dst(x, df = 3, mu = 0, sigma = 2.5),
-  parameter = "student_t"
-) |> mutate(y = y / max(y))
+#Initial unfinished attempt to plot the prior on the distribution of different participants
+#prior_Ss <- tibble(
+#  x = seq(-8, 8, length.out = 500),
+#  ##y = dt(x, df = 3, mu = 0, sigma = 2.5),
+#  parameter = "student_t"
+#) |> mutate(y = y / max(y))
 
 prior_lapse <- tibble(
   x = seq(0, 1, length.out = 500),
@@ -498,6 +499,8 @@ cat(stan_code)
 #| echo: false 
 
 cores_available <- parallel::detectCores()
+cat('cores_available =', cores_available)
+
 #set mc.cores option which is used by brms by default 
 options(mc.cores = cores_available)
 
